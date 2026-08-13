@@ -1,0 +1,3 @@
+- [OpenAPI zod-int quirk](openapi-zod-int.md) — utiliser `number` pas `integer` dans l'OpenAPI de ce projet (Orval génère zod.int() incompatible avec zod 3.x)
+- [CSS import order](css-import-order.md) — @import url() Google Fonts doit être la première ligne du index.css, avant @import tailwindcss
+- [Generated types import path](generated-types-import.md) — les types Orval (CarteCatalogueFamille etc.) s'importent depuis @workspace/api-client-react, pas depuis /src/generated/api.schemas

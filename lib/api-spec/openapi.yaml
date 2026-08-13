@@ -3,20 +3,30 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Jeu des valeurs — API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: catalogue
+    description: Catalogue de cartes et dilemmes
+  - name: sessions
+    description: Sessions de jeu
+  - name: cartes
+    description: Cartes sélectionnées dans une session
+  - name: reponses
+    description: Réponses aux collisions
+  - name: constellation
+    description: Constellation personnelle
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +34,670 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Catalogue ───────────────────────────────────────────────────────────────
+
+  /catalogue/cartes:
+    get:
+      operationId: listCartessCatalogue
+      tags: [catalogue]
+      summary: Liste toutes les cartes du catalogue (filtrable par famille)
+      parameters:
+        - in: query
+          name: famille
+          required: false
+          schema:
+            type: string
+            enum: [lignes_rouges, horizons, tresors]
+      responses:
+        "200":
+          description: Liste de cartes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CarteCatalogue"
+
+  /catalogue/dilemmes:
+    get:
+      operationId: listDilemmes
+      tags: [catalogue]
+      summary: Liste tous les dilemmes du catalogue
+      responses:
+        "200":
+          description: Liste de dilemmes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dilemme"
+
+  # ─── Sessions ────────────────────────────────────────────────────────────────
+
+  /sessions:
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Crée une nouvelle session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInput"
+      responses:
+        "201":
+          description: Session créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Récupère une session complète
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Session trouvée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Session introuvable
+    patch:
+      operationId: updateSession
+      tags: [sessions]
+      summary: Met à jour l'étape courante d'une session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionUpdate"
+      responses:
+        "200":
+          description: Session mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Session introuvable
+    delete:
+      operationId: deleteSession
+      tags: [sessions]
+      summary: Supprime toutes les données d'une session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "204":
+          description: Session supprimée
+        "404":
+          description: Session introuvable
+
+  # ─── Cartes session ──────────────────────────────────────────────────────────
+
+  /sessions/{sessionId}/cartes:
+    get:
+      operationId: listCartesSession
+      tags: [cartes]
+      summary: Liste les cartes sélectionnées pour une session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Cartes de la session
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CarteSession"
+    post:
+      operationId: addCarteSession
+      tags: [cartes]
+      summary: Ajoute une carte (du catalogue ou personnalisée)
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarteSessionInput"
+      responses:
+        "201":
+          description: Carte ajoutée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarteSession"
+        "400":
+          description: Données invalides
+
+  /sessions/{sessionId}/cartes/{carteSessionId}:
+    patch:
+      operationId: updateCarteSession
+      tags: [cartes]
+      summary: Modifie une carte (libellé, description, valeurs confirmées)
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CarteSessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarteSessionUpdate"
+      responses:
+        "200":
+          description: Carte mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CarteSession"
+        "404":
+          description: Carte introuvable
+    delete:
+      operationId: removeCarteSession
+      tags: [cartes]
+      summary: Retire une carte de la session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CarteSessionId"
+      responses:
+        "204":
+          description: Carte retirée
+        "404":
+          description: Carte introuvable
+
+  # ─── Réponses (collisions) ────────────────────────────────────────────────────
+
+  /sessions/{sessionId}/reponses:
+    get:
+      operationId: listReponses
+      tags: [reponses]
+      summary: Liste toutes les réponses aux collisions d'une session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Réponses enregistrées
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReponseCollision"
+    post:
+      operationId: createReponse
+      tags: [reponses]
+      summary: Enregistre une réponse à une collision
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReponseCollisionInput"
+      responses:
+        "201":
+          description: Réponse enregistrée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReponseCollision"
+        "400":
+          description: Données invalides
+
+  /sessions/{sessionId}/reponses/{reponseId}:
+    patch:
+      operationId: updateReponse
+      tags: [reponses]
+      summary: Corrige une réponse (sans écrasement silencieux — crée une nouvelle version)
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/ReponseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReponseCollisionUpdate"
+      responses:
+        "200":
+          description: Réponse mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReponseCollision"
+        "404":
+          description: Réponse introuvable
+
+  # ─── Constellation ────────────────────────────────────────────────────────────
+
+  /sessions/{sessionId}/constellation:
+    get:
+      operationId: getConstellation
+      tags: [constellation]
+      summary: Calcule et retourne la constellation personnelle (déterministe)
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Constellation calculée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Constellation"
+        "404":
+          description: Session introuvable
+
+  /sessions/{sessionId}/progres:
+    get:
+      operationId: getProgres
+      tags: [sessions]
+      summary: Retourne un résumé de la progression de la session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Progression
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Progres"
+
 components:
+  parameters:
+    SessionId:
+      in: path
+      name: sessionId
+      required: true
+      schema:
+        type: string
+    CarteSessionId:
+      in: path
+      name: carteSessionId
+      required: true
+      schema:
+        type: number
+    ReponseId:
+      in: path
+      name: reponseId
+      required: true
+      schema:
+        type: number
+
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ─── Catalogue ─────────────────────────────────────────────────────────────
+
+    CarteCatalogue:
+      type: object
+      required: [id, famille, label, valeursSuggérées]
+      properties:
+        id:
+          type: number
+        famille:
+          type: string
+          enum: [lignes_rouges, horizons, tresors]
+        label:
+          type: string
+        description:
+          type: ["string", "null"]
+        valeursSuggérées:
+          type: array
+          items:
+            type: string
+        estPersonnalisable:
+          type: boolean
+
+    Dilemme:
+      type: object
+      required: [id, valeurA, valeurB, texte]
+      properties:
+        id:
+          type: number
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        texte:
+          type: string
+        contexte:
+          type: ["string", "null"]
+        familles:
+          type: array
+          items:
+            type: string
+
+    # ─── Session ───────────────────────────────────────────────────────────────
+
+    Session:
+      type: object
+      required: [id, etapeCourante, creeLe, miseAJourLe]
+      properties:
+        id:
+          type: string
+        etapeCourante:
+          type: string
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+        creeLe:
+          type: string
+          format: date-time
+        miseAJourLe:
+          type: string
+          format: date-time
+
+    SessionInput:
+      type: object
+      properties:
+        etapeCourante:
+          type: string
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+          default: accueil
+
+    SessionUpdate:
+      type: object
+      properties:
+        etapeCourante:
+          type: string
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+
+    # ─── Cartes session ────────────────────────────────────────────────────────
+
+    CarteSession:
+      type: object
+      required: [id, sessionId, famille, label, valeursConfirmées, estPersonnalisée]
+      properties:
+        id:
+          type: number
+        sessionId:
+          type: string
+        catalogueCarteId:
+          type: ["number", "null"]
+        famille:
+          type: string
+          enum: [lignes_rouges, horizons, tresors]
+        label:
+          type: string
+        description:
+          type: ["string", "null"]
+        valeursConfirmées:
+          type: array
+          items:
+            type: string
+        valeursSuggérées:
+          type: array
+          items:
+            type: string
+        estPersonnalisée:
+          type: boolean
+        creeLe:
+          type: string
+          format: date-time
+
+    CarteSessionInput:
+      type: object
+      required: [famille, label]
+      properties:
+        catalogueCarteId:
+          type: ["number", "null"]
+        famille:
+          type: string
+          enum: [lignes_rouges, horizons, tresors]
+        label:
+          type: string
+        description:
+          type: ["string", "null"]
+        valeursSuggérées:
+          type: array
+          items:
+            type: string
+        valeursConfirmées:
+          type: array
+          items:
+            type: string
+        estPersonnalisée:
+          type: boolean
+
+    CarteSessionUpdate:
+      type: object
+      properties:
+        label:
+          type: string
+        description:
+          type: ["string", "null"]
+        valeursConfirmées:
+          type: array
+          items:
+            type: string
+
+    # ─── Réponses ──────────────────────────────────────────────────────────────
+
+    ReponseCollision:
+      type: object
+      required: [id, sessionId, valeurA, valeurB, choix, version, creeLe]
+      properties:
+        id:
+          type: number
+        sessionId:
+          type: string
+        dilemmeId:
+          type: ["number", "null"]
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        choix:
+          type: string
+          enum: [A, B, ca_depend, je_ne_sais_pas, passer]
+        facteurDepend:
+          type: ["string", "null"]
+          description: >
+            Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact,
+            proximite_sociale, nombre_personnes, certitude, reversibilite,
+            urgence, responsabilite
+        facteurDependLibre:
+          type: ["string", "null"]
+          description: Réponse libre si facteurDepend = autre
+        difficulte:
+          type: ["number", "null"]
+          description: 1 à 5, absent si choix=passer
+        certitude:
+          type: ["number", "null"]
+          description: 1 à 5, absent si choix=passer
+        version:
+          type: number
+          description: Numéro de version (incrémenter à chaque correction)
+        creeLe:
+          type: string
+          format: date-time
+        miseAJourLe:
+          type: string
+          format: date-time
+
+    ReponseCollisionInput:
+      type: object
+      required: [valeurA, valeurB, choix]
+      properties:
+        dilemmeId:
+          type: ["number", "null"]
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        choix:
+          type: string
+          enum: [A, B, ca_depend, je_ne_sais_pas, passer]
+        facteurDepend:
+          type: ["string", "null"]
+        facteurDependLibre:
+          type: ["string", "null"]
+        difficulte:
+          type: ["number", "null"]
+        certitude:
+          type: ["number", "null"]
+
+    ReponseCollisionUpdate:
+      type: object
+      properties:
+        choix:
+          type: string
+          enum: [A, B, ca_depend, je_ne_sais_pas, passer]
+        facteurDepend:
+          type: ["string", "null"]
+        facteurDependLibre:
+          type: ["string", "null"]
+        difficulte:
+          type: ["number", "null"]
+        certitude:
+          type: ["number", "null"]
+
+    # ─── Constellation ─────────────────────────────────────────────────────────
+
+    TendanceValeur:
+      type: object
+      required: [valeur, scoreNet, totalCollisions, victoiresA, victoiresB, incertitudes, abandonnes, difficulteMovenne, certitudeMoyenne, territoireInexplore]
+      properties:
+        valeur:
+          type: string
+        scoreNet:
+          type: number
+          description: Score net (victoires - défaites) / total significatifs
+        totalCollisions:
+          type: number
+        victoiresA:
+          type: number
+        victoiresB:
+          type: number
+        incertitudes:
+          type: number
+          description: ca_depend + je_ne_sais_pas
+        abandonnes:
+          type: number
+          description: passer
+        difficulteMoyenne:
+          type: ["number", "null"]
+        certitudeMoyenne:
+          type: ["number", "null"]
+        territoireInexplore:
+          type: boolean
+          description: Vrai si aucune collision résolue pour cette valeur
+
+    TensionObservee:
+      type: object
+      required: [valeurA, valeurB, totalCollisions, incertitudes, estForte]
+      properties:
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        totalCollisions:
+          type: number
+        incertitudes:
+          type: number
+        estForte:
+          type: boolean
+
+    ObservationConstellation:
+      type: object
+      required: [id, texte, type, valeursConcernees, reponsesSources]
+      properties:
+        id:
+          type: string
+        texte:
+          type: string
+          description: Formulation prudente (ex. "Dans les situations explorées jusqu'ici…")
+        type:
+          type: string
+          enum: [tendance, tension, territoire_inexplore, stabilite, couverture]
+        valeursConcernees:
+          type: array
+          items:
+            type: string
+        reponsesSources:
+          type: array
+          items:
+            type: number
+          description: IDs des réponses qui appuient cette observation
+
+    Constellation:
+      type: object
+      required: [sessionId, version, tendances, tensions, observations, couverture, stabilite, versionCalcul]
+      properties:
+        sessionId:
+          type: string
+        version:
+          type: number
+        tendances:
+          type: array
+          items:
+            $ref: "#/components/schemas/TendanceValeur"
+        tensions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TensionObservee"
+        observations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ObservationConstellation"
+        couverture:
+          type: number
+          description: Proportion de collisions possibles explorées (0 à 1)
+        stabilite:
+          type: number
+          description: Stabilité globale des choix (0 à 1, basée sur la certitude moyenne)
+        versionCalcul:
+          type: number
+          description: Version du moteur de calcul utilisé
+
+    # ─── Progression ───────────────────────────────────────────────────────────
+
+    Progres:
+      type: object
+      required: [sessionId, etapeCourante, nombreCartes, nombreValeurs, nombreCollisions, nombreReponses, prochaineDilemme]
+      properties:
+        sessionId:
+          type: string
+        etapeCourante:
+          type: string
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+        nombreCartes:
+          type: number
+        nombreValeurs:
+          type: number
+        nombreCollisions:
+          type: number
+          description: Nombre de collisions possibles (combinaisons C(n,2) des valeurs)
+        nombreReponses:
+          type: number
+          description: Nombre de collisions auxquelles une réponse a été donnée
+        prochaineDilemme:
+          type: ["object", "null"]
+          properties:
+            valeurA:
+              type: string
+            valeurB:
+              type: string
+            dilemmeId:
+              type: ["number", "null"]
+            texte:
+              type: ["string", "null"]

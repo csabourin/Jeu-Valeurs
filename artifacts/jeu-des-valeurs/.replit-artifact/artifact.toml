@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Jeu des valeurs"
+description = "Une aventure introspective interactive en français canadien qui aide la personne à explorer ses priorités et les circonstances qui changent ses choix. Parcours : accueil, sélection de cartes (Mes lignes rouges, Mes horizons, Mes trésors), collision entre valeurs, et constellation personnelle nuancée avec tendances explicables."
+version = "1.0.0"
+id = "artifacts/jeu-des-valeurs"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26183
+
+[services.development]
+run = "pnpm --filter @workspace/jeu-des-valeurs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/jeu-des-valeurs", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/jeu-des-valeurs/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26183"
+BASE_PATH = "/"
