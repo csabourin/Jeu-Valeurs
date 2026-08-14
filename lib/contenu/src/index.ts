@@ -10,4 +10,5 @@ export * from "./valeurs";
 export * from "./cartes";
 export * from "./duels";
 export * from "./bascules";
+export * from "./hasard";
 export * from "./parcours";

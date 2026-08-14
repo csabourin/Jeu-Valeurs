@@ -10,6 +10,7 @@ import {
 } from "@workspace/api-client-react";
 import { Layers, Swords, SlidersHorizontal, MoveRight, Play } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 /** Où reprendre une partie selon l'étape enregistrée. */
 const chemins: Record<SessionEtapeCourante, string> = {
@@ -30,6 +31,7 @@ export default function Home() {
   }, []);
 
   const creerSession = useCreateSession();
+  const { toast } = useToast();
   const { data: session, isError } = useGetSession(partieEnCours ?? "", {
     query: {
       enabled: !!partieEnCours,
@@ -53,6 +55,15 @@ export default function Home() {
         onSuccess: (nouvelle) => {
           localStorage.setItem("jdv_session_id", nouvelle.id);
           setLocation(`/session/${nouvelle.id}/cartes`);
+        },
+        // Sans ceci, un serveur en échec donnait un bouton qui ne fait
+        // simplement rien — impossible à diagnostiquer depuis l'écran.
+        onError: (erreur) => {
+          toast({
+            title: "La partie n'a pas pu démarrer",
+            description: erreur.message,
+            variant: "destructive",
+          });
         },
       },
     );

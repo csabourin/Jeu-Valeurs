@@ -19,6 +19,7 @@ import {
   series,
   familles,
   calculerParcours,
+  planifierDuels,
   clePaire,
   type ReponseConnue,
 } from "@workspace/contenu";
@@ -140,10 +141,14 @@ for (const v of valeurs) {
 // ── Une partie doit toujours se terminer ─────────────────────────────────────
 
 /** Rejoue une partie complète en répondant toujours de la même façon. */
-function jouerJusquAuBout(valeursConfirmees: string[], choix: string): number {
+function jouerJusquAuBout(
+  valeursConfirmees: string[],
+  choix: string,
+  graine = 0,
+): number {
   const reponses: ReponseConnue[] = [];
   for (let tour = 0; tour < 200; tour++) {
-    const parcours = calculerParcours(valeursConfirmees, reponses);
+    const parcours = calculerParcours(valeursConfirmees, reponses, graine);
     if (!parcours.prochaine) return tour;
     const q = parcours.prochaine;
     reponses.push({
@@ -189,6 +194,56 @@ for (const scenario of scenarios) {
 const vide = calculerParcours([], []);
 verifier(vide.prochaine === null, "Sans valeur confirmée, le jeu devrait n'avoir aucune question.");
 
+// ── Le tirage : varié d'une partie à l'autre, figé à l'intérieur d'une ───────
+
+const toutesLesValeurs = valeurs.map((v) => v.label);
+
+// Une graine donnée doit toujours produire exactement la même partie, sinon
+// rafraîchir la page changerait les questions sous les pieds de la personne.
+const planA = planifierDuels(toutesLesValeurs, 12345).map((d) => d.id);
+const planA2 = planifierDuels(toutesLesValeurs, 12345).map((d) => d.id);
+verifier(
+  planA.join(",") === planA2.join(","),
+  "Une même graine doit redonner exactement le même plan de duels.",
+);
+
+// Et deux parties différentes ne doivent pas jouer la même chose.
+const plans = new Set<string>();
+for (let graine = 1; graine <= 200; graine++) {
+  plans.add(planifierDuels(toutesLesValeurs, graine).map((d) => d.id).join(","));
+}
+verifier(
+  plans.size > 150,
+  `Le tirage varie trop peu : ${plans.size} plans distincts sur 200 graines.`,
+);
+
+// Combien de situations différentes le jeu peut-il servir en tout.
+const vues = new Set<number>();
+for (let graine = 1; graine <= 500; graine++) {
+  for (const d of planifierDuels(toutesLesValeurs, graine)) vues.add(d.id);
+}
+
+// Une variante ne doit jamais partir sans sa jumelle : l'écran annonce
+// « déjà croisé, autrement », et la stabilité se calcule en comparant les deux.
+for (let graine = 1; graine <= 200; graine++) {
+  const plan = planifierDuels(toutesLesValeurs, graine);
+  const paires = plan.map((d) => clePaire(d.valeurA, d.valeurB));
+  for (const d of plan.filter((x) => x.variante)) {
+    const cle = clePaire(d.valeurA, d.valeurB);
+    if (paires.filter((p) => p === cle).length < 2) {
+      erreurs.push(
+        `Graine ${graine} : la variante ${d.id} est servie sans son duel principal.`,
+      );
+      break;
+    }
+  }
+}
+
+// Toute partie doit se terminer, quelle que soit la graine.
+for (const graine of [0, 1, 7, 99, 123456]) {
+  jouerJusquAuBout(toutesLesValeurs, "A", graine);
+}
+
 // ── Rapport ──────────────────────────────────────────────────────────────────
 
 const paires = new Set(duels.map((d) => clePaire(d.valeurA, d.valeurB)));
@@ -200,6 +255,9 @@ console.log(
     `${duels.length} duels sur ${paires.size} paires`,
     `${series.length} séries de bascule`,
   ].join(" · "),
+);
+console.log(
+  `Tirage : ${plans.size} sélections distinctes sur 200 parties · ${vues.size}/${duels.length} duels atteignables`,
 );
 
 for (const a of avertissements) console.warn(`⚠ ${a}`);

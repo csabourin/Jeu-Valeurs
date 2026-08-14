@@ -533,12 +533,13 @@ function redigerObservations(
 export function calculerConstellation(
   reponses: ReponseSource[],
   valeursConnues: string[],
+  graine = 0,
 ): ResultatConstellation {
   const tendances = calculerTendances(reponses, valeursConnues);
   const tensions = calculerTensions(reponses);
   const bascules = calculerBascules(reponses);
 
-  const duelsPlanifies = planifierDuels(valeursConnues).length;
+  const duelsPlanifies = planifierDuels(valeursConnues, graine).length;
   const duelsRepondus = reponses.filter(
     (r) => !r.serieId && r.choix !== "passer",
   ).length;

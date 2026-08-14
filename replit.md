@@ -66,8 +66,13 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
   pose que des situations écrites à la main. C'est ce qui empêche le jeu de
   retomber sur « Liberté ou Sécurité ? » posé à froid. Une paire sans situation
   écrite n'est simplement jamais posée.
-- **Déterminisme complet.** Aucun LLM, aucun tirage au hasard : mêmes cartes +
-  mêmes réponses ⇒ même partie. Rafraîchir la page ne rejoue rien.
+- **Hasard reproductible, pas déterminisme figé.** Chaque partie tire une
+  `graine` à sa création (colonne `sessions.graine`) ; tout le tirage de
+  situations en découle. Deux parties bâties sur les mêmes cartes ne servent
+  donc pas les mêmes duels, alors qu'une partie donnée reste identique à
+  elle-même — rafraîchir la page ne rejoue rien. Un `Math.random()` direct
+  casserait la seconde propriété, puisque le parcours est recalculé à chaque
+  requête de progrès. Aucun LLM nulle part.
 - **Une bascule ne fait bouger qu'une chose.** Les deux options d'une série sont
   définies au niveau de la série, jamais du palier : seule la situation change.
   C'est ce qui rend le point de bascule interprétable.
@@ -92,7 +97,8 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 3. **Tes mots** — la personne confirme les raisons derrière chaque carte. **Rien
    n'est coché d'avance** : une suggestion du jeu n'est pas une réponse. Minimum
    2 raisons distinctes.
-4. **Duels** — jusqu'à 12 situations concrètes (A / B / Ça dépend / Je ne sais
+4. **Duels** — jusqu'à 12 situations concrètes tirées parmi celles que tes
+   cartes rendent possibles (la graine décide lesquelles) (A / B / Ça dépend / Je ne sais
    pas / Passer). Les variantes rejouent une même tension autrement, en fin de
    phase. « Ça dépend » demande de quoi.
 5. **Bascules** — jusqu'à 3 séries de 3 paliers, servies pour les tensions déjà
@@ -138,3 +144,10 @@ Les règles sont en tête de `duels.ts` et `bascules.ts`. En résumé :
 - `artifacts/mockup-sandbox` échoue au build sans `PORT` : c'est indépendant du jeu.
 - `constellation-engine.ts` : `VERSION_CALCUL = 2`. Incrémenter à chaque
   changement d'algorithme.
+- Une erreur de base de données remonte en JSON via le gestionnaire de
+  `app.ts` — Drizzle enveloppe l'erreur PostgreSQL, donc il faut lire
+  `err.cause` (le code `42P01` signale un schéma non poussé), jamais
+  `err.message` seul.
+- Toute mutation dont dépend la suite du jeu doit brancher `onError` sur
+  `useSignalerErreur()` : sans ça, un serveur en échec donne un bouton qui ne
+  fait rien, sans aucune trace à l'écran.

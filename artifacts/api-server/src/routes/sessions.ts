@@ -13,7 +13,7 @@ import {
   DeleteSessionParams,
 } from "@workspace/api-zod";
 import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt } from "crypto";
 
 const router: IRouter = Router();
 
@@ -25,9 +25,16 @@ router.post("/sessions", async (req, res): Promise<void> => {
   }
 
   const id = randomUUID();
+  // Tirée une seule fois, ici. Tout le tirage de situations de la partie en
+  // découle, donc la partie reste stable tant que la ligne existe.
+  const graine = randomInt(1, 2 ** 31 - 1);
   const [session] = await db
     .insert(sessionsTable)
-    .values({ id, etapeCourante: parsed.data.etapeCourante ?? "accueil" })
+    .values({
+      id,
+      graine,
+      etapeCourante: parsed.data.etapeCourante ?? "accueil",
+    })
     .returning();
 
   res.status(201).json({

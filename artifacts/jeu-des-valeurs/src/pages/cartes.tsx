@@ -20,6 +20,7 @@ import {
 import { useState, useMemo } from "react";
 import { Check, Plus, MoveRight, Loader2, PenLine } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSignalerErreur } from "@/hooks/use-erreur";
 
 /** En dessous, il n'y a pas assez de matière pour construire des duels. */
 const MINIMUM_CARTES = 3;
@@ -81,6 +82,7 @@ export default function Cartes() {
   const ajouter = useAddCarteSession();
   const retirer = useRemoveCarteSession();
   const majSession = useUpdateSession();
+  const signaler = useSignalerErreur();
 
   const rafraichir = () =>
     queryClient.invalidateQueries({
@@ -100,7 +102,7 @@ export default function Cartes() {
     if (deja) {
       retirer.mutate(
         { sessionId, carteSessionId: deja.id },
-        { onSuccess: rafraichir },
+        { onSuccess: rafraichir, onError: signaler("Carte pas retirée") },
       );
       return;
     }
@@ -116,7 +118,7 @@ export default function Cartes() {
           estPersonnalisée: false,
         },
       },
-      { onSuccess: rafraichir },
+      { onSuccess: rafraichir, onError: signaler("Carte pas ajoutée") },
     );
   };
 
@@ -140,6 +142,7 @@ export default function Cartes() {
           setSaisieLibre((prev) => ({ ...prev, [famille]: "" }));
           rafraichir();
         },
+        onError: signaler("Carte pas ajoutée"),
       },
     );
   };
@@ -147,7 +150,10 @@ export default function Cartes() {
   const continuer = () => {
     majSession.mutate(
       { sessionId, data: { etapeCourante: "confirmation_valeurs" } },
-      { onSuccess: () => setLocation(`/session/${sessionId}/valeurs`) },
+      {
+        onSuccess: () => setLocation(`/session/${sessionId}/valeurs`),
+        onError: signaler("Impossible de continuer"),
+      },
     );
   };
 
