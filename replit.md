@@ -97,9 +97,9 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 3. **Tes mots** — la personne confirme les raisons derrière chaque carte. **Rien
    n'est coché d'avance** : une suggestion du jeu n'est pas une réponse. Minimum
    2 raisons distinctes.
-4. **Duels** — jusqu'à 12 situations concrètes tirées parmi celles que tes
-   cartes rendent possibles (la graine décide lesquelles) (A / B / Ça dépend / Je ne sais
-   pas / Passer). Les variantes rejouent une même tension autrement, en fin de
+4. **Duels** — jusqu'à 12 situations, tirées par la graine parmi toutes celles
+   que tes cartes rendent possibles. Réponses : A / B / Ça dépend / Je ne sais
+   pas / Passer. Les variantes rejouent une même tension autrement, en fin de
    phase. « Ça dépend » demande de quoi.
 5. **Bascules** — jusqu'à 3 séries de 3 paliers, servies pour les tensions déjà
    tranchées franchement. La série s'arrête dès que la réponse change : le point
