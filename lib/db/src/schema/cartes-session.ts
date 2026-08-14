@@ -25,6 +25,7 @@ export const cartesSessionTable = pgTable("cartes_session", {
     .notNull()
     .default([])
     .$type<string[]>(),
+  valeurPrincipale: text("valeur_principale"),
   estPersonnalisee: boolean("est_personnalisee").notNull().default(false),
   creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
 });

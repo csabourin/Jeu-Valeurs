@@ -125,6 +125,7 @@ export const ListCartesSessionResponseItem = zod.object({
   "description": zod.string().nullish(),
   "valeursConfirmées": zod.array(zod.string()),
   "valeursSuggérées": zod.array(zod.string()).optional(),
+  "valeurPrincipale": zod.string().nullish(),
   "estPersonnalisée": zod.boolean(),
   "creeLe": zod.coerce.date().optional()
 })
@@ -145,7 +146,8 @@ export const AddCarteSessionBody = zod.object({
   "description": zod.string().nullish(),
   "valeursSuggérées": zod.array(zod.string()).optional(),
   "valeursConfirmées": zod.array(zod.string()).optional(),
-  "estPersonnalisée": zod.boolean().optional()
+  "estPersonnalisée": zod.boolean().optional(),
+  "valeurPrincipale": zod.string().nullish()
 })
 
 export const AddCarteSessionResponse = zod.object({
@@ -157,6 +159,7 @@ export const AddCarteSessionResponse = zod.object({
   "description": zod.string().nullish(),
   "valeursConfirmées": zod.array(zod.string()),
   "valeursSuggérées": zod.array(zod.string()).optional(),
+  "valeurPrincipale": zod.string().nullish(),
   "estPersonnalisée": zod.boolean(),
   "creeLe": zod.coerce.date().optional()
 })
@@ -173,7 +176,8 @@ export const UpdateCarteSessionParams = zod.object({
 export const UpdateCarteSessionBody = zod.object({
   "label": zod.string().optional(),
   "description": zod.string().nullish(),
-  "valeursConfirmées": zod.array(zod.string()).optional()
+  "valeursConfirmées": zod.array(zod.string()).optional(),
+  "valeurPrincipale": zod.string().nullish()
 })
 
 export const UpdateCarteSessionResponse = zod.object({
@@ -185,6 +189,7 @@ export const UpdateCarteSessionResponse = zod.object({
   "description": zod.string().nullish(),
   "valeursConfirmées": zod.array(zod.string()),
   "valeursSuggérées": zod.array(zod.string()).optional(),
+  "valeurPrincipale": zod.string().nullish(),
   "estPersonnalisée": zod.boolean(),
   "creeLe": zod.coerce.date().optional()
 })
@@ -214,12 +219,18 @@ export const ListReponsesResponseItem = zod.object({
   "dilemmeId": zod.number().nullish(),
   "valeurA": zod.string(),
   "valeurB": zod.string(),
+  "texteDilemme": zod.string().describe('Texte exact présenté à la personne'),
+  "contexte": zod.string().nullish(),
+  "pivotDimension": zod.string().nullish(),
   "choix": zod.enum(['A', 'B', 'ca_depend', 'je_ne_sais_pas', 'passer']),
   "facteurDepend": zod.string().nullish().describe('Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite\n'),
   "facteurDependLibre": zod.string().nullish().describe('Réponse libre si facteurDepend = autre'),
   "difficulte": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "certitude": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "version": zod.number().describe('Numéro de version (incrémenter à chaque correction)'),
+  "supersedesResponseId": zod.number().nullish(),
+  "invalidatedAt": zod.coerce.date().nullish(),
+  "invalidationReason": zod.string().nullish(),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date().optional()
 })
@@ -237,6 +248,9 @@ export const CreateReponseBody = zod.object({
   "dilemmeId": zod.number().nullish(),
   "valeurA": zod.string(),
   "valeurB": zod.string(),
+  "texteDilemme": zod.string(),
+  "contexte": zod.string().nullish(),
+  "pivotDimension": zod.string().nullish(),
   "choix": zod.enum(['A', 'B', 'ca_depend', 'je_ne_sais_pas', 'passer']),
   "facteurDepend": zod.string().nullish(),
   "facteurDependLibre": zod.string().nullish(),
@@ -250,12 +264,18 @@ export const CreateReponseResponse = zod.object({
   "dilemmeId": zod.number().nullish(),
   "valeurA": zod.string(),
   "valeurB": zod.string(),
+  "texteDilemme": zod.string().describe('Texte exact présenté à la personne'),
+  "contexte": zod.string().nullish(),
+  "pivotDimension": zod.string().nullish(),
   "choix": zod.enum(['A', 'B', 'ca_depend', 'je_ne_sais_pas', 'passer']),
   "facteurDepend": zod.string().nullish().describe('Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite\n'),
   "facteurDependLibre": zod.string().nullish().describe('Réponse libre si facteurDepend = autre'),
   "difficulte": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "certitude": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "version": zod.number().describe('Numéro de version (incrémenter à chaque correction)'),
+  "supersedesResponseId": zod.number().nullish(),
+  "invalidatedAt": zod.coerce.date().nullish(),
+  "invalidationReason": zod.string().nullish(),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date().optional()
 })
@@ -283,12 +303,18 @@ export const UpdateReponseResponse = zod.object({
   "dilemmeId": zod.number().nullish(),
   "valeurA": zod.string(),
   "valeurB": zod.string(),
+  "texteDilemme": zod.string().describe('Texte exact présenté à la personne'),
+  "contexte": zod.string().nullish(),
+  "pivotDimension": zod.string().nullish(),
   "choix": zod.enum(['A', 'B', 'ca_depend', 'je_ne_sais_pas', 'passer']),
   "facteurDepend": zod.string().nullish().describe('Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite\n'),
   "facteurDependLibre": zod.string().nullish().describe('Réponse libre si facteurDepend = autre'),
   "difficulte": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "certitude": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "version": zod.number().describe('Numéro de version (incrémenter à chaque correction)'),
+  "supersedesResponseId": zod.number().nullish(),
+  "invalidatedAt": zod.coerce.date().nullish(),
+  "invalidationReason": zod.string().nullish(),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date().optional()
 })
@@ -306,13 +332,24 @@ export const GetConstellationResponse = zod.object({
   "version": zod.number(),
   "tendances": zod.array(zod.object({
   "valeur": zod.string(),
-  "scoreNet": zod.number().describe('Score net (victoires - défaites) \/ total significatifs'),
+  "scoreNet": zod.number().describe('Transformation de l\'importance apparente sur l\'intervalle -1 à 1'),
+  "importanceApparente": zod.number().describe('Moyenne des préférences Beta(1,1) pondérées, de 0 à 1'),
+  "incertitude": zod.number(),
+  "stabilite": zod.number(),
+  "couverture": zod.number(),
+  "statutProtege": zod.boolean(),
+  "contextesExplores": zod.array(zod.string()),
+  "preferencesParContexte": zod.array(zod.object({
+  "contexte": zod.string(),
+  "importanceApparente": zod.number(),
+  "preuvesEffectives": zod.number()
+})),
   "totalCollisions": zod.number(),
   "victoiresA": zod.number(),
   "victoiresB": zod.number(),
   "incertitudes": zod.number().describe('ca_depend + je_ne_sais_pas'),
   "abandonnes": zod.number().describe('passer'),
-  "difficulteMoyenne": zod.number().nullish(),
+  "difficulteMoyenne": zod.number().nullable(),
   "certitudeMoyenne": zod.number().nullable(),
   "territoireInexplore": zod.boolean().describe('Vrai si aucune collision résolue pour cette valeur')
 })),
@@ -321,17 +358,20 @@ export const GetConstellationResponse = zod.object({
   "valeurB": zod.string(),
   "totalCollisions": zod.number(),
   "incertitudes": zod.number(),
+  "difficulteMoyenne": zod.number().nullable(),
+  "probabiliteA": zod.number(),
+  "incertitude": zod.number(),
   "estForte": zod.boolean()
 })),
   "observations": zod.array(zod.object({
   "id": zod.string(),
   "texte": zod.string().describe('Formulation prudente (ex. \"Dans les situations explorées jusqu\'ici…\")'),
-  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture']),
+  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture', 'valeur_protegee', 'point_bascule']),
   "valeursConcernees": zod.array(zod.string()),
   "reponsesSources": zod.array(zod.number()).describe('IDs des réponses qui appuient cette observation')
 })),
   "couverture": zod.number().describe('Proportion de collisions possibles explorées (0 à 1)'),
-  "stabilite": zod.number().describe('Stabilité globale des choix (0 à 1, basée sur la certitude moyenne)'),
+  "stabilite": zod.number().describe('Cohérence observée lors des répétitions comparables (0 à 1)'),
   "versionCalcul": zod.number().describe('Version du moteur de calcul utilisé')
 })
 
@@ -354,8 +394,8 @@ export const GetProgresResponse = zod.object({
   "valeurA": zod.string().optional(),
   "valeurB": zod.string().optional(),
   "dilemmeId": zod.number().nullish(),
-  "texte": zod.string().nullish()
+  "texte": zod.string().nullish(),
+  "contexte": zod.string().nullish(),
+  "pivotDimension": zod.string().nullish()
 }).nullable()
 })
-
-

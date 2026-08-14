@@ -1,0 +1,1502 @@
+[
+  {
+    "id": "LR001",
+    "category": "Dignité et respect de la personne",
+    "label": "Humilier délibérément quelqu’un pour me valoriser.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR002",
+    "category": "Dignité et respect de la personne",
+    "label": "Traiter quelqu’un comme inférieur simplement à cause de son origine ou de son appartenance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR003",
+    "category": "Dignité et respect de la personne",
+    "label": "Profiter volontairement d’une personne qui ne peut pas correctement se défendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR004",
+    "category": "Dignité et respect de la personne",
+    "label": "Réduire quelqu’un à son utilité pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR005",
+    "category": "Dignité et respect de la personne",
+    "label": "Déshumaniser un groupe avec lequel je suis en désaccord.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR006",
+    "category": "Dignité et respect de la personne",
+    "label": "Prendre plaisir à rabaisser quelqu’un qui a échoué.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR007",
+    "category": "Dignité et respect de la personne",
+    "label": "Ignorer volontairement la dignité d’une personne parce qu’elle a mal agi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR008",
+    "category": "Dignité et respect de la personne",
+    "label": "Exclure quelqu’un uniquement parce qu’il est différent de mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR009",
+    "category": "Dignité et respect de la personne",
+    "label": "Utiliser mon statut pour faire taire quelqu’un sans écouter ce qu’il a à dire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR010",
+    "category": "Dignité et respect de la personne",
+    "label": "Demander aux autres un respect que je refuse moi-même de leur accorder.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR011",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Mentir délibérément pour obtenir un avantage important aux dépens d’une autre personne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR012",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Accuser quelqu’un de quelque chose que je sais faux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR013",
+    "category": "Vérité, intégrité et confiance",
+    "label": "M’attribuer le travail ou les idées de quelqu’un d’autre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR014",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Modifier les faits pour protéger mon image lorsque quelqu’un d’autre en subirait les conséquences.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR015",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Faire une promesse importante tout en sachant que je n’ai aucune intention de la tenir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR016",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Révéler sans raison valable quelque chose qu’une personne m’a confié en toute confiance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR017",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Cacher volontairement une information essentielle à quelqu’un qui doit prendre une décision importante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR018",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Manipuler quelqu’un en exploitant délibérément ses peurs.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR019",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Prétendre posséder une compétence ou une autorité que je n’ai pas lorsque les autres comptent sur moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR020",
+    "category": "Vérité, intégrité et confiance",
+    "label": "Continuer à défendre quelque chose que je sais faux uniquement pour ne pas perdre la face.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR021",
+    "category": "Loyauté, engagements et relations",
+    "label": "Abandonner quelqu’un qui dépend réellement de moi simplement parce que cela devient difficile.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR022",
+    "category": "Loyauté, engagements et relations",
+    "label": "Trahir un proche uniquement pour améliorer ma situation personnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR023",
+    "category": "Loyauté, engagements et relations",
+    "label": "Rompre un engagement important dès qu’une option plus avantageuse apparaît.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR024",
+    "category": "Loyauté, engagements et relations",
+    "label": "Utiliser contre quelqu’un une vulnérabilité qu’il m’a confiée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR025",
+    "category": "Loyauté, engagements et relations",
+    "label": "Prendre systématiquement sans jamais contribuer à une relation importante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR026",
+    "category": "Loyauté, engagements et relations",
+    "label": "Refuser mon soutien à un proche en difficulté uniquement parce que son problème m’incommode.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR027",
+    "category": "Loyauté, engagements et relations",
+    "label": "Faire semblant d’être loyal à quelqu’un uniquement pour obtenir quelque chose de lui.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR028",
+    "category": "Loyauté, engagements et relations",
+    "label": "Monter deux personnes l’une contre l’autre pour renforcer ma propre position.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR029",
+    "category": "Loyauté, engagements et relations",
+    "label": "Sacrifier une relation importante pour une réussite mineure.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR030",
+    "category": "Loyauté, engagements et relations",
+    "label": "Exiger une loyauté que je ne suis pas moi-même disposé à offrir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR031",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Négliger volontairement une personne de ma famille qui dépend de moi alors que je pourrais raisonnablement l’aider.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR032",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Favoriser ma famille au point de causer une injustice grave à quelqu’un d’autre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR033",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Imposer à mes proches tous mes choix simplement parce que je suis plus âgé ou que j’ai davantage d’autorité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR034",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Refuser d’écouter l’expérience des personnes plus âgées uniquement parce que leurs idées viennent d’une autre génération.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR035",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Exiger qu’une personne plus jeune obéisse sans jamais lui permettre de s’exprimer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR036",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Abandonner une responsabilité familiale essentielle pour poursuivre un avantage personnel mineur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR037",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Utiliser les liens familiaux comme moyen de contrôler les choix personnels d’un proche.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR038",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Couper volontairement les générations futures de toute connaissance de leur histoire familiale.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR039",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Considérer automatiquement les besoins de ma famille comme plus importants que ceux de toute autre personne, quelles que soient les circonstances.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR040",
+    "category": "Famille, proches et responsabilités intergénérationnelles",
+    "label": "Considérer automatiquement mes propres projets comme plus importants que toutes mes obligations envers mes proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR041",
+    "category": "Justice, équité et réciprocité",
+    "label": "M’accorder volontairement un privilège que je refuserais à quelqu’un placé dans la même situation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR042",
+    "category": "Justice, équité et réciprocité",
+    "label": "Punir quelqu’un pour quelque chose dont je sais qu’il n’est pas responsable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR043",
+    "category": "Justice, équité et réciprocité",
+    "label": "Profiter d’une règle uniquement parce que je sais que les autres n’ont pas le même accès que moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR044",
+    "category": "Justice, équité et réciprocité",
+    "label": "Refuser d’entendre la version d’une personne avant de prendre une décision importante à son sujet.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR045",
+    "category": "Justice, équité et réciprocité",
+    "label": "Changer les règles après coup uniquement pour obtenir le résultat que je souhaite.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR046",
+    "category": "Justice, équité et réciprocité",
+    "label": "Demander aux autres un sacrifice que je refuserais absolument de faire moi-même.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR047",
+    "category": "Justice, équité et réciprocité",
+    "label": "Exploiter une position de pouvoir pour obtenir quelque chose qui ne me serait autrement pas accordé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR048",
+    "category": "Justice, équité et réciprocité",
+    "label": "Ignorer volontairement une injustice simplement parce qu’elle m’avantage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR049",
+    "category": "Justice, équité et réciprocité",
+    "label": "Distribuer une ressource commune selon mes préférences personnelles plutôt que selon des critères défendables.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR050",
+    "category": "Justice, équité et réciprocité",
+    "label": "Prendre beaucoup plus que ma part d’une ressource limitée en sachant que les autres en manqueront.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR051",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Forcer quelqu’un à adopter mes convictions personnelles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR052",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Prendre à la place d’un adulte capable une décision personnelle fondamentale qui lui appartient.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR053",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Empêcher quelqu’un d’exprimer respectueusement un désaccord simplement parce qu’il me dérange.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR054",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Faire pression sur quelqu’un jusqu’à ce qu’il accepte quelque chose qu’il avait clairement refusé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR055",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Utiliser une dépendance financière ou sociale pour contrôler les décisions personnelles de quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR056",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Chercher à tout savoir de la vie privée d’une personne sans raison légitime.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR057",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Punir quelqu’un uniquement pour avoir fait un choix différent du mien sans nuire à personne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR058",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Laisser une majorité supprimer systématiquement toute possibilité de désaccord minoritaire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR059",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Décider qu’une personne ne mérite pas de choisir simplement parce que son choix me paraît étrange.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR060",
+    "category": "Liberté, autonomie et consentement",
+    "label": "Renoncer à toute liberté de jugement personnel simplement parce qu’une autorité l’exige.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR061",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Désobéir à une règle importante uniquement parce qu’elle m’est personnellement incommode.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR062",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Ignorer mes responsabilités parce que je suppose que quelqu’un d’autre les assumera.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR063",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Utiliser ma liberté personnelle sans tenir compte des conséquences importantes pour ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR064",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Refuser par principe toute autorité, même lorsqu’elle est légitime et nécessaire au fonctionnement du groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR065",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Profiter des efforts du groupe tout en refusant systématiquement d’y contribuer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR066",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Briser délibérément une règle commune qui protège les autres, uniquement pour mon bénéfice.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR067",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Accepter une responsabilité importante puis l’abandonner sans prévenir ceux qui comptent sur moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR068",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Refuser toute obligation envers ma communauté au nom de mon seul intérêt personnel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR069",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Utiliser une fonction d’autorité pour mon intérêt plutôt que pour la responsabilité qui m’a été confiée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR070",
+    "category": "Autorité, ordre, devoir et responsabilité",
+    "label": "Obéir à une autorité lorsque je crois clairement que ce qu’elle demande est profondément injuste.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR071",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Créer volontairement un conflit uniquement pour attirer l’attention.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR072",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Ridiculiser publiquement quelqu’un alors qu’un désaccord pourrait être réglé autrement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR073",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Mettre mon besoin d’avoir raison avant la préservation d’une relation importante dans une question insignifiante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR074",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Refuser tout compromis même lorsque personne ne me demande d’abandonner une valeur essentielle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR075",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Faire perdre la face à quelqu’un intentionnellement lorsque cela n’est pas nécessaire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR076",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Répandre une rumeur parce qu’elle renforce ma position dans un groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR077",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Exclure une personne d’un groupe pour une simple divergence d’opinion.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR078",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Demander au groupe de préserver l’harmonie en faisant taire une personne qui subit réellement une injustice.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR079",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Faire passer mon prestige personnel avant la cohésion d’une communauté qui dépend de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR080",
+    "category": "Harmonie sociale, conflit et appartenance",
+    "label": "Préserver une apparence d’harmonie au prix d’un problème grave que tout le monde connaît.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR081",
+    "category": "Tradition, culture et transmission",
+    "label": "Ridiculiser une tradition importante pour quelqu’un simplement parce qu’elle m’est étrangère.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR082",
+    "category": "Tradition, culture et transmission",
+    "label": "Obliger quelqu’un à abandonner sa langue ou ses pratiques culturelles pour être accepté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR083",
+    "category": "Tradition, culture et transmission",
+    "label": "Détruire volontairement une mémoire culturelle parce que je la considère dépassée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR084",
+    "category": "Tradition, culture et transmission",
+    "label": "Traiter les traditions de mon groupe comme automatiquement supérieures à celles des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR085",
+    "category": "Tradition, culture et transmission",
+    "label": "Rejeter une pratique uniquement parce qu’elle est ancienne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR086",
+    "category": "Tradition, culture et transmission",
+    "label": "Maintenir une pratique uniquement parce qu’elle est ancienne, même si je crois qu’elle cause maintenant un tort important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR087",
+    "category": "Tradition, culture et transmission",
+    "label": "Empêcher les nouvelles générations de questionner les traditions qu’elles héritent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR088",
+    "category": "Tradition, culture et transmission",
+    "label": "Empêcher les générations futures d’apprendre les traditions que j’ai moi-même reçues.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR089",
+    "category": "Tradition, culture et transmission",
+    "label": "M’approprier un symbole culturel important en sachant que mon usage est profondément irrespectueux pour ceux auxquels il appartient.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR090",
+    "category": "Tradition, culture et transmission",
+    "label": "Effacer l’histoire d’un groupe parce qu’elle dérange le récit dominant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR091",
+    "category": "Sacré, convictions et sens",
+    "label": "Profaner volontairement quelque chose que je sais profondément sacré pour une autre communauté uniquement pour la provoquer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR092",
+    "category": "Sacré, convictions et sens",
+    "label": "Me moquer d’une conviction existentielle sincère uniquement parce que je ne la partage pas.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR093",
+    "category": "Sacré, convictions et sens",
+    "label": "Prétendre partager des croyances que je méprise uniquement pour obtenir un avantage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR094",
+    "category": "Sacré, convictions et sens",
+    "label": "Utiliser une croyance spirituelle ou philosophique pour manipuler quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR095",
+    "category": "Sacré, convictions et sens",
+    "label": "Contraindre une personne à participer à un rituel contre sa volonté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR096",
+    "category": "Sacré, convictions et sens",
+    "label": "Empêcher une personne de pratiquer paisiblement une tradition simplement parce qu’elle diffère de la mienne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR097",
+    "category": "Sacré, convictions et sens",
+    "label": "Renier publiquement une conviction fondamentale uniquement pour gagner l’approbation du groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR098",
+    "category": "Sacré, convictions et sens",
+    "label": "Imposer mes convictions à l’ensemble d’une communauté sans accepter leur remise en question.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR099",
+    "category": "Sacré, convictions et sens",
+    "label": "Traiter tout ce qui est sacré pour les autres comme dépourvu de valeur par définition.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR100",
+    "category": "Sacré, convictions et sens",
+    "label": "Utiliser ce qui est sacré pour une communauté comme simple outil de profit en sachant que cela lui cause un tort important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR101",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Refuser toute aide à ma communauté tout en comptant constamment sur son soutien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR102",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Laisser quelqu’un affronter seul un problème grave alors que je pourrais facilement lui apporter une aide importante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR103",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Accumuler une ressource dont je n’ai pas besoin lorsque ceux dont je suis responsable en manquent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR104",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Refuser de partager mes connaissances uniquement pour préserver mon importance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR105",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "M’enrichir considérablement grâce à une communauté sans jamais rien lui rendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR106",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Recevoir continuellement sans jamais reconnaître ce que les autres m’ont apporté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR107",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Refuser d’aider quelqu’un simplement parce qu’il appartient à un autre groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR108",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Aider mon propre groupe même lorsque cela exige de causer une injustice grave à un autre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR109",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Sacrifier systématiquement mes propres besoins essentiels pour répondre à toutes les demandes du groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR110",
+    "category": "Communauté, entraide et réciprocité",
+    "label": "Faire systématiquement passer mes intérêts personnels avant tout besoin collectif, même en situation critique.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR111",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Détruire inutilement un milieu naturel uniquement pour ma commodité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR112",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Prendre d’un territoire beaucoup plus que ce dont j’ai besoin sans penser à son renouvellement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR113",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Gaspiller systématiquement une ressource rare simplement parce que je peux me le permettre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR114",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Endommager volontairement un lieu auquel une communauté entretient un lien culturel profond sans même chercher à la consulter.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR115",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Considérer le monde vivant uniquement comme une réserve de ressources à ma disposition.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR116",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Faire disparaître un espace naturel irremplaçable pour un bénéfice personnel insignifiant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR117",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Transmettre volontairement aux générations suivantes un problème environnemental grave que je pourrais raisonnablement éviter.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR118",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Empêcher une communauté de participer aux décisions concernant un territoire dont elle dépend.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR119",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Utiliser une ressource commune sans contribuer à sa préservation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR120",
+    "category": "Nature, territoire et monde vivant",
+    "label": "Refuser toute utilisation humaine de la nature même lorsqu’une communauté en dépend de façon responsable pour vivre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR121",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Utiliser une position d’autorité pour me venger d’un désaccord personnel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR122",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Exiger un privilège uniquement à cause de mon rang.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR123",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Faire taire les personnes qui me donnent des informations que je n’aime pas entendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR124",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Accepter les mérites d’un succès collectif tout en faisant porter les échecs aux autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR125",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Exploiter la dépendance de quelqu’un pour obtenir son obéissance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR126",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Garder une responsabilité que je ne suis plus capable d’assumer uniquement pour conserver mon statut.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR127",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Favoriser uniquement ceux qui me sont personnellement loyaux lorsque je dois décider pour tout le groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR128",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Refuser de reconnaître une erreur importante parce que je suis en position d’autorité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR129",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Chercher le pouvoir simplement pour pouvoir imposer mes préférences aux autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR130",
+    "category": "Pouvoir, statut et leadership",
+    "label": "Refuser toute responsabilité de leadership lorsqu’un groupe compte réellement sur moi et que je suis capable de l’assumer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR131",
+    "category": "Courage, prudence et protection",
+    "label": "Exposer inutilement les autres à un danger uniquement pour prouver mon courage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR132",
+    "category": "Courage, prudence et protection",
+    "label": "Mettre quelqu’un en danger pour obtenir un avantage mineur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR133",
+    "category": "Courage, prudence et protection",
+    "label": "Ignorer un risque sérieux connu lorsque d’autres dépendent de ma décision.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR134",
+    "category": "Courage, prudence et protection",
+    "label": "Refuser par peur toute action nouvelle, même lorsqu’elle est nécessaire pour protéger ce qui compte.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR135",
+    "category": "Courage, prudence et protection",
+    "label": "Prendre une décision irréversible importante sur une simple impulsion lorsque d’autres en subiront les conséquences.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR136",
+    "category": "Courage, prudence et protection",
+    "label": "Dissimuler un risque sérieux aux personnes qui y seront exposées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR137",
+    "category": "Courage, prudence et protection",
+    "label": "Demander aux autres de courir un risque que je juge moi-même inacceptable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR138",
+    "category": "Courage, prudence et protection",
+    "label": "Sacrifier la sécurité d’une personne uniquement pour éviter une gêne ou un coût mineur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR139",
+    "category": "Courage, prudence et protection",
+    "label": "Utiliser la sécurité comme justification pour contrôler tout comportement différent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR140",
+    "category": "Courage, prudence et protection",
+    "label": "Refuser toute mesure de sécurité par principe parce qu’elle limite légèrement ma liberté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR141",
+    "category": "Travail, contribution et mérite",
+    "label": "Laisser volontairement les autres faire ma part du travail tout en réclamant le même mérite.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR142",
+    "category": "Travail, contribution et mérite",
+    "label": "Saboter le travail de quelqu’un pour augmenter mes chances de réussir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR143",
+    "category": "Travail, contribution et mérite",
+    "label": "Cacher une erreur importante commise dans mon travail en sachant qu’elle pourrait affecter les autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR144",
+    "category": "Travail, contribution et mérite",
+    "label": "Exiger d’une personne des résultats impossibles simplement pour démontrer mon autorité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR145",
+    "category": "Travail, contribution et mérite",
+    "label": "Considérer une personne comme sans valeur parce que sa contribution économique est faible.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR146",
+    "category": "Travail, contribution et mérite",
+    "label": "Refuser de reconnaître une contribution parce qu’elle provient d’une personne de statut inférieur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR147",
+    "category": "Travail, contribution et mérite",
+    "label": "Sacrifier systématiquement les relations humaines pour obtenir de meilleurs résultats.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR148",
+    "category": "Travail, contribution et mérite",
+    "label": "Sacrifier systématiquement la qualité du travail pour éviter tout désaccord.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR149",
+    "category": "Travail, contribution et mérite",
+    "label": "Accepter un mérite que je sais ne pas avoir gagné.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR150",
+    "category": "Travail, contribution et mérite",
+    "label": "Faire de la réussite personnelle ma seule mesure de la valeur d’une personne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR151",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Prétendre être quelqu’un que je ne suis pas uniquement pour être accepté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR152",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Renoncer à une part importante de mon identité uniquement pour éviter le jugement des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR153",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Refuser toute adaptation de ma façon d’être même lorsqu’elle rend inutilement la vie difficile aux autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR154",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Exiger que quelqu’un cache une partie importante de son identité pour appartenir à mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR155",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Présumer que quelqu’un partage les valeurs de son groupe d’origine sans lui demander.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR156",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Rejeter mon groupe d’appartenance simplement parce qu’il n’est pas valorisé socialement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR157",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Rester fidèle à mon groupe lorsqu’il exige de moi quelque chose que je juge fondamentalement contraire à mes convictions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR158",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Exclure quelqu’un parce qu’il refuse de se conformer à une coutume qui n’est pas essentielle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR159",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Utiliser mon appartenance à un groupe comme excuse pour ne jamais remettre mes comportements en question.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR160",
+    "category": "Identité, authenticité et appartenance",
+    "label": "Me couper de toutes mes appartenances pour préserver une indépendance absolue.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR161",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Refuser toute hospitalité à une personne dans le besoin alors que l’accueillir ne me coûterait presque rien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR162",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Mettre en danger les personnes dont je suis responsable pour accueillir quelqu’un que je connais à peine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR163",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Profiter de l’hospitalité de quelqu’un sans respecter son foyer ou ses règles raisonnables.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR164",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Traiter un invité comme inférieur parce qu’il dépend momentanément de mon accueil.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR165",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Refuser systématiquement les nouveaux venus afin de préserver l’identité du groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR166",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Modifier systématiquement les pratiques d’un groupe pour satisfaire chaque nouvel arrivant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR167",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Fermer l’accès à une ressource commune simplement parce qu’une personne vient d’ailleurs.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR168",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Accueillir quelqu’un sans tenir compte des inquiétudes légitimes des personnes déjà présentes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR169",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Juger la valeur d’une personne selon la façon dont elle a été reçue par mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR170",
+    "category": "Hospitalité, accueil et frontières du groupe",
+    "label": "Considérer automatiquement toute personne extérieure comme une menace.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR171",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Mépriser ce que les générations précédentes m’ont transmis sans chercher à le comprendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR172",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Maintenir une décision ancienne uniquement parce que personne avant moi n’a osé la changer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR173",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Modifier profondément un héritage collectif sans consulter ceux qui y sont attachés.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR174",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Empêcher toute évolution d’une tradition au nom du respect des ancêtres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR175",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Faire disparaître les récits des générations précédentes parce qu’ils ne correspondent plus à notre vision actuelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR176",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Présenter le passé comme meilleur qu’il ne l’était pour protéger l’image de mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR177",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Juger les générations passées uniquement selon mes propres normes actuelles sans chercher à comprendre leur contexte.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR178",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Utiliser le respect des ancêtres pour empêcher quelqu’un de choisir sa propre voie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR179",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Refuser de transmettre un savoir parce qu’il diminuerait mon importance dans le groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR180",
+    "category": "Respect des ancêtres, héritage et changement",
+    "label": "Transmettre une pratique sans permettre à la génération suivante de décider ce qu’elle veut en faire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR181",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Refuser de changer d’avis malgré des preuves solides uniquement pour préserver ma fierté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR182",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Accepter une affirmation importante uniquement parce qu’une personne prestigieuse l’a dite.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR183",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Rejeter l’expérience vécue de quelqu’un simplement parce qu’elle n’est pas exprimée dans un langage expert.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR184",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Rejeter les connaissances scientifiques uniquement lorsqu’elles contredisent ce que je préférerais croire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR185",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Considérer qu’un savoir traditionnel n’a aucune valeur simplement parce qu’il n’est pas scientifique.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR186",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Considérer qu’un savoir traditionnel doit être vrai simplement parce qu’il est ancien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR187",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Cacher volontairement une connaissance importante pour conserver un avantage sur les autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR188",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Donner un conseil avec assurance lorsque je sais que je ne maîtrise pas le sujet.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR189",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Refuser d’apprendre d’une personne parce qu’elle a moins de statut que moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR190",
+    "category": "Savoir, apprentissage et expertise",
+    "label": "Obliger quelqu’un à accepter mon interprétation lorsqu’il existe raisonnablement plusieurs façons de comprendre une situation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR191",
+    "category": "Propriété, partage et biens communs",
+    "label": "Prendre quelque chose appartenant clairement à quelqu’un sans son accord simplement parce que j’en ai davantage besoin.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR192",
+    "category": "Propriété, partage et biens communs",
+    "label": "Refuser de partager une ressource vitale inutilisée avec quelqu’un qui en a un besoin urgent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR193",
+    "category": "Propriété, partage et biens communs",
+    "label": "Traiter une ressource commune comme si elle m’appartenait personnellement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR194",
+    "category": "Propriété, partage et biens communs",
+    "label": "Utiliser un bien collectif sans participer d’aucune façon à son entretien lorsque je pourrais le faire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR195",
+    "category": "Propriété, partage et biens communs",
+    "label": "Exiger qu’une personne partage ce qui lui appartient simplement parce que je considère son besoin moins important que le mien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR196",
+    "category": "Propriété, partage et biens communs",
+    "label": "Accumuler volontairement une ressource rare afin de pouvoir la revendre beaucoup plus cher à ceux qui en ont besoin.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR197",
+    "category": "Propriété, partage et biens communs",
+    "label": "Interdire toute propriété individuelle au nom du bien collectif.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR198",
+    "category": "Propriété, partage et biens communs",
+    "label": "Privatiser une ressource indispensable dont toute une communauté dépend depuis longtemps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR199",
+    "category": "Propriété, partage et biens communs",
+    "label": "Gaspiller quelque chose simplement parce que je l’ai payé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR200",
+    "category": "Propriété, partage et biens communs",
+    "label": "Décider de l’usage d’une ressource commune sans consulter ceux qui en dépendent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR201",
+    "category": "Réputation, honneur et face",
+    "label": "Détruire volontairement la réputation de quelqu’un pour obtenir un avantage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR202",
+    "category": "Réputation, honneur et face",
+    "label": "Laisser quelqu’un porter injustement la honte d’une erreur que j’ai commise.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR203",
+    "category": "Réputation, honneur et face",
+    "label": "Protéger ma réputation en cachant une faute importante qui affecte les autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR204",
+    "category": "Réputation, honneur et face",
+    "label": "Exposer publiquement l’erreur mineure d’une personne lorsqu’une correction privée suffirait.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR205",
+    "category": "Réputation, honneur et face",
+    "label": "Refuser de signaler une faute grave uniquement pour éviter de faire perdre la face à quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR206",
+    "category": "Réputation, honneur et face",
+    "label": "Exiger des excuses publiques uniquement pour humilier quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR207",
+    "category": "Réputation, honneur et face",
+    "label": "Refuser de présenter des excuses parce que cela diminuerait mon statut.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR208",
+    "category": "Réputation, honneur et face",
+    "label": "Considérer l’honneur de mon groupe comme plus important que la vérité sur ce qui s’est passé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR209",
+    "category": "Réputation, honneur et face",
+    "label": "Déshonorer publiquement ma communauté uniquement pour obtenir l’approbation d’un autre groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR210",
+    "category": "Réputation, honneur et face",
+    "label": "Défendre l’honneur de mon groupe en attaquant quelqu’un qui n’est pas responsable de l’offense.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR211",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Refuser par principe toute possibilité de pardon, peu importe ce que la personne fait pour réparer son tort.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR212",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Pardonner automatiquement une faute grave sans tenir compte de ses conséquences pour les personnes touchées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR213",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Exiger qu’une personne soit punie même lorsqu’elle a pleinement réparé un tort mineur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR214",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Refuser toute conséquence à quelqu’un uniquement parce qu’il m’est proche.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR215",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Utiliser une erreur passée déjà reconnue pour contrôler indéfiniment quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR216",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Faire comme si rien ne s’était passé lorsqu’un tort important n’a jamais été reconnu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR217",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Exiger le pardon d’une personne avant qu’elle soit prête à l’accorder.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR218",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Refuser toute réconciliation uniquement pour continuer à avoir raison.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR219",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Confondre le pardon avec l’obligation de rétablir exactement la relation précédente.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR220",
+    "category": "Pardon, réparation et conséquences",
+    "label": "Considérer qu’une personne ne peut jamais changer à cause d’une faute ancienne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR221",
+    "category": "Individu et collectivité",
+    "label": "Sacrifier volontairement une personne innocente uniquement parce que la majorité y gagnerait un avantage modéré.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR222",
+    "category": "Individu et collectivité",
+    "label": "Refuser un petit sacrifice personnel lorsqu’il empêcherait un préjudice important pour toute ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR223",
+    "category": "Individu et collectivité",
+    "label": "Faire passer systématiquement la volonté de la majorité avant les droits essentiels d’une minorité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR224",
+    "category": "Individu et collectivité",
+    "label": "Permettre à une petite minorité de bloquer indéfiniment toute décision collective, quelles qu’en soient les conséquences.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR225",
+    "category": "Individu et collectivité",
+    "label": "Demander à quelqu’un de s’effacer constamment « pour le bien du groupe ».",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR226",
+    "category": "Individu et collectivité",
+    "label": "Refuser toute concession personnelle au groupe au nom de mon indépendance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR227",
+    "category": "Individu et collectivité",
+    "label": "Considérer qu’un besoin individuel est automatiquement égoïste.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR228",
+    "category": "Individu et collectivité",
+    "label": "Considérer qu’une obligation collective est automatiquement une atteinte à ma liberté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR229",
+    "category": "Individu et collectivité",
+    "label": "Décider du bien collectif sans permettre aux personnes touchées d’avoir voix au chapitre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR230",
+    "category": "Individu et collectivité",
+    "label": "Renoncer à une décision nécessaire uniquement parce qu’il est impossible d’obtenir l’accord de tout le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR231",
+    "category": "Temps, rythme et obligations",
+    "label": "Faire attendre régulièrement les autres sans considérer leur temps comme important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR232",
+    "category": "Temps, rythme et obligations",
+    "label": "Exiger que chaque personne respecte exactement mon rapport au temps et aux horaires.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR233",
+    "category": "Temps, rythme et obligations",
+    "label": "Sacrifier constamment le temps consacré aux relations importantes pour être plus productif.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR234",
+    "category": "Temps, rythme et obligations",
+    "label": "Abandonner systématiquement mes responsabilités pour préserver mon temps personnel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR235",
+    "category": "Temps, rythme et obligations",
+    "label": "Considérer le repos comme inutile lorsque quelqu’un pourrait encore produire davantage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR236",
+    "category": "Temps, rythme et obligations",
+    "label": "Refuser toute urgence collective parce qu’elle perturbe mes projets personnels.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR237",
+    "category": "Temps, rythme et obligations",
+    "label": "Imposer une urgence permanente à un groupe simplement parce que je planifie mal.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR238",
+    "category": "Temps, rythme et obligations",
+    "label": "Remettre indéfiniment une décision importante uniquement pour éviter un conflit.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR239",
+    "category": "Temps, rythme et obligations",
+    "label": "Précipiter une décision collective uniquement parce que l’incertitude me rend inconfortable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR240",
+    "category": "Temps, rythme et obligations",
+    "label": "Considérer automatiquement la rapidité comme plus importante que la consultation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR241",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Faire souffrir inutilement un animal pour mon amusement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR242",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Mettre systématiquement les besoins des animaux avant les besoins essentiels de personnes dont je suis responsable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR243",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Détruire une forme de vie simplement parce qu’elle n’a aucune utilité visible pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR244",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Refuser toute intervention humaine dans un écosystème même lorsqu’elle pourrait éviter un dommage plus important causé par nos actions passées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR245",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Introduire volontairement une modification importante dans un écosystème sans chercher à comprendre ses conséquences.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR246",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Considérer que l’intérêt humain justifie automatiquement toute atteinte au reste du vivant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR247",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Considérer que les besoins humains ne devraient jamais pouvoir justifier l’utilisation d’autres formes de vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR248",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Épuiser une population animale ou végétale dont une communauté dépend sans prévoir son renouvellement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR249",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Empêcher une communauté de maintenir une relation traditionnelle durable avec le vivant au nom d’un principe abstrait de conservation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "LR250",
+    "category": "Humains, autres êtres vivants et interdépendance",
+    "label": "Maintenir une pratique traditionnelle lorsque je suis convaincu qu’elle menace désormais gravement la survie d’une espèce ou d’un écosystème.",
+    "status": "candidate_unvalidated"
+  }
+]

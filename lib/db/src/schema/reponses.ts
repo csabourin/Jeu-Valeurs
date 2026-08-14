@@ -38,12 +38,20 @@ export const reponsesCollisionTable = pgTable("reponses_collision", {
   dilemmeId: integer("dilemme_id"),
   valeurA: text("valeur_a").notNull(),
   valeurB: text("valeur_b").notNull(),
+  texteDilemme: text("texte_dilemme")
+    .notNull()
+    .default("Dilemme antérieur : le texte exact n'était pas encore conservé."),
+  contexte: text("contexte"),
+  pivotDimension: text("pivot_dimension"),
   choix: text("choix").notNull().$type<ChoixCollision>(),
   facteurDepend: text("facteur_depend").$type<FacteurDepend>(),
   facteurDependLibre: text("facteur_depend_libre"),
   difficulte: integer("difficulte"),
   certitude: integer("certitude"),
   version: integer("version").notNull().default(1),
+  supersedesResponseId: integer("supersedes_response_id"),
+  invalidatedAt: timestamp("invalidated_at", { withTimezone: true }),
+  invalidationReason: text("invalidation_reason"),
   creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
   miseAJourLe: timestamp("mise_a_jour_le", { withTimezone: true })
     .notNull()

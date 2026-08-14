@@ -23,6 +23,7 @@ function mapCarte(c: typeof cartesSessionTable.$inferSelect) {
     description: c.description ?? null,
     valeursConfirmées: c.valeursConfirmees,
     valeursSuggérées: c.valeursSuggerees,
+    valeurPrincipale: c.valeurPrincipale ?? null,
     estPersonnalisée: c.estPersonnalisee,
     creeLe: c.creeLe.toISOString(),
   };
@@ -61,6 +62,18 @@ router.post(
       return;
     }
 
+    if (
+      parsed.data.valeurPrincipale &&
+      !(parsed.data.valeursConfirmées ?? []).includes(
+        parsed.data.valeurPrincipale,
+      )
+    ) {
+      res.status(400).json({
+        error: "La valeur principale doit faire partie des valeurs confirmées.",
+      });
+      return;
+    }
+
     const [carte] = await db
       .insert(cartesSessionTable)
       .values({
@@ -73,6 +86,7 @@ router.post(
         description: parsed.data.description ?? null,
         valeursSuggerees: parsed.data.valeursSuggérées ?? [],
         valeursConfirmees: parsed.data.valeursConfirmées ?? [],
+        valeurPrincipale: parsed.data.valeurPrincipale ?? null,
         estPersonnalisee: parsed.data.estPersonnalisée ?? false,
       })
       .returning();
@@ -96,12 +110,45 @@ router.patch(
       return;
     }
 
+    const [existing] = await db
+      .select()
+      .from(cartesSessionTable)
+      .where(
+        and(
+          eq(cartesSessionTable.id, params.data.carteSessionId),
+          eq(cartesSessionTable.sessionId, params.data.sessionId),
+        ),
+      );
+    if (!existing) {
+      res.status(404).json({ error: "Carte introuvable" });
+      return;
+    }
+
+    const nextConfirmedValues =
+      parsed.data.valeursConfirmées ?? existing.valeursConfirmees;
+    if (
+      parsed.data.valeurPrincipale &&
+      !nextConfirmedValues.includes(parsed.data.valeurPrincipale)
+    ) {
+      res.status(400).json({
+        error: "La valeur principale doit faire partie des valeurs confirmées.",
+      });
+      return;
+    }
+
     const updates: Record<string, unknown> = {};
     if (parsed.data.label !== undefined) updates.label = parsed.data.label;
     if (parsed.data.description !== undefined)
       updates.description = parsed.data.description;
     if (parsed.data.valeursConfirmées !== undefined)
       updates.valeursConfirmees = parsed.data.valeursConfirmées;
+    if (parsed.data.valeurPrincipale !== undefined) {
+      const valeurPrincipale = parsed.data.valeurPrincipale;
+      updates.valeurPrincipale =
+        typeof valeurPrincipale === "string" && valeurPrincipale.trim()
+          ? valeurPrincipale.trim()
+          : null;
+    }
 
     const [carte] = await db
       .update(cartesSessionTable)
@@ -113,11 +160,6 @@ router.patch(
         ),
       )
       .returning();
-
-    if (!carte) {
-      res.status(404).json({ error: "Carte introuvable" });
-      return;
-    }
 
     res.json(mapCarte(carte));
   },

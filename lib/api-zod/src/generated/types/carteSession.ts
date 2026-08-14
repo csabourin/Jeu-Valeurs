@@ -18,6 +18,8 @@ export interface CarteSession {
   description?: string | null;
   valeursConfirmées: string[];
   valeursSuggérées?: string[];
+  /** @nullable */
+  valeurPrincipale?: string | null;
   estPersonnalisée: boolean;
   creeLe?: Date;
 }

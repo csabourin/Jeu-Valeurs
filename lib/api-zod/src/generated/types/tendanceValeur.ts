@@ -8,8 +8,20 @@
 
 export interface TendanceValeur {
   valeur: string;
-  /** Score net (victoires - défaites) / total significatifs */
+  /** Transformation de l'importance apparente sur l'intervalle -1 à 1 */
   scoreNet: number;
+  /** Moyenne des préférences Beta(1,1) pondérées, de 0 à 1 */
+  importanceApparente: number;
+  incertitude: number;
+  stabilite: number;
+  couverture: number;
+  statutProtege: boolean;
+  contextesExplores: string[];
+  preferencesParContexte: {
+    contexte: string;
+    importanceApparente: number;
+    preuvesEffectives: number;
+  }[];
   totalCollisions: number;
   victoiresA: number;
   victoiresB: number;
@@ -18,7 +30,7 @@ export interface TendanceValeur {
   /** passer */
   abandonnes: number;
   /** @nullable */
-  difficulteMoyenne?: number | null;
+  difficulteMoyenne: number | null;
   /** @nullable */
   certitudeMoyenne: number | null;
   /** Vrai si aucune collision résolue pour cette valeur */

@@ -11,4 +11,6 @@ export interface CarteSessionUpdate {
   /** @nullable */
   description?: string | null;
   valeursConfirmées?: string[];
+  /** @nullable */
+  valeurPrincipale?: string | null;
 }

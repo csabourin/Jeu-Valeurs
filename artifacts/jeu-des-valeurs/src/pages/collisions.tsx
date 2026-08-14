@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   useGetProgres,
   getGetProgresQueryKey,
@@ -33,6 +32,7 @@ export default function Collisions() {
   const updateSession = useUpdateSession();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const [step, setStep] = useState<"choice" | "depend" | "difficulty">("choice");
   const [choice, setChoice] = useState<ReponseCollisionInputChoix | null>(null);
   
@@ -54,7 +54,15 @@ export default function Collisions() {
       setDifficulty(3);
       setCertitude(3);
     }
-  }, [progres?.prochaineDilemme?.valeurA, progres?.prochaineDilemme?.valeurB]);
+  }, [
+    progres?.prochaineDilemme?.valeurA,
+    progres?.prochaineDilemme?.valeurB,
+    progres?.prochaineDilemme?.texte,
+  ]);
+
+  useEffect(() => {
+    stepHeadingRef.current?.focus();
+  }, [step, progres?.prochaineDilemme?.texte]);
 
   const handleChoice = (c: ReponseCollisionInputChoix) => {
     setChoice(c);
@@ -84,6 +92,11 @@ export default function Collisions() {
         valeurA: progres.prochaineDilemme.valeurA!,
         valeurB: progres.prochaineDilemme.valeurB!,
         dilemmeId: progres.prochaineDilemme.dilemmeId,
+        texteDilemme:
+          progres.prochaineDilemme.texte ??
+          `Arbitrage entre ${progres.prochaineDilemme.valeurA} et ${progres.prochaineDilemme.valeurB}.`,
+        contexte: progres.prochaineDilemme.contexte,
+        pivotDimension: progres.prochaineDilemme.pivotDimension,
         choix: actChoice,
         facteurDepend: actChoice === "ca_depend" ? factor : null,
         facteurDependLibre: factor === "autre" ? customFactor : null,
@@ -157,34 +170,58 @@ export default function Collisions() {
           <Progress value={Math.min(100, Math.max(0, percent))} className="h-2" />
         </div>
 
-        <div className="flex-1 flex flex-col justify-center">
+        <div className="flex-1 flex flex-col justify-center" aria-live="polite">
           {step === "choice" && (
             <div className="space-y-12 animate-in fade-in slide-in-from-right-8">
               <div className="text-center space-y-4">
-                <h2 className="text-2xl text-muted-foreground font-serif italic">Entre ces deux chemins,</h2>
+                {dil.contexte && (
+                  <p className="text-sm font-medium uppercase tracking-wider text-primary">
+                    {dil.contexte}
+                  </p>
+                )}
+                <h2
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                  className="text-2xl text-muted-foreground font-serif italic outline-none"
+                >
+                  Une collision de valeurs
+                </h2>
                 <h3 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
                   Lequel privilégiez-vous ?
                 </h3>
+                {dil.texte && (
+                  <p className="text-base md:text-lg text-foreground leading-relaxed max-w-2xl mx-auto bg-muted/40 border border-border/60 rounded-xl p-5">
+                    {dil.texte}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card 
-                  className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md hover-elevate border-border/60"
+                <button
+                  type="button"
+                  className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   onClick={() => handleChoice("A")}
+                  aria-label={`Privilégier ${dil.valeurA}`}
                 >
-                  <CardContent className="flex items-center justify-center p-8 md:p-12 min-h-[200px] text-center">
-                    <span className="text-2xl md:text-3xl font-serif font-semibold">{dil.valeurA}</span>
-                  </CardContent>
-                </Card>
+                  <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md hover-elevate border-border/60">
+                    <CardContent className="flex items-center justify-center p-8 md:p-12 min-h-[200px] text-center">
+                      <span className="text-2xl md:text-3xl font-serif font-semibold">{dil.valeurA}</span>
+                    </CardContent>
+                  </Card>
+                </button>
 
-                <Card 
-                  className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md hover-elevate border-border/60"
+                <button
+                  type="button"
+                  className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   onClick={() => handleChoice("B")}
+                  aria-label={`Privilégier ${dil.valeurB}`}
                 >
-                  <CardContent className="flex items-center justify-center p-8 md:p-12 min-h-[200px] text-center">
-                    <span className="text-2xl md:text-3xl font-serif font-semibold">{dil.valeurB}</span>
-                  </CardContent>
-                </Card>
+                  <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md hover-elevate border-border/60">
+                    <CardContent className="flex items-center justify-center p-8 md:p-12 min-h-[200px] text-center">
+                      <span className="text-2xl md:text-3xl font-serif font-semibold">{dil.valeurB}</span>
+                    </CardContent>
+                  </Card>
+                </button>
               </div>
 
               <div className="flex flex-wrap justify-center gap-4 pt-4">
@@ -204,7 +241,7 @@ export default function Collisions() {
           {step === "depend" && (
             <div className="space-y-8 animate-in slide-in-from-right-8 fade-in">
               <div className="text-center space-y-2">
-                <h3 className="text-3xl font-serif font-bold">Ça dépend de quoi ?</h3>
+                <h3 ref={stepHeadingRef} tabIndex={-1} className="text-3xl font-serif font-bold outline-none">Ça dépend de quoi ?</h3>
                 <p className="text-muted-foreground text-lg">{dil.valeurA} vs {dil.valeurB}</p>
               </div>
 
@@ -213,6 +250,9 @@ export default function Collisions() {
                   { id: "cout_personnel", label: "Coût personnel" },
                   { id: "ampleur_impact", label: "Ampleur de l'impact" },
                   { id: "proximite_sociale", label: "Proximité sociale" },
+                  { id: "nombre_personnes", label: "Portée / personnes touchées" },
+                  { id: "certitude", label: "Certitude des conséquences" },
+                  { id: "reversibilite", label: "Réversibilité" },
                   { id: "urgence", label: "L'urgence" },
                   { id: "responsabilite", label: "Ma responsabilité" },
                   { id: "autre", label: "Autre..." }
@@ -222,6 +262,7 @@ export default function Collisions() {
                     variant={factor === opt.id ? "default" : "outline"}
                     className="h-16 whitespace-normal text-center leading-tight"
                     onClick={() => setFactor(opt.id)}
+                    aria-pressed={factor === opt.id}
                   >
                     {opt.label}
                   </Button>
@@ -231,6 +272,7 @@ export default function Collisions() {
               {factor === "autre" && (
                 <div className="max-w-xl mx-auto">
                   <Input 
+                    aria-label="Autre facteur dont dépendrait la décision"
                     placeholder="De quoi cela dépend-il ?"
                     value={customFactor}
                     onChange={(e) => setCustomFactor(e.target.value)}
@@ -252,20 +294,23 @@ export default function Collisions() {
           {step === "difficulty" && (
             <div className="space-y-12 animate-in slide-in-from-right-8 fade-in max-w-xl mx-auto w-full">
               <div className="text-center space-y-2">
-                <h3 className="text-3xl font-serif font-bold">Derniers détails</h3>
+                <h3 ref={stepHeadingRef} tabIndex={-1} className="text-3xl font-serif font-bold outline-none">Derniers détails</h3>
                 <p className="text-muted-foreground">À quel point cette décision était-elle évidente ?</p>
               </div>
 
               <div className="space-y-8 bg-card border border-border/50 rounded-2xl p-6 md:p-8">
-                <div className="space-y-4">
-                  <label className="text-lg font-medium block">Niveau de difficulté du dilemme</label>
+                <fieldset className="space-y-4">
+                  <legend className="text-lg font-medium block">Niveau de difficulté du dilemme</legend>
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-sm text-muted-foreground whitespace-nowrap">Facile</span>
                     <div className="flex-1 flex justify-between px-4">
                       {[1,2,3,4,5].map(v => (
                         <button
                           key={v}
+                          type="button"
                           onClick={() => setDifficulty(v)}
+                          aria-pressed={difficulty === v}
+                          aria-label={`Difficulté ${v} sur 5`}
                           className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${
                             difficulty === v 
                               ? 'bg-primary text-primary-foreground scale-110 shadow-md' 
@@ -278,17 +323,20 @@ export default function Collisions() {
                     </div>
                     <span className="text-sm text-muted-foreground whitespace-nowrap">Déchirant</span>
                   </div>
-                </div>
+                </fieldset>
 
-                <div className="space-y-4 pt-4 border-t border-border/40">
-                  <label className="text-lg font-medium block">Votre certitude face au choix</label>
+                <fieldset className="space-y-4 pt-4 border-t border-border/40">
+                  <legend className="text-lg font-medium block">Votre certitude face au choix</legend>
                   <div className="flex justify-between items-center gap-2">
                     <span className="text-sm text-muted-foreground whitespace-nowrap">Hésitant</span>
                     <div className="flex-1 flex justify-between px-4">
                       {[1,2,3,4,5].map(v => (
                         <button
                           key={v}
+                          type="button"
                           onClick={() => setCertitude(v)}
+                          aria-pressed={certitude === v}
+                          aria-label={`Certitude ${v} sur 5`}
                           className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all ${
                             certitude === v 
                               ? 'bg-accent text-accent-foreground scale-110 shadow-md' 
@@ -301,7 +349,7 @@ export default function Collisions() {
                     </div>
                     <span className="text-sm text-muted-foreground whitespace-nowrap">Absolu</span>
                   </div>
-                </div>
+                </fieldset>
               </div>
 
               <div className="flex justify-center gap-4">
@@ -309,7 +357,12 @@ export default function Collisions() {
                   Retour
                 </Button>
                 <Button size="lg" onClick={() => submitReponse()} disabled={isSubmitting} className="min-w-[150px]">
-                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Valider"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                      <span className="sr-only">Enregistrement en cours</span>
+                    </>
+                  ) : "Valider"}
                 </Button>
               </div>
             </div>

@@ -15,4 +15,6 @@ export const ObservationConstellationType = {
   territoire_inexplore: 'territoire_inexplore',
   stabilite: 'stabilite',
   couverture: 'couverture',
+  valeur_protegee: 'valeur_protegee',
+  point_bascule: 'point_bascule',
 } as const;

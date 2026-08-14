@@ -16,4 +16,8 @@ export type ProgresProchaineDilemme = {
   dilemmeId?: number | null;
   /** @nullable */
   texte?: string | null;
+  /** @nullable */
+  contexte?: string | null;
+  /** @nullable */
+  pivotDimension?: string | null;
 } | null;

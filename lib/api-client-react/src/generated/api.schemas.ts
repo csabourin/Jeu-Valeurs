@@ -106,6 +106,8 @@ export interface CarteSession {
   description?: string | null;
   valeursConfirmées: string[];
   valeursSuggérées?: string[];
+  /** @nullable */
+  valeurPrincipale?: string | null;
   estPersonnalisée: boolean;
   creeLe?: string;
 }
@@ -129,6 +131,8 @@ export interface CarteSessionInput {
   valeursSuggérées?: string[];
   valeursConfirmées?: string[];
   estPersonnalisée?: boolean;
+  /** @nullable */
+  valeurPrincipale?: string | null;
 }
 
 export interface CarteSessionUpdate {
@@ -136,6 +140,8 @@ export interface CarteSessionUpdate {
   /** @nullable */
   description?: string | null;
   valeursConfirmées?: string[];
+  /** @nullable */
+  valeurPrincipale?: string | null;
 }
 
 export type ReponseCollisionChoix = typeof ReponseCollisionChoix[keyof typeof ReponseCollisionChoix];
@@ -156,6 +162,12 @@ export interface ReponseCollision {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  /** Texte exact présenté à la personne */
+  texteDilemme: string;
+  /** @nullable */
+  contexte?: string | null;
+  /** @nullable */
+  pivotDimension?: string | null;
   choix: ReponseCollisionChoix;
   /**
      * Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite
@@ -179,6 +191,12 @@ export interface ReponseCollision {
   certitude?: number | null;
   /** Numéro de version (incrémenter à chaque correction) */
   version: number;
+  /** @nullable */
+  supersedesResponseId?: number | null;
+  /** @nullable */
+  invalidatedAt?: string | null;
+  /** @nullable */
+  invalidationReason?: string | null;
   creeLe: string;
   miseAJourLe?: string;
 }
@@ -199,6 +217,11 @@ export interface ReponseCollisionInput {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  texteDilemme: string;
+  /** @nullable */
+  contexte?: string | null;
+  /** @nullable */
+  pivotDimension?: string | null;
   choix: ReponseCollisionInputChoix;
   /** @nullable */
   facteurDepend?: string | null;
@@ -235,8 +258,20 @@ export interface ReponseCollisionUpdate {
 
 export interface TendanceValeur {
   valeur: string;
-  /** Score net (victoires - défaites) / total significatifs */
+  /** Transformation de l'importance apparente sur l'intervalle -1 à 1 */
   scoreNet: number;
+  /** Moyenne des préférences Beta(1,1) pondérées, de 0 à 1 */
+  importanceApparente: number;
+  incertitude: number;
+  stabilite: number;
+  couverture: number;
+  statutProtege: boolean;
+  contextesExplores: string[];
+  preferencesParContexte: {
+    contexte: string;
+    importanceApparente: number;
+    preuvesEffectives: number;
+  }[];
   totalCollisions: number;
   victoiresA: number;
   victoiresB: number;
@@ -245,7 +280,7 @@ export interface TendanceValeur {
   /** passer */
   abandonnes: number;
   /** @nullable */
-  difficulteMoyenne?: number | null;
+  difficulteMoyenne: number | null;
   /** @nullable */
   certitudeMoyenne: number | null;
   /** Vrai si aucune collision résolue pour cette valeur */
@@ -257,6 +292,10 @@ export interface TensionObservee {
   valeurB: string;
   totalCollisions: number;
   incertitudes: number;
+  /** @nullable */
+  difficulteMoyenne: number | null;
+  probabiliteA: number;
+  incertitude: number;
   estForte: boolean;
 }
 
@@ -269,6 +308,8 @@ export const ObservationConstellationType = {
   territoire_inexplore: 'territoire_inexplore',
   stabilite: 'stabilite',
   couverture: 'couverture',
+  valeur_protegee: 'valeur_protegee',
+  point_bascule: 'point_bascule',
 } as const;
 
 export interface ObservationConstellation {
@@ -316,6 +357,10 @@ export type ProgresProchaineDilemme = {
   dilemmeId?: number | null;
   /** @nullable */
   texte?: string | null;
+  /** @nullable */
+  contexte?: string | null;
+  /** @nullable */
+  pivotDimension?: string | null;
 } | null;
 
 export interface Progres {
@@ -343,4 +388,3 @@ export const ListCartessCatalogueFamille = {
   horizons: 'horizons',
   tresors: 'tresors',
 } as const;
-

@@ -3,6 +3,17 @@ import { Button } from "./ui/button";
 import { useDeleteSession } from "@workspace/api-client-react";
 import { Trash2, Compass } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 
 export function Shell({ children, sessionId }: { children: React.ReactNode, sessionId?: string }) {
   const [, setLocation] = useLocation();
@@ -37,16 +48,33 @@ export function Shell({ children, sessionId }: { children: React.ReactNode, sess
           </Link>
 
           {(sessionId || localStorage.getItem('jdv_session_id')) && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleDelete}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              title="Supprimer mes données"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Supprimer mes données</span>
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" aria-hidden="true" />
+                  <span className="hidden sm:inline">Supprimer mes données</span>
+                  <span className="sm:hidden">Supprimer</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer toute cette exploration?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Les cartes personnelles, les réponses et les résultats de cette session seront supprimés du serveur. Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Conserver mes données</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                    Supprimer définitivement
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </header>

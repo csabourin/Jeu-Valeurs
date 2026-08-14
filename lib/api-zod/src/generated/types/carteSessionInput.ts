@@ -17,4 +17,6 @@ export interface CarteSessionInput {
   valeursSuggérées?: string[];
   valeursConfirmées?: string[];
   estPersonnalisée?: boolean;
+  /** @nullable */
+  valeurPrincipale?: string | null;
 }

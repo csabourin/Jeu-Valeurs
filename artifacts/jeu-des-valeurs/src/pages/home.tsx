@@ -60,7 +60,7 @@ export default function Home() {
             Explorez votre <span className="text-primary italic">boussole</span> intérieure
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Un carnet de voyage interactif pour découvrir vos priorités, identifier vos lignes rouges et naviguer vos contradictions. 
+            Un carnet de voyage interactif pour découvrir vos priorités, identifier vos lignes rouges et explorer vos tensions.
           </p>
         </div>
 
@@ -86,7 +86,7 @@ export default function Home() {
 
             <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground italic text-left border border-border/50">
               <span className="font-semibold not-italic block mb-1">Avant de partir :</span>
-              Ceci n'est ni un test psychométrique, ni un diagnostic. C'est un espace de réflexion. Il n'y a pas de "bonnes" valeurs.
+              Ceci n'est ni un test psychométrique, ni un diagnostic. Le jeu ne prédit pas vos comportements et ne déduit aucune caractéristique sensible. Il n'y a pas de « bonnes » valeurs : vous pouvez passer toute question.
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">

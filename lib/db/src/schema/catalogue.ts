@@ -13,7 +13,9 @@ export type Famille = (typeof familles)[number];
 
 export const cartesCatalogueTable = pgTable("cartes_catalogue", {
   id: serial("id").primaryKey(),
+  sourceId: text("source_id").unique(),
   famille: text("famille").notNull().$type<Famille>(),
+  categorie: text("categorie"),
   label: text("label").notNull(),
   description: text("description"),
   valeursSuggerees: jsonb("valeurs_suggerees")
@@ -21,6 +23,7 @@ export const cartesCatalogueTable = pgTable("cartes_catalogue", {
     .default([])
     .$type<string[]>(),
   estPersonnalisable: boolean("est_personnalisable").notNull().default(true),
+  statut: text("statut").notNull().default("candidate_unvalidated"),
 });
 
 export const insertCarteCatalogueSchema = createInsertSchema(
@@ -32,11 +35,13 @@ export type CarteCatalogue = typeof cartesCatalogueTable.$inferSelect;
 
 export const dilemmesTable = pgTable("dilemmes", {
   id: serial("id").primaryKey(),
+  sourceId: text("source_id").unique(),
   valeurA: text("valeur_a").notNull(),
   valeurB: text("valeur_b").notNull(),
   texte: text("texte").notNull(),
   contexte: text("contexte"),
   familles: jsonb("familles").notNull().default([]).$type<string[]>(),
+  pivotDimensionCandidate: text("pivot_dimension_candidate"),
 });
 
 export const insertDilemmeSchema = createInsertSchema(dilemmesTable).omit({

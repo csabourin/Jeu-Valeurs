@@ -11,5 +11,9 @@ export interface TensionObservee {
   valeurB: string;
   totalCollisions: number;
   incertitudes: number;
+  /** @nullable */
+  difficulteMoyenne: number | null;
+  probabiliteA: number;
+  incertitude: number;
   estForte: boolean;
 }

@@ -12,6 +12,11 @@ export interface ReponseCollisionInput {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  texteDilemme: string;
+  /** @nullable */
+  contexte?: string | null;
+  /** @nullable */
+  pivotDimension?: string | null;
   choix: ReponseCollisionInputChoix;
   /** @nullable */
   facteurDepend?: string | null;

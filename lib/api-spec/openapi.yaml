@@ -448,6 +448,8 @@ components:
           type: array
           items:
             type: string
+        valeurPrincipale:
+          type: ["string", "null"]
         estPersonnalisée:
           type: boolean
         creeLe:
@@ -477,6 +479,8 @@ components:
             type: string
         estPersonnalisée:
           type: boolean
+        valeurPrincipale:
+          type: ["string", "null"]
 
     CarteSessionUpdate:
       type: object
@@ -489,12 +493,14 @@ components:
           type: array
           items:
             type: string
+        valeurPrincipale:
+          type: ["string", "null"]
 
     # ─── Réponses ──────────────────────────────────────────────────────────────
 
     ReponseCollision:
       type: object
-      required: [id, sessionId, valeurA, valeurB, choix, version, creeLe]
+      required: [id, sessionId, valeurA, valeurB, texteDilemme, choix, version, creeLe]
       properties:
         id:
           type: number
@@ -506,6 +512,13 @@ components:
           type: string
         valeurB:
           type: string
+        texteDilemme:
+          type: string
+          description: Texte exact présenté à la personne
+        contexte:
+          type: ["string", "null"]
+        pivotDimension:
+          type: ["string", "null"]
         choix:
           type: string
           enum: [A, B, ca_depend, je_ne_sais_pas, passer]
@@ -527,6 +540,13 @@ components:
         version:
           type: number
           description: Numéro de version (incrémenter à chaque correction)
+        supersedesResponseId:
+          type: ["number", "null"]
+        invalidatedAt:
+          type: ["string", "null"]
+          format: date-time
+        invalidationReason:
+          type: ["string", "null"]
         creeLe:
           type: string
           format: date-time
@@ -536,7 +556,7 @@ components:
 
     ReponseCollisionInput:
       type: object
-      required: [valeurA, valeurB, choix]
+      required: [valeurA, valeurB, texteDilemme, choix]
       properties:
         dilemmeId:
           type: ["number", "null"]
@@ -544,6 +564,12 @@ components:
           type: string
         valeurB:
           type: string
+        texteDilemme:
+          type: string
+        contexte:
+          type: ["string", "null"]
+        pivotDimension:
+          type: ["string", "null"]
         choix:
           type: string
           enum: [A, B, ca_depend, je_ne_sais_pas, passer]
@@ -575,13 +601,40 @@ components:
 
     TendanceValeur:
       type: object
-      required: [valeur, scoreNet, totalCollisions, victoiresA, victoiresB, incertitudes, abandonnes, difficulteMovenne, certitudeMoyenne, territoireInexplore]
+      required: [valeur, scoreNet, importanceApparente, incertitude, stabilite, couverture, statutProtege, contextesExplores, preferencesParContexte, totalCollisions, victoiresA, victoiresB, incertitudes, abandonnes, difficulteMoyenne, certitudeMoyenne, territoireInexplore]
       properties:
         valeur:
           type: string
         scoreNet:
           type: number
-          description: Score net (victoires - défaites) / total significatifs
+          description: Transformation de l'importance apparente sur l'intervalle -1 à 1
+        importanceApparente:
+          type: number
+          description: Moyenne des préférences Beta(1,1) pondérées, de 0 à 1
+        incertitude:
+          type: number
+        stabilite:
+          type: number
+        couverture:
+          type: number
+        statutProtege:
+          type: boolean
+        contextesExplores:
+          type: array
+          items:
+            type: string
+        preferencesParContexte:
+          type: array
+          items:
+            type: object
+            required: [contexte, importanceApparente, preuvesEffectives]
+            properties:
+              contexte:
+                type: string
+              importanceApparente:
+                type: number
+              preuvesEffectives:
+                type: number
         totalCollisions:
           type: number
         victoiresA:
@@ -604,7 +657,7 @@ components:
 
     TensionObservee:
       type: object
-      required: [valeurA, valeurB, totalCollisions, incertitudes, estForte]
+      required: [valeurA, valeurB, totalCollisions, incertitudes, difficulteMoyenne, probabiliteA, incertitude, estForte]
       properties:
         valeurA:
           type: string
@@ -613,6 +666,12 @@ components:
         totalCollisions:
           type: number
         incertitudes:
+          type: number
+        difficulteMoyenne:
+          type: ["number", "null"]
+        probabiliteA:
+          type: number
+        incertitude:
           type: number
         estForte:
           type: boolean
@@ -628,7 +687,7 @@ components:
           description: Formulation prudente (ex. "Dans les situations explorées jusqu'ici…")
         type:
           type: string
-          enum: [tendance, tension, territoire_inexplore, stabilite, couverture]
+          enum: [tendance, tension, territoire_inexplore, stabilite, couverture, valeur_protegee, point_bascule]
         valeursConcernees:
           type: array
           items:
@@ -664,7 +723,7 @@ components:
           description: Proportion de collisions possibles explorées (0 à 1)
         stabilite:
           type: number
-          description: Stabilité globale des choix (0 à 1, basée sur la certitude moyenne)
+          description: Cohérence observée lors des répétitions comparables (0 à 1)
         versionCalcul:
           type: number
           description: Version du moteur de calcul utilisé
@@ -700,4 +759,8 @@ components:
             dilemmeId:
               type: ["number", "null"]
             texte:
+              type: ["string", "null"]
+            contexte:
+              type: ["string", "null"]
+            pivotDimension:
               type: ["string", "null"]

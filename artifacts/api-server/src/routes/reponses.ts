@@ -8,7 +8,7 @@ import {
   UpdateReponseParams,
   UpdateReponseBody,
 } from "@workspace/api-zod";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -19,12 +19,18 @@ function mapReponse(r: typeof reponsesCollisionTable.$inferSelect) {
     dilemmeId: r.dilemmeId ?? null,
     valeurA: r.valeurA,
     valeurB: r.valeurB,
+    texteDilemme: r.texteDilemme,
+    contexte: r.contexte ?? null,
+    pivotDimension: r.pivotDimension ?? null,
     choix: r.choix,
     facteurDepend: r.facteurDepend ?? null,
     facteurDependLibre: r.facteurDependLibre ?? null,
     difficulte: r.difficulte ?? null,
     certitude: r.certitude ?? null,
     version: r.version,
+    supersedesResponseId: r.supersedesResponseId ?? null,
+    invalidatedAt: r.invalidatedAt?.toISOString() ?? null,
+    invalidationReason: r.invalidationReason ?? null,
     creeLe: r.creeLe.toISOString(),
     miseAJourLe: r.miseAJourLe.toISOString(),
   };
@@ -40,7 +46,12 @@ router.get("/sessions/:sessionId/reponses", async (req, res): Promise<void> => {
   const reponses = await db
     .select()
     .from(reponsesCollisionTable)
-    .where(eq(reponsesCollisionTable.sessionId, params.data.sessionId));
+    .where(
+      and(
+        eq(reponsesCollisionTable.sessionId, params.data.sessionId),
+        isNull(reponsesCollisionTable.invalidatedAt),
+      ),
+    );
 
   res.json(reponses.map(mapReponse));
 });
@@ -62,6 +73,39 @@ router.post(
 
     // Si choix=passer, difficulté et certitude ignorées
     const isPasser = parsed.data.choix === "passer";
+    const texteDilemme = parsed.data.texteDilemme.trim();
+    const contexte =
+      typeof parsed.data.contexte === "string" && parsed.data.contexte.trim()
+        ? parsed.data.contexte.trim()
+        : null;
+
+    if (!texteDilemme || texteDilemme.length > 4000) {
+      res.status(400).json({
+        error: "Le texte exact du dilemme présenté est requis.",
+      });
+      return;
+    }
+    if (
+      !isPasser &&
+      (parsed.data.difficulte == null ||
+        parsed.data.certitude == null ||
+        parsed.data.difficulte < 1 ||
+        parsed.data.difficulte > 5 ||
+        parsed.data.certitude < 1 ||
+        parsed.data.certitude > 5)
+    ) {
+      res.status(400).json({
+        error: "La difficulté et la certitude doivent être indiquées de 1 à 5.",
+      });
+      return;
+    }
+    if (
+      parsed.data.choix === "ca_depend" &&
+      !parsed.data.facteurDepend
+    ) {
+      res.status(400).json({ error: "Un facteur de dépendance est requis." });
+      return;
+    }
 
     const [reponse] = await db
       .insert(reponsesCollisionTable)
@@ -70,6 +114,9 @@ router.post(
         dilemmeId: parsed.data.dilemmeId ?? null,
         valeurA: parsed.data.valeurA,
         valeurB: parsed.data.valeurB,
+        texteDilemme,
+        contexte,
+        pivotDimension: parsed.data.pivotDimension ?? null,
         choix: parsed.data.choix,
         facteurDepend:
           parsed.data.choix === "ca_depend"
@@ -104,7 +151,7 @@ router.patch(
       return;
     }
 
-    // Récupérer la réponse actuelle pour incrémenter la version
+    // Une correction crée une nouvelle observation et invalide l'ancienne.
     const [existing] = await db
       .select()
       .from(reponsesCollisionTable)
@@ -112,6 +159,7 @@ router.patch(
         and(
           eq(reponsesCollisionTable.id, params.data.reponseId),
           eq(reponsesCollisionTable.sessionId, params.data.sessionId),
+          isNull(reponsesCollisionTable.invalidatedAt),
         ),
       );
 
@@ -123,41 +171,81 @@ router.patch(
     const newChoix = parsed.data.choix ?? existing.choix;
     const isPasser = newChoix === "passer";
 
-    const updates: Record<string, unknown> = {
-      version: existing.version + 1,
-    };
-
-    if (parsed.data.choix !== undefined) updates.choix = parsed.data.choix;
+    let facteurDepend = existing.facteurDepend;
+    let facteurDependLibre = existing.facteurDependLibre;
     if (newChoix === "ca_depend") {
       if (parsed.data.facteurDepend !== undefined)
-        updates.facteurDepend = parsed.data.facteurDepend;
+        facteurDepend = parsed.data.facteurDepend;
       if (parsed.data.facteurDependLibre !== undefined)
-        updates.facteurDependLibre = parsed.data.facteurDependLibre;
+        facteurDependLibre = parsed.data.facteurDependLibre;
     } else {
-      updates.facteurDepend = null;
-      updates.facteurDependLibre = null;
+      facteurDepend = null;
+      facteurDependLibre = null;
     }
 
+    if (newChoix === "ca_depend" && !facteurDepend) {
+      res.status(400).json({ error: "Un facteur de dépendance est requis." });
+      return;
+    }
+
+    let difficulte = existing.difficulte;
+    let certitude = existing.certitude;
     if (!isPasser) {
       if (parsed.data.difficulte !== undefined)
-        updates.difficulte = parsed.data.difficulte;
+        difficulte = parsed.data.difficulte;
       if (parsed.data.certitude !== undefined)
-        updates.certitude = parsed.data.certitude;
+        certitude = parsed.data.certitude;
     } else {
-      updates.difficulte = null;
-      updates.certitude = null;
+      difficulte = null;
+      certitude = null;
     }
 
-    const [reponse] = await db
-      .update(reponsesCollisionTable)
-      .set(updates)
-      .where(
-        and(
-          eq(reponsesCollisionTable.id, params.data.reponseId),
-          eq(reponsesCollisionTable.sessionId, params.data.sessionId),
-        ),
-      )
-      .returning();
+    if (
+      !isPasser &&
+      (difficulte == null ||
+        certitude == null ||
+        difficulte < 1 ||
+        difficulte > 5 ||
+        certitude < 1 ||
+        certitude > 5)
+    ) {
+      res.status(400).json({
+        error: "La difficulté et la certitude doivent être indiquées de 1 à 5.",
+      });
+      return;
+    }
+
+    const reponse = await db.transaction(async (transaction) => {
+      const [created] = await transaction
+        .insert(reponsesCollisionTable)
+        .values({
+          sessionId: existing.sessionId,
+          dilemmeId: existing.dilemmeId,
+          valeurA: existing.valeurA,
+          valeurB: existing.valeurB,
+          texteDilemme: existing.texteDilemme,
+          contexte: existing.contexte,
+          pivotDimension: existing.pivotDimension,
+          choix: newChoix,
+          facteurDepend,
+          facteurDependLibre,
+          difficulte,
+          certitude,
+          version: existing.version + 1,
+          supersedesResponseId: existing.id,
+        })
+        .returning();
+
+      await transaction
+        .update(reponsesCollisionTable)
+        .set({
+          invalidatedAt: new Date(),
+          invalidationReason: "superseded",
+        })
+        .where(eq(reponsesCollisionTable.id, existing.id));
+
+      return created;
+    });
 
     res.json(mapReponse(reponse));
   },

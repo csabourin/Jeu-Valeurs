@@ -1,0 +1,11 @@
+slug,name,allowed_pair,core_question,pivot_candidates
+redline_horizon,Franchir une limite pour poursuivre un horizon,red_line|horizon,"Jusqu'où irais-tu pour obtenir ou devenir quelque chose?","personal_cost,certainty,impact_magnitude,responsibility"
+redline_treasure,Franchir une limite pour protéger un trésor,red_line|treasure,"Jusqu'où irais-tu pour ne pas perdre quelque chose?","impact_magnitude,certainty,reversibility,social_proximity"
+redline_redline,Deux limites incompatibles,red_line|red_line,"Que fais-tu quand il est impossible de respecter les deux limites?","responsibility,certainty,impact_magnitude,affected_scope"
+horizon_horizon,Deux directions désirables,horizon|horizon,"Quelle direction poursuis-tu lorsque les deux ne sont pas compatibles?","personal_cost,certainty,urgency"
+horizon_treasure,Risquer un acquis,horizon|treasure,"Que risques-tu de perdre pour poursuivre ce que tu souhaites?","personal_cost,certainty,reversibility"
+treasure_treasure,Deux choses à protéger,treasure|treasure,"Que protèges-tu lorsque tu ne peux préserver les deux?","impact_magnitude,social_proximity,reversibility,affected_scope"
+individual_collective,Individu et collectif,any|any,"Quand un intérêt personnel et collectif divergent, qu'est-ce qui change ton choix?","affected_scope,personal_cost,responsibility"
+close_distant,Proche et lointain,any|any,"La proximité de la personne change-t-elle ton arbitrage?","social_proximity"
+present_future,Présent et futur,any|any,"Combien de poids accordes-tu à une conséquence plus éloignée?","certainty,reversibility,urgency"
+authority_autonomy,Autorité et choix personnel,any|any,"Quand acceptes-tu ou refuses-tu une contrainte d'autorité?","responsibility,impact_magnitude,certainty"

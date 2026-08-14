@@ -7,6 +7,7 @@ Une aventure introspective interactive en français canadien qui aide les gens �
 - `pnpm --filter @workspace/api-server run dev` — serveur API (port géré par le workflow)
 - `pnpm --filter @workspace/jeu-des-valeurs run dev` — frontend React/Vite
 - `pnpm run typecheck` — vérification TypeScript complète
+- `pnpm test` — tests déterministes du moteur
 - `pnpm run build` — typecheck + build de tous les packages
 - `pnpm --filter @workspace/api-spec run codegen` — régénérer les hooks React Query et les schémas Zod depuis l'OpenAPI
 - `pnpm --filter @workspace/db run push` — pousser les changements de schéma BD (dev uniquement)
@@ -28,7 +29,8 @@ Une aventure introspective interactive en français canadien qui aide les gens �
 - `lib/api-spec/openapi.yaml` — source de vérité de tous les contrats API
 - `lib/db/src/schema/` — schémas Drizzle (sessions, catalogue, cartes-session, reponses)
 - `artifacts/api-server/src/routes/` — routes Express (catalogue, sessions, cartes-session, reponses, constellation)
-- `artifacts/api-server/src/lib/constellation-engine.ts` — moteur de calcul déterministe V1
+- `artifacts/api-server/src/lib/constellation-engine.ts` — moteur de calcul déterministe V2
+- `lib/db/src/data/` — catalogue canonique du handoff (825 cartes, 30 dilemmes)
 - `artifacts/jeu-des-valeurs/src/pages/` — pages React (home, cartes, valeurs, collisions, constellation)
 - `artifacts/jeu-des-valeurs/src/components/` — composants UI (shell, cartes, etc.)
 
@@ -64,4 +66,4 @@ _Contenu en français canadien partout. Interface chaleureuse, ludique, sobre �
 ## Pointers
 
 - Voir le skill `pnpm-workspace` pour la structure du workspace, TypeScript et les détails des packages
-- `constellation-engine.ts` : moteur V1, VERSION_CALCUL = 1. Incrémenter à chaque changement d'algorithme.
+- `constellation-engine.ts` : moteur V2, VERSION_CALCUL = 2. Incrémenter à chaque changement d'algorithme.

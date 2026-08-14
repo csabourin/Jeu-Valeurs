@@ -14,6 +14,12 @@ export interface ReponseCollision {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  /** Texte exact présenté à la personne */
+  texteDilemme: string;
+  /** @nullable */
+  contexte?: string | null;
+  /** @nullable */
+  pivotDimension?: string | null;
   choix: ReponseCollisionChoix;
   /**
      * Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite
@@ -37,6 +43,12 @@ export interface ReponseCollision {
   certitude?: number | null;
   /** Numéro de version (incrémenter à chaque correction) */
   version: number;
+  /** @nullable */
+  supersedesResponseId?: number | null;
+  /** @nullable */
+  invalidatedAt?: Date | null;
+  /** @nullable */
+  invalidationReason?: string | null;
   creeLe: Date;
   miseAJourLe?: Date;
 }

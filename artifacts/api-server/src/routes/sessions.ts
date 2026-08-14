@@ -1,6 +1,10 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { sessionsTable } from "@workspace/db";
+import {
+  sessionsTable,
+  cartesSessionTable,
+  reponsesCollisionTable,
+} from "@workspace/db";
 import {
   CreateSessionBody,
   GetSessionParams,
@@ -103,10 +107,24 @@ router.delete("/sessions/:sessionId", async (req, res): Promise<void> => {
     return;
   }
 
-  const [session] = await db
-    .delete(sessionsTable)
-    .where(eq(sessionsTable.id, params.data.sessionId))
-    .returning();
+  const session = await db.transaction(async (transaction) => {
+    const [existing] = await transaction
+      .select()
+      .from(sessionsTable)
+      .where(eq(sessionsTable.id, params.data.sessionId));
+    if (!existing) return null;
+
+    await transaction
+      .delete(reponsesCollisionTable)
+      .where(eq(reponsesCollisionTable.sessionId, params.data.sessionId));
+    await transaction
+      .delete(cartesSessionTable)
+      .where(eq(cartesSessionTable.sessionId, params.data.sessionId));
+    await transaction
+      .delete(sessionsTable)
+      .where(eq(sessionsTable.id, params.data.sessionId));
+    return existing;
+  });
 
   if (!session) {
     res.status(404).json({ error: "Session introuvable" });
