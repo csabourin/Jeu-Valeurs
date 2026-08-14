@@ -8,6 +8,8 @@
 
 export * from "./valeurs";
 export * from "./cartes";
+export * from "./categories";
+export * from "./catalogue";
 export * from "./duels";
 export * from "./bascules";
 export * from "./hasard";

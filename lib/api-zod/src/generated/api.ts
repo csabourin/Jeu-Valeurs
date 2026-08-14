@@ -24,11 +24,13 @@ export const ListCartessCatalogueQueryParams = zod.object({
 })
 
 export const ListCartessCatalogueResponseItem = zod.object({
-  "id": zod.number(),
+  "id": zod.string().describe('Identifiant stable du contenu (ex. JV1001, LR042)'),
   "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
   "label": zod.string(),
   "description": zod.string().nullish(),
   "valeursSuggérées": zod.array(zod.string()),
+  "origine": zod.enum(['maison', 'importee']).describe('`maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.\n'),
+  "categorie": zod.string().nullish(),
   "estPersonnalisable": zod.boolean().optional()
 })
 export const ListCartessCatalogueResponse = zod.array(ListCartessCatalogueResponseItem)
@@ -107,6 +109,27 @@ export const DeleteSessionResponse = zod.void()
 
 
 /**
+ * 825 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main tirée avec sa graine : stable pour une partie donnée, différente d'une partie à l'autre.
+ * @summary La main de cartes tirée pour cette partie
+ */
+export const ListCartesProposeesParams = zod.object({
+  "sessionId": zod.coerce.string()
+})
+
+export const ListCartesProposeesResponseItem = zod.object({
+  "id": zod.string().describe('Identifiant stable du contenu (ex. JV1001, LR042)'),
+  "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
+  "label": zod.string(),
+  "description": zod.string().nullish(),
+  "valeursSuggérées": zod.array(zod.string()),
+  "origine": zod.enum(['maison', 'importee']).describe('`maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.\n'),
+  "categorie": zod.string().nullish(),
+  "estPersonnalisable": zod.boolean().optional()
+})
+export const ListCartesProposeesResponse = zod.array(ListCartesProposeesResponseItem)
+
+
+/**
  * @summary Liste les cartes sélectionnées pour une session
  */
 export const ListCartesSessionParams = zod.object({
@@ -116,7 +139,7 @@ export const ListCartesSessionParams = zod.object({
 export const ListCartesSessionResponseItem = zod.object({
   "id": zod.number(),
   "sessionId": zod.string(),
-  "catalogueCarteId": zod.number().nullish(),
+  "catalogueCarteId": zod.string().nullish(),
   "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
   "label": zod.string(),
   "description": zod.string().nullish(),
@@ -136,7 +159,7 @@ export const AddCarteSessionParams = zod.object({
 })
 
 export const AddCarteSessionBody = zod.object({
-  "catalogueCarteId": zod.number().nullish(),
+  "catalogueCarteId": zod.string().nullish(),
   "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
   "label": zod.string(),
   "description": zod.string().nullish(),
@@ -148,7 +171,7 @@ export const AddCarteSessionBody = zod.object({
 export const AddCarteSessionResponse = zod.object({
   "id": zod.number(),
   "sessionId": zod.string(),
-  "catalogueCarteId": zod.number().nullish(),
+  "catalogueCarteId": zod.string().nullish(),
   "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
   "label": zod.string(),
   "description": zod.string().nullish(),
@@ -176,7 +199,7 @@ export const UpdateCarteSessionBody = zod.object({
 export const UpdateCarteSessionResponse = zod.object({
   "id": zod.number(),
   "sessionId": zod.string(),
-  "catalogueCarteId": zod.number().nullish(),
+  "catalogueCarteId": zod.string().nullish(),
   "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
   "label": zod.string(),
   "description": zod.string().nullish(),

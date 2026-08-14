@@ -593,6 +593,84 @@ export const useDeleteSession = <TError = ErrorType<void>,
       return useMutation(getDeleteSessionMutationOptions(options));
     }
 
+export const getListCartesProposeesUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/cartes-proposees`
+}
+
+/**
+ * 825 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main tirée avec sa graine : stable pour une partie donnée, différente d'une partie à l'autre.
+ * @summary La main de cartes tirée pour cette partie
+ */
+export const listCartesProposees = async (sessionId: string, options?: Parameters<typeof customFetch>[1]): Promise<CarteCatalogue[]> => {
+
+  return customFetch<CarteCatalogue[]>(getListCartesProposeesUrl(sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCartesProposeesQueryKey = (sessionId: string,) => {
+    return [
+    `/api/sessions/${sessionId}/cartes-proposees`
+    ] as const;
+    }
+
+
+export const getListCartesProposeesQueryOptions = <TData = Awaited<ReturnType<typeof listCartesProposees>>, TError = ErrorType<void>>(sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCartesProposeesQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCartesProposees>>> = ({ signal }) => listCartesProposees(sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListCartesProposeesQueryResult = NonNullable<Awaited<ReturnType<typeof listCartesProposees>>>
+export type ListCartesProposeesQueryError = ErrorType<void>
+
+
+/**
+ * @summary La main de cartes tirée pour cette partie
+ */
+
+export function useListCartesProposees<TData = Awaited<ReturnType<typeof listCartesProposees>>, TError = ErrorType<void>>(
+ sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListCartesProposeesQueryOptions(sessionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getListCartesSessionUrl = (sessionId: string,) => {
 
 

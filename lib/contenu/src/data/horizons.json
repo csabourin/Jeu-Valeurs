@@ -1,0 +1,1652 @@
+[
+  {
+    "id": "H001",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Pouvoir décider moi-même de la façon dont je vis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H002",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Ne dépendre de personne financièrement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H003",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Pouvoir changer de direction dans ma vie quand je le souhaite.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H004",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Disposer de beaucoup de temps dont personne ne décide à ma place.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H005",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Pouvoir dire non sans avoir à me justifier.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H006",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Être libre de toute obligation importante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H007",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "N’avoir de comptes à rendre à personne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H008",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Être suffisamment autonome pour pouvoir quitter n’importe quelle situation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H009",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Ne jamais me sentir piégé par une relation ou un engagement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H010",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Être capable de vivre selon mes propres règles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H011",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Pouvoir travailler seulement lorsque j’en ai envie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H012",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Posséder suffisamment de ressources pour ne pas avoir à faire de compromis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H013",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Ne plus dépendre de l’approbation des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H014",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Être libre de disparaître quelques jours quand j’en ai besoin.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H015",
+    "category": "Liberté, autonomie et indépendance",
+    "label": "Pouvoir choisir exactement avec qui je passe mon temps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H016",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Savoir que mes besoins essentiels seront toujours couverts.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H017",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Avoir suffisamment d’argent pour ne plus m’inquiéter des dépenses courantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H018",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Vivre dans un environnement calme et prévisible.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H019",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Pouvoir compter sur les gens autour de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H020",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Avoir une routine stable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H021",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Être certain de ce que l’avenir me réserve.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H022",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Ne jamais risquer de perdre ce que j’ai construit.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H023",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Être protégé des changements imposés par les autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H024",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Pouvoir prévoir longtemps à l’avance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H025",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Ne jamais être pris au dépourvu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H026",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Avoir toujours un plan de secours.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H027",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Être entouré de personnes fiables et constantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H028",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Ne plus avoir de conflits importants dans ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H029",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Pouvoir vieillir sans dépendre des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H030",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Savoir que ma famille sera en sécurité même si quelque chose m’arrive.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H031",
+    "category": "Appartenance, affection et proximité",
+    "label": "Me sentir profondément aimé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H032",
+    "category": "Appartenance, affection et proximité",
+    "label": "Avoir une personne qui me connaît réellement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H033",
+    "category": "Appartenance, affection et proximité",
+    "label": "Être entouré de gens heureux de me voir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H034",
+    "category": "Appartenance, affection et proximité",
+    "label": "Sentir que quelqu’un pense spontanément à moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H035",
+    "category": "Appartenance, affection et proximité",
+    "label": "Faire partie d’un groupe soudé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H036",
+    "category": "Appartenance, affection et proximité",
+    "label": "Avoir une famille très unie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H037",
+    "category": "Appartenance, affection et proximité",
+    "label": "Être quelqu’un que les autres viennent spontanément voir lorsqu’ils ont besoin d’aide.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H038",
+    "category": "Appartenance, affection et proximité",
+    "label": "Être indispensable à certaines personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H039",
+    "category": "Appartenance, affection et proximité",
+    "label": "Ne jamais me sentir seul.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H040",
+    "category": "Appartenance, affection et proximité",
+    "label": "Avoir beaucoup d’amis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H041",
+    "category": "Appartenance, affection et proximité",
+    "label": "Avoir quelques relations extrêmement profondes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H042",
+    "category": "Appartenance, affection et proximité",
+    "label": "Sentir que j’ai une place claire dans ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H043",
+    "category": "Appartenance, affection et proximité",
+    "label": "Être accueilli chaleureusement partout où je vais.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H044",
+    "category": "Appartenance, affection et proximité",
+    "label": "Être entouré de personnes qui partagent ma façon de voir le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H045",
+    "category": "Appartenance, affection et proximité",
+    "label": "Être accepté même lorsque je ne corresponds pas aux attentes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H046",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être reconnu pour ce que je fais bien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H047",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être admiré.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H048",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Impressionner les autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H049",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être considéré comme exceptionnel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H050",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être respecté par les gens importants pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H051",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être connu dans mon domaine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H052",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Avoir une réputation prestigieuse.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H053",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être la personne la plus compétente dans une pièce.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H054",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être considéré comme intelligent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H055",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être considéré comme sage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H056",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être envié.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H057",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Faire quelque chose dont les gens se souviendront longtemps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H058",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Recevoir des signes visibles de reconnaissance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H059",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Être pris au sérieux immédiatement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H060",
+    "category": "Reconnaissance, statut et admiration",
+    "label": "Avoir suffisamment de prestige pour que mon opinion compte davantage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H061",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Avoir une influence réelle sur les décisions qui m’entourent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H062",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Pouvoir décider de la direction d’un groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H063",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Être en position de donner les orientations plutôt que de les recevoir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H064",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Pouvoir faire changer les choses selon ma vision.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H065",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Être écouté lorsque je parle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H066",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Être capable de convaincre presque n’importe qui.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H067",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Avoir suffisamment de statut pour ne pas pouvoir être facilement ignoré.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H068",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Être celui ou celle dont les autres attendent la décision finale.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H069",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Garder le contrôle dans les situations difficiles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H070",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Ne jamais être à la merci des décisions de quelqu’un d’autre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H071",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Être capable d’imposer mes limites sans résistance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H072",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Avoir des personnes qui suivent naturellement mes idées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H073",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Pouvoir protéger mon groupe grâce à mon influence.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H074",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Avoir suffisamment de pouvoir pour empêcher certaines choses de m’arriver.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H075",
+    "category": "Pouvoir, influence et contrôle",
+    "label": "Être difficile à remplacer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H076",
+    "category": "Réussite, compétence et excellence",
+    "label": "Être excellent dans quelque chose.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H077",
+    "category": "Réussite, compétence et excellence",
+    "label": "Maîtriser profondément un domaine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H078",
+    "category": "Réussite, compétence et excellence",
+    "label": "Réussir un projet très difficile.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H079",
+    "category": "Réussite, compétence et excellence",
+    "label": "Dépasser mes propres limites.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H080",
+    "category": "Réussite, compétence et excellence",
+    "label": "Être meilleur que la plupart des gens dans mon domaine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H081",
+    "category": "Réussite, compétence et excellence",
+    "label": "Gagner une compétition importante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H082",
+    "category": "Réussite, compétence et excellence",
+    "label": "Être le meilleur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H083",
+    "category": "Réussite, compétence et excellence",
+    "label": "Prouver à ceux qui doutaient de moi qu’ils avaient tort.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H084",
+    "category": "Réussite, compétence et excellence",
+    "label": "Atteindre un niveau de réussite que ma famille n’a jamais connu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H085",
+    "category": "Réussite, compétence et excellence",
+    "label": "Terminer ce que j’entreprends.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H086",
+    "category": "Réussite, compétence et excellence",
+    "label": "Être reconnu comme une référence.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H087",
+    "category": "Réussite, compétence et excellence",
+    "label": "Être fier de mon travail.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H088",
+    "category": "Réussite, compétence et excellence",
+    "label": "Faire quelque chose que très peu de gens sont capables de faire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H089",
+    "category": "Réussite, compétence et excellence",
+    "label": "Ne plus jamais être considéré comme médiocre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H090",
+    "category": "Réussite, compétence et excellence",
+    "label": "Continuer à progresser toute ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H091",
+    "category": "Richesse, confort et possessions",
+    "label": "Devenir riche.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H092",
+    "category": "Richesse, confort et possessions",
+    "label": "Avoir beaucoup plus d’argent que nécessaire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H093",
+    "category": "Richesse, confort et possessions",
+    "label": "Pouvoir acheter ce que je veux sans regarder le prix.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H094",
+    "category": "Richesse, confort et possessions",
+    "label": "Posséder une maison remarquable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H095",
+    "category": "Richesse, confort et possessions",
+    "label": "Avoir des objets que peu de gens peuvent se permettre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H096",
+    "category": "Richesse, confort et possessions",
+    "label": "Vivre dans le luxe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H097",
+    "category": "Richesse, confort et possessions",
+    "label": "Ne jamais avoir à choisir selon le prix.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H098",
+    "category": "Richesse, confort et possessions",
+    "label": "Accumuler suffisamment de patrimoine pour plusieurs générations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H099",
+    "category": "Richesse, confort et possessions",
+    "label": "Posséder moins de choses mais seulement celles que j’apprécie vraiment.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H100",
+    "category": "Richesse, confort et possessions",
+    "label": "Ne rien posséder qui m’attache à un endroit.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H101",
+    "category": "Richesse, confort et possessions",
+    "label": "Avoir une résidence très confortable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H102",
+    "category": "Richesse, confort et possessions",
+    "label": "Pouvoir voyager dans les meilleures conditions possibles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H103",
+    "category": "Richesse, confort et possessions",
+    "label": "Être financièrement plus prospère que les personnes avec lesquelles je me compare.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H104",
+    "category": "Richesse, confort et possessions",
+    "label": "Ne plus jamais travailler pour de l’argent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H105",
+    "category": "Richesse, confort et possessions",
+    "label": "Pouvoir offrir des choses importantes aux gens que j’aime.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H106",
+    "category": "Plaisir, confort et gratification",
+    "label": "Avoir beaucoup de plaisir dans ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H107",
+    "category": "Plaisir, confort et gratification",
+    "label": "Pouvoir manger ce qui me plaît.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H108",
+    "category": "Plaisir, confort et gratification",
+    "label": "Passer beaucoup de temps à me divertir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H109",
+    "category": "Plaisir, confort et gratification",
+    "label": "Ne presque jamais m’ennuyer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H110",
+    "category": "Plaisir, confort et gratification",
+    "label": "Me sentir bien la majorité du temps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H111",
+    "category": "Plaisir, confort et gratification",
+    "label": "Vivre confortablement sans faire d’efforts inutiles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H112",
+    "category": "Plaisir, confort et gratification",
+    "label": "Pouvoir satisfaire rapidement mes envies.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H113",
+    "category": "Plaisir, confort et gratification",
+    "label": "Faire plus souvent ce qui me plaît que ce que je dois faire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H114",
+    "category": "Plaisir, confort et gratification",
+    "label": "Ne plus avoir à supporter des choses désagréables.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H115",
+    "category": "Plaisir, confort et gratification",
+    "label": "Être régulièrement surpris et émerveillé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H116",
+    "category": "Plaisir, confort et gratification",
+    "label": "Avoir une vie excitante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H117",
+    "category": "Plaisir, confort et gratification",
+    "label": "Pouvoir changer souvent d’environnement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H118",
+    "category": "Plaisir, confort et gratification",
+    "label": "Vivre de nombreuses expériences différentes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H119",
+    "category": "Plaisir, confort et gratification",
+    "label": "Ne pas devoir sacrifier le plaisir au nom de la productivité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H120",
+    "category": "Plaisir, confort et gratification",
+    "label": "Être libre de profiter de la vie sans culpabilité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H121",
+    "category": "Paix, solitude et retrait",
+    "label": "Qu’on me laisse tranquille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H122",
+    "category": "Paix, solitude et retrait",
+    "label": "Pouvoir passer beaucoup de temps seul.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H123",
+    "category": "Paix, solitude et retrait",
+    "label": "Ne plus être constamment sollicité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H124",
+    "category": "Paix, solitude et retrait",
+    "label": "Pouvoir me retirer des conflits qui ne me concernent pas.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H125",
+    "category": "Paix, solitude et retrait",
+    "label": "Vivre dans un endroit éloigné de l’agitation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H126",
+    "category": "Paix, solitude et retrait",
+    "label": "Avoir peu d’obligations sociales.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H127",
+    "category": "Paix, solitude et retrait",
+    "label": "Être capable de fermer complètement la porte au monde extérieur.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H128",
+    "category": "Paix, solitude et retrait",
+    "label": "Ne pas avoir besoin de maintenir beaucoup de relations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H129",
+    "category": "Paix, solitude et retrait",
+    "label": "Pouvoir rester silencieux sans devoir divertir les autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H130",
+    "category": "Paix, solitude et retrait",
+    "label": "Avoir une vie simple et discrète.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H131",
+    "category": "Paix, solitude et retrait",
+    "label": "Ne jamais être célèbre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H132",
+    "category": "Paix, solitude et retrait",
+    "label": "Être presque invisible socialement quand je le souhaite.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H133",
+    "category": "Paix, solitude et retrait",
+    "label": "Ne pas être responsable du bonheur des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H134",
+    "category": "Paix, solitude et retrait",
+    "label": "Avoir suffisamment d’espace pour ne pas devoir faire de compromis fréquents.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H135",
+    "category": "Paix, solitude et retrait",
+    "label": "Pouvoir disparaître du regard social.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H136",
+    "category": "Famille, descendance et continuité",
+    "label": "Avoir une famille proche et solidaire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H137",
+    "category": "Famille, descendance et continuité",
+    "label": "Être un parent dont les enfants se souviennent avec affection.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H138",
+    "category": "Famille, descendance et continuité",
+    "label": "Voir mes enfants réussir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H139",
+    "category": "Famille, descendance et continuité",
+    "label": "Voir ma famille conserver ses traditions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H140",
+    "category": "Famille, descendance et continuité",
+    "label": "Transmettre mon nom, mon histoire ou mon héritage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H141",
+    "category": "Famille, descendance et continuité",
+    "label": "Que mes descendants aient une vie meilleure que la mienne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H142",
+    "category": "Famille, descendance et continuité",
+    "label": "Pouvoir aider financièrement ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H143",
+    "category": "Famille, descendance et continuité",
+    "label": "Être la personne qui maintient ma famille unie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H144",
+    "category": "Famille, descendance et continuité",
+    "label": "Être respecté comme aîné un jour.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H145",
+    "category": "Famille, descendance et continuité",
+    "label": "Que mes enfants adoptent une partie importante de mes valeurs.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H146",
+    "category": "Famille, descendance et continuité",
+    "label": "Que mes enfants deviennent très différents de moi s’ils le souhaitent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H147",
+    "category": "Famille, descendance et continuité",
+    "label": "Ne pas avoir de responsabilités familiales importantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H148",
+    "category": "Famille, descendance et continuité",
+    "label": "Construire quelque chose qui survivra à ma génération.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H149",
+    "category": "Famille, descendance et continuité",
+    "label": "Préserver ce que ma famille m’a transmis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H150",
+    "category": "Famille, descendance et continuité",
+    "label": "Être celui ou celle qui change profondément la trajectoire de ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H151",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Être apprécié par presque tout le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H152",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Éviter les conflits importants.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H153",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Ne jamais embarrasser ma famille ou mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H154",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Être considéré comme respectable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H155",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Savoir exactement ce qu’on attend de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H156",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Être parfaitement intégré à mon environnement social.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H157",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Ne jamais faire quelque chose qui ferait parler de moi négativement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H158",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Être entouré de gens qui évitent les affrontements.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H159",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Pouvoir conserver de bonnes relations même lorsque nous sommes en désaccord.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H160",
+    "category": "Harmonie, conformité et acceptation sociale",
+    "label": "Être reconnu comme quelqu’un de respectable selon les normes de mon milieu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H161",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Être différent des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H162",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Refuser de vivre une vie conventionnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H163",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Faire des choses que mon entourage n’oserait pas faire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H164",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Être imprévisible.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H165",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Choquer un peu les attentes sociales.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H166",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Avoir une apparence ou un mode de vie qui attire l’attention.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H167",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Montrer que certaines conventions ne sont pas nécessaires.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H168",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Pouvoir briser les règles lorsqu’elles me semblent absurdes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H169",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Être connu comme quelqu’un qui ne suit pas le troupeau.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H170",
+    "category": "Différence, originalité et transgression légère",
+    "label": "Ne jamais devenir complètement prévisible ou conformiste.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H171",
+    "category": "Contribution, service et utilité",
+    "label": "Être utile aux autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H172",
+    "category": "Contribution, service et utilité",
+    "label": "Améliorer concrètement la vie de certaines personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H173",
+    "category": "Contribution, service et utilité",
+    "label": "Contribuer à ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H174",
+    "category": "Contribution, service et utilité",
+    "label": "Résoudre un problème qui affecte beaucoup de personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H175",
+    "category": "Contribution, service et utilité",
+    "label": "Être quelqu’un sur qui les autres peuvent compter.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H176",
+    "category": "Contribution, service et utilité",
+    "label": "Transmettre mes connaissances.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H177",
+    "category": "Contribution, service et utilité",
+    "label": "Laisser un endroit meilleur que je l’ai trouvé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H178",
+    "category": "Contribution, service et utilité",
+    "label": "Être nécessaire au bon fonctionnement d’un groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H179",
+    "category": "Contribution, service et utilité",
+    "label": "Avoir un impact mesurable sur le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H180",
+    "category": "Contribution, service et utilité",
+    "label": "Aider sans nécessairement recevoir de reconnaissance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H181",
+    "category": "Contribution, service et utilité",
+    "label": "Être reconnu pour mon dévouement aux autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H182",
+    "category": "Contribution, service et utilité",
+    "label": "Faire partie d’une grande cause.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H183",
+    "category": "Contribution, service et utilité",
+    "label": "Être capable de protéger ceux qui comptent sur moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H184",
+    "category": "Contribution, service et utilité",
+    "label": "Être celui ou celle qui trouve une solution quand tout va mal.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H185",
+    "category": "Contribution, service et utilité",
+    "label": "Être utile au point d’être difficile à remplacer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H186",
+    "category": "Justice, transformation et changement social",
+    "label": "Vivre dans une société plus juste.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H187",
+    "category": "Justice, transformation et changement social",
+    "label": "Réduire les inégalités.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H188",
+    "category": "Justice, transformation et changement social",
+    "label": "Faire changer une règle que je considère injuste.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H189",
+    "category": "Justice, transformation et changement social",
+    "label": "Défendre les personnes qui ont moins de pouvoir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H190",
+    "category": "Justice, transformation et changement social",
+    "label": "Avoir suffisamment d’influence pour changer les institutions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H191",
+    "category": "Justice, transformation et changement social",
+    "label": "Voir certaines structures sociales disparaître complètement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H192",
+    "category": "Justice, transformation et changement social",
+    "label": "Préserver les institutions qui maintiennent l’ordre et la stabilité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H193",
+    "category": "Justice, transformation et changement social",
+    "label": "Vivre dans un monde où les mêmes règles s’appliquent à tous.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H194",
+    "category": "Justice, transformation et changement social",
+    "label": "Vivre dans un monde où les circonstances particulières comptent davantage que l’uniformité des règles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H195",
+    "category": "Justice, transformation et changement social",
+    "label": "Avoir le courage de m’opposer publiquement à ce que je juge injuste.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H196",
+    "category": "Nature, territoire et enracinement",
+    "label": "Vivre près de la nature.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H197",
+    "category": "Nature, territoire et enracinement",
+    "label": "Avoir un lieu auquel je me sente profondément attaché.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H198",
+    "category": "Nature, territoire et enracinement",
+    "label": "Pouvoir vivre longtemps sur le même territoire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H199",
+    "category": "Nature, territoire et enracinement",
+    "label": "Contribuer à préserver un lieu pour les générations futures.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H200",
+    "category": "Nature, territoire et enracinement",
+    "label": "Pouvoir vivre directement de la terre ou des ressources locales.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H201",
+    "category": "Nature, territoire et enracinement",
+    "label": "Voyager constamment plutôt que m’enraciner quelque part.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H202",
+    "category": "Nature, territoire et enracinement",
+    "label": "Connaître intimement les saisons, les plantes ou les animaux de mon environnement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H203",
+    "category": "Nature, territoire et enracinement",
+    "label": "Laisser certains endroits complètement libres de l’activité humaine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H204",
+    "category": "Nature, territoire et enracinement",
+    "label": "Pouvoir utiliser durablement les ressources d’un territoire auquel j’appartiens.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H205",
+    "category": "Nature, territoire et enracinement",
+    "label": "Avoir un endroit qui puisse rester dans ma famille ou ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H206",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Comprendre comment fonctionne le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H207",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Ne jamais cesser d’apprendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H208",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Pouvoir consacrer beaucoup de temps à mes curiosités.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H209",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Comprendre profondément les gens.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H210",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Devenir expert dans plusieurs domaines.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H211",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Découvrir quelque chose que personne ne savait auparavant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H212",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Trouver des réponses aux grandes questions de ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H213",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Être capable de reconnaître quand j’ai tort.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H214",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Toujours avoir une réponse lorsqu’on me pose une question.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H215",
+    "category": "Savoir, compréhension et curiosité",
+    "label": "Connaître suffisamment de choses pour ne pas pouvoir être facilement trompé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H216",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Sentir que ma vie a un sens.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H217",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Faire partie de quelque chose de plus grand que moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H218",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Être en paix avec ma place dans le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H219",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Vivre conformément à mes convictions profondes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H220",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Sentir un lien profond avec mes ancêtres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H221",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Sentir un lien profond avec la nature.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H222",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Trouver une pratique spirituelle ou philosophique qui me guide.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H223",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Être entièrement libre de toute croyance spirituelle imposée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H224",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Transmettre une vision du monde aux générations suivantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H225",
+    "category": "Sens, spiritualité et transcendance",
+    "label": "Accepter certaines choses sans avoir besoin de tout expliquer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H226",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Être plus performant que mes pairs.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H227",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Gagner plus d’argent que les gens autour de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H228",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Être plus respecté que ceux qui m’ont sous-estimé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H229",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Être celui ou celle qu’on choisit en premier.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H230",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Avoir plus d’influence que mes rivaux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H231",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Prouver que je suis meilleur que quelqu’un avec qui je me compare.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H232",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Être difficile à égaler.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H233",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Ne plus jamais être dans une position inférieure.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H234",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Être suffisamment puissant pour que ceux qui m’ont méprisé doivent me respecter.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H235",
+    "category": "Compétition, comparaison et supériorité",
+    "label": "Avoir le dernier mot dans une rivalité importante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H236",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Avoir le moins de responsabilités possible.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H237",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Ne jamais être celui ou celle qu’on appelle lorsqu’il y a un problème.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H238",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Pouvoir laisser les autres prendre les décisions difficiles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H239",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Avoir une vie où peu de choses importantes dépendent de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H240",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Ne plus être obligé de prendre soin des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H241",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Pouvoir profiter d’un groupe sans devoir toujours y jouer un rôle important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H242",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Ne pas être responsable des erreurs des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H243",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Pouvoir abandonner un projet lorsqu’il ne m’intéresse plus.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H244",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Ne plus avoir à résoudre les conflits des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H245",
+    "category": "Évitement, facilité et moindre responsabilité",
+    "label": "Avoir une vie facile.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H246",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Être très important pour quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H247",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Être la première personne à qui quelqu’un pense lorsqu’il a besoin d’aide.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H248",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Être irremplaçable dans une relation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H249",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Savoir que certaines personnes ont besoin de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H250",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Être celui ou celle dont l’avis compte le plus pour une personne proche.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H251",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Pouvoir influencer fortement les décisions de mes proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H252",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Avoir des proches qui suivent volontiers mes conseils.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H253",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Être admiré par mes enfants, élèves ou personnes plus jeunes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H254",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Être considéré comme le pilier de ma famille ou de mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H255",
+    "category": "Influence relationnelle et dépendance",
+    "label": "Sentir que mon absence serait réellement remarquée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H256",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Pouvoir garder certaines parties de ma vie entièrement privées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H257",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Décider moi-même ce que les autres savent de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H258",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Pouvoir recommencer ailleurs sans être défini par mon passé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H259",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Être capable de maintenir une image très différente selon les contextes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H260",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Ne jamais être exposé publiquement contre ma volonté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H261",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Être capable de contrôler ma réputation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H262",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Être mystérieux aux yeux des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H263",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Ne pas être complètement connu, même de mes proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H264",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Pouvoir effacer certaines traces de mon passé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H265",
+    "category": "Vie privée, secret et contrôle de son image",
+    "label": "Être libre de changer sans devoir justifier qui j’étais auparavant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H266",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Être encore évoqué longtemps après ma mort.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H267",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Créer une œuvre qui me survive.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H268",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Fonder une tradition durable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H269",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Laisser une institution ou un projet qui continuera sans moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H270",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Que mon nom soit associé à quelque chose d’important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H271",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Être considéré comme un ancêtre important par les générations futures.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H272",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Transmettre un patrimoine matériel important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H273",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Transmettre surtout mes connaissances plutôt que mes possessions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H274",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Changer durablement ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "H275",
+    "category": "Héritage et immortalité symbolique",
+    "label": "Laisser derrière moi la preuve que ma vie a compté.",
+    "status": "candidate_unvalidated"
+  }
+]

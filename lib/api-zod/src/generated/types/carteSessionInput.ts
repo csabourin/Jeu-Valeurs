@@ -9,7 +9,7 @@ import type { CarteSessionInputFamille } from './carteSessionInputFamille';
 
 export interface CarteSessionInput {
   /** @nullable */
-  catalogueCarteId?: number | null;
+  catalogueCarteId?: string | null;
   famille: CarteSessionInputFamille;
   label: string;
   /** @nullable */

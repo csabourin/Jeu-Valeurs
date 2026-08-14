@@ -8,6 +8,7 @@
 
 export * from './carteCatalogue';
 export * from './carteCatalogueFamille';
+export * from './carteCatalogueOrigine';
 export * from './carteSession';
 export * from './carteSessionFamille';
 export * from './carteSessionInput';

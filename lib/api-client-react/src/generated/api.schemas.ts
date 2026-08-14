@@ -18,13 +18,29 @@ export const CarteCatalogueFamille = {
   tresors: 'tresors',
 } as const;
 
+/**
+ * `maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.
+ */
+export type CarteCatalogueOrigine = typeof CarteCatalogueOrigine[keyof typeof CarteCatalogueOrigine];
+
+
+export const CarteCatalogueOrigine = {
+  maison: 'maison',
+  importee: 'importee',
+} as const;
+
 export interface CarteCatalogue {
-  id: number;
+  /** Identifiant stable du contenu (ex. JV1001, LR042) */
+  id: string;
   famille: CarteCatalogueFamille;
   label: string;
   /** @nullable */
   description?: string | null;
   valeursSuggérées: string[];
+  /** `maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie. */
+  origine: CarteCatalogueOrigine;
+  /** @nullable */
+  categorie?: string | null;
   estPersonnalisable?: boolean;
 }
 
@@ -156,7 +172,7 @@ export interface CarteSession {
   id: number;
   sessionId: string;
   /** @nullable */
-  catalogueCarteId?: number | null;
+  catalogueCarteId?: string | null;
   famille: CarteSessionFamille;
   label: string;
   /** @nullable */
@@ -178,7 +194,7 @@ export const CarteSessionInputFamille = {
 
 export interface CarteSessionInput {
   /** @nullable */
-  catalogueCarteId?: number | null;
+  catalogueCarteId?: string | null;
   famille: CarteSessionInputFamille;
   label: string;
   /** @nullable */
