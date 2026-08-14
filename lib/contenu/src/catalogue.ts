@@ -16,10 +16,20 @@
 
 import { cartesMaison, familles, type CarteContenu, type Famille } from "./cartes";
 import { valeursParCategorie } from "./categories";
+import { reecritures } from "./reecritures";
 import { generateurAleatoire, melanger } from "./hasard";
 import lignesRougesImportees from "./data/red_lines.json";
 import horizonsImportes from "./data/horizons.json";
 import tresorsImportes from "./data/treasures.json";
+
+/**
+ * Les données importées utilisent l'apostrophe typographique, le contenu écrit
+ * ici l'apostrophe droite. Une même main affichait donc les deux. On uniformise
+ * à l'affichage plutôt que de retoucher les fichiers d'origine.
+ */
+function normaliser(texte: string): string {
+  return texte.replace(/\u2019/g, "'");
+}
 
 interface CarteImportee {
   id: string;
@@ -30,7 +40,11 @@ interface CarteImportee {
 
 /** Combien de cartes une main propose, par famille. */
 export const CARTES_PAR_FAMILLE = 18;
-/** Dont ce nombre venant du deck maison, pour ancrer le ton de chaque main. */
+/**
+ * Dont ce nombre venant du deck maison. Les cartes maison portent une
+ * description et des valeurs choisies carte par carte, là où les relues tirent
+ * les leurs de leur catégorie : en garantir une part garde chaque main ancrée.
+ */
 const PART_MAISON = 6;
 
 function importer(brutes: CarteImportee[], famille: Famille): CarteContenu[] {
@@ -38,12 +52,15 @@ function importer(brutes: CarteImportee[], famille: Famille): CarteContenu[] {
   return brutes.map((c) => ({
     id: c.id,
     famille,
-    label: c.label,
+    // Le libellé d'origine ne sert que de repli : toutes les cartes ont été
+    // relues, et celles qui ne sont pas dans `reecritures` sont celles qui
+    // passaient déjà telles quelles.
+    label: normaliser(reecritures[c.id] ?? c.label),
     description: null,
     // Une catégorie inconnue ne fait pas disparaître la carte : elle arrive
     // sans hypothèse, et la personne nomme elle-même ce qu'elle y voit.
     valeursSuggerees: parCategorie[c.category] ?? [],
-    origine: "importee" as const,
+    origine: "relue" as const,
     categorie: c.category,
   }));
 }

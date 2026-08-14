@@ -52,6 +52,7 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 - `lib/contenu/` — **tout le matériel du jeu, en code** : valeurs, cartes, duels,
   séries de bascule, et le planificateur de parcours
 - `lib/contenu/src/data/` — le jeu de 825 cartes importé, laissé tel quel
+- `lib/contenu/src/reecritures.ts` — la relecture 12-14 ans, par identifiant
 - `lib/contenu/src/categories.ts` — les 70 catégories importées vers les valeurs
 - `lib/api-spec/openapi.yaml` — source de vérité de tous les contrats API
 - `lib/db/src/schema/` — sessions, cartes-session, réponses (**rien du contenu**)
@@ -64,11 +65,15 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 - **Le contenu est du code, pas des données.** `lib/contenu` est la source de
   vérité ; la base ne garde que ce qui appartient à la personne. Aucune étape
   d'amorçage : une partie est jouable dès le premier démarrage.
-- **Deux provenances de cartes, jamais confondues.** 60 cartes `maison`, écrites
-  et relues, au vocabulaire calibré ; 825 cartes `importee`, qui donnent le
-  volume. Les secondes tirent leurs valeurs suggérées de leur catégorie, pas
-  d'une relecture carte par carte — d'où le champ `origine`, qui dit ce qu'on
-  peut affirmer d'une carte et pas seulement d'où elle vient.
+- **La relecture est une couche, pas une réécriture des données.** Les 825
+  libellés d'origine restent dans `data/*.json` ; `reecritures.ts` associe un
+  nouveau libellé à un identifiant. On peut donc comparer avant/après à tout
+  moment, et une carte sans réécriture affiche simplement son libellé d'origine.
+- **Trois provenances, jamais confondues.** `maison` : écrite ici, avec
+  description et valeurs choisies carte par carte. `relue` : importée puis
+  relue pour le registre. `importee` : pas encore relue — aucune carte
+  aujourd'hui, mais la valeur reste pour qu'un futur import ne se fasse pas
+  passer pour du contenu vérifié.
 - **On annote 70 catégories, pas 825 cartes.** Une correspondance carte par
   carte serait impossible à relire et à garder cohérente. Le résultat reste une
   hypothèse que la personne confirme ou jette à l'étape suivante.
@@ -121,6 +126,27 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 6. **Ta carte** — ce qui n'a pas plié, les points de bascule, les tensions
    ouvertes, le détail chiffré, et ce que tout ça ne dit pas.
 
+## Relire une carte importée
+
+494 des 825 cartes ont été réécrites ; 331 passaient déjà. Ce que la relecture
+cherche :
+
+- des mots de tous les jours, sans jargon moral ;
+- court — la carte se lit d'un coup d'œil (le plus long libellé est passé de
+  146 à 84 caractères, la moyenne de 61 à 50) ;
+- **la même tension** qu'à l'origine, sinon la catégorie et donc les valeurs
+  suggérées deviennent fausses ;
+- ce qu'une personne de 12-14 ans possède vraiment. Un trésor n'est pas une
+  carrière : « Mon expérience professionnelle » est devenu « Tout ce que j'ai
+  appris en le faisant ».
+
+Ce qu'elle ne fait pas : adoucir. « Faire souffrir un animal pour m'amuser »
+reste dur à lire, et doit le rester — une carte tiède ne fait rien découvrir.
+
+`verifier-contenu` signale les libellés qui gardent du vocabulaire adulte
+(liste dans `motsTropAdultes`), ceux qui dépassent 100 caractères, et les
+réécritures qui pointent un identifiant inexistant.
+
 ## Écrire du contenu
 
 Les règles sont en tête de `duels.ts` et `bascules.ts`. En résumé :
@@ -139,10 +165,6 @@ Les règles sont en tête de `duels.ts` et `bascules.ts`. En résumé :
 
 - **Comparaisons par paires / Best-Worst Scaling** entre les cartes de la
   personne (le brief le prévoit ; le parcours n'a que duels et bascules).
-- **Relecture des 825 cartes importées** : registre inégal (plusieurs supposent
-  un contexte adulte — travail, patrimoine, conjoint) et 29 libellés dépassent
-  110 caractères. Elles sont marquées `origine: "importee"`, ce qui permet de
-  les reprendre par lots sans toucher au deck maison.
 - **Les 30 dilemmes importés** (`data/dilemmas.json`) ont servi de squelettes
   aux duels 201-230 ; le fichier reste comme trace, il n'est pas lu à
   l'exécution.

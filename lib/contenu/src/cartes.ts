@@ -32,12 +32,19 @@ export interface CarteContenu {
   /** Hypothèses de valeurs — la personne confirme, corrige ou remplace. */
   valeursSuggerees: string[];
   /**
-   * `maison` : écrite et relue à la main, vocabulaire calibré 12-14 ans.
-   * `importee` : venue du jeu de 825 cartes, valeurs déduites de sa catégorie
-   * et registre non homogène. La distinction est conservée parce qu'elle
-   * change ce qu'on peut affirmer de la carte, pas seulement sa provenance.
+   * `maison`   : écrite ici, de zéro.
+   * `relue`    : venue du jeu de 825 cartes, puis relue pour le registre
+   *              12-14 ans — réécrite si nécessaire, gardée telle quelle si
+   *              elle passait déjà.
+   * `importee` : arrivée d'un import et pas encore relue. Aucune carte n'est
+   *              dans cet état aujourd'hui ; la valeur reste pour qu'un futur
+   *              import ne se fasse pas passer pour du contenu vérifié.
+   *
+   * La distinction dit ce qu'on peut affirmer d'une carte, pas seulement d'où
+   * elle vient : les valeurs suggérées d'une carte relue viennent de sa
+   * catégorie, pas d'une lecture carte par carte.
    */
-  origine: "maison" | "importee";
+  origine: "maison" | "relue" | "importee";
   /** Catégorie d'origine, pour les cartes importées. */
   categorie: string | null;
 }

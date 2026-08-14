@@ -16,7 +16,7 @@ export interface CarteCatalogue {
   /** @nullable */
   description?: string | null;
   valeursSuggérées: string[];
-  /** `maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie. */
+  /** `maison` : carte écrite ici. `relue` : carte du jeu de 825, relue pour le registre, dont les valeurs suggérées viennent de sa catégorie. `importee` : pas encore relue. */
   origine: CarteCatalogueOrigine;
   /** @nullable */
   categorie?: string | null;

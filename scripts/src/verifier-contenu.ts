@@ -18,6 +18,7 @@ import {
   cartesImportees,
   distribuerCartes,
   valeursParCategorie,
+  reecritures,
   CARTES_PAR_FAMILLE,
   valeurs,
   duels,
@@ -89,6 +90,69 @@ for (const famille of familles) {
       );
     }
   }
+}
+
+// ── Registre des libellés ───────────────────────────────────────────────────
+
+/**
+ * Mots qui trahissent le registre adulte ou administratif du jeu importé.
+ * Ce n'est pas une liste de mots interdits en soi : c'est un filet pour
+ * repérer les libellés qui n'ont pas été relus, ou dont la réécriture a laissé
+ * passer le vocabulaire d'origine.
+ */
+const motsTropAdultes = [
+  "délibérément",
+  "volontairement",
+  "systématiquement",
+  "automatiquement",
+  "déshumanis",
+  "réciprocité",
+  "instrumentalis",
+  "patrimoine",
+  "institutionnel",
+  "professionnel",
+  "partenaire",
+  "prospère",
+  "conventionnel",
+  "conformiste",
+  "transcendance",
+  "descendants",
+  "légitime",
+  "environnement social",
+  "structures sociales",
+  "perspectives",
+  "mesurable",
+  "arbitraire",
+  "irréversible",
+  "vulnérabilité",
+  "dignité",
+];
+
+/** Un libellé qui ne se lit pas d'un coup d'œil rate sa cible. */
+const LONGUEUR_MAX = 100;
+
+for (const c of cartesImportees) {
+  const minuscule = c.label.toLowerCase();
+  for (const mot of motsTropAdultes) {
+    if (minuscule.includes(mot)) {
+      avertissements.push(`${c.id} garde « ${mot} » : ${c.label}`);
+      break;
+    }
+  }
+  if (c.label.length > LONGUEUR_MAX) {
+    avertissements.push(`${c.id} fait ${c.label.length} caractères : ${c.label}`);
+  }
+  verifier(
+    !c.label.includes("\u2019"),
+    `${c.id} mélange les apostrophes typographiques et droites : ${c.label}`,
+  );
+}
+
+// Une réécriture qui pointe un identifiant inexistant est du texte mort : elle
+// ne s'affichera jamais et personne ne le remarquera.
+const idsImportes = new Set(cartesImportees.map((c) => c.id));
+for (const id of Object.keys(reecritures)) {
+  verifier(idsImportes.has(id), `Réécriture orpheline : « ${id} » ne correspond à aucune carte.`);
 }
 
 // ── Identifiants uniques, toutes situations confondues ───────────────────────
@@ -353,7 +417,11 @@ console.log(
   ].join(" · "),
 );
 console.log(
-  `Cartes : ${cartesMaison.length} maison + ${cartesImportees.length} importées · ` +
+  `Relecture : ${Object.keys(reecritures).length} cartes réécrites, ` +
+    `${cartesImportees.length - Object.keys(reecritures).length} gardées telles quelles`,
+);
+console.log(
+  `Cartes : ${cartesMaison.length} maison + ${cartesImportees.length} relues · ` +
     `${mains.size} mains distinctes sur 200 parties · ${cartesVues.size}/${cartes.length} cartes atteignables`,
 );
 console.log(
