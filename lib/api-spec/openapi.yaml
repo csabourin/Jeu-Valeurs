@@ -392,10 +392,11 @@ components:
             type: string
         origine:
           type: string
-          enum: [maison, importee]
+          enum: [maison, relue, importee]
           description: >
-            `maison` : carte écrite et relue à la main. `importee` : carte du
-            jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.
+            `maison` : carte écrite ici. `relue` : carte du jeu de 825, relue
+            pour le registre, dont les valeurs suggérées viennent de sa
+            catégorie. `importee` : pas encore relue.
         categorie:
           type: ["string", "null"]
         estPersonnalisable:

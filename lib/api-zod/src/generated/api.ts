@@ -29,7 +29,7 @@ export const ListCartessCatalogueResponseItem = zod.object({
   "label": zod.string(),
   "description": zod.string().nullish(),
   "valeursSuggérées": zod.array(zod.string()),
-  "origine": zod.enum(['maison', 'importee']).describe('`maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.\n'),
+  "origine": zod.enum(['maison', 'relue', 'importee']).describe('`maison` : carte écrite ici. `relue` : carte du jeu de 825, relue pour le registre, dont les valeurs suggérées viennent de sa catégorie. `importee` : pas encore relue.\n'),
   "categorie": zod.string().nullish(),
   "estPersonnalisable": zod.boolean().optional()
 })
@@ -122,7 +122,7 @@ export const ListCartesProposeesResponseItem = zod.object({
   "label": zod.string(),
   "description": zod.string().nullish(),
   "valeursSuggérées": zod.array(zod.string()),
-  "origine": zod.enum(['maison', 'importee']).describe('`maison` : carte écrite et relue à la main. `importee` : carte du jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.\n'),
+  "origine": zod.enum(['maison', 'relue', 'importee']).describe('`maison` : carte écrite ici. `relue` : carte du jeu de 825, relue pour le registre, dont les valeurs suggérées viennent de sa catégorie. `importee` : pas encore relue.\n'),
   "categorie": zod.string().nullish(),
   "estPersonnalisable": zod.boolean().optional()
 })
