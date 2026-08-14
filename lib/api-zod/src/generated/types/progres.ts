@@ -6,17 +6,22 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProgresEtapeCourante } from './progresEtapeCourante';
-import type { ProgresProchaineDilemme } from './progresProchaineDilemme';
+import type { ProgresPhase } from './progresPhase';
+import type { Question } from './question';
 
 export interface Progres {
   sessionId: string;
   etapeCourante: ProgresEtapeCourante;
+  /** Où en est la partie, calculé depuis les réponses */
+  phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
-  /** Nombre de collisions possibles (combinaisons C(n,2) des valeurs) */
-  nombreCollisions: number;
-  /** Nombre de collisions auxquelles une réponse a été donnée */
+  /** Nombre de duels prévus pour cette partie */
+  duelsPlanifies: number;
+  duelsRepondus: number;
+  seriesPlanifiees: number;
+  seriesTerminees: number;
+  /** Toutes réponses confondues, duels et bascules */
   nombreReponses: number;
-  /** @nullable */
-  prochaineDilemme: ProgresProchaineDilemme;
+  prochaineQuestion: Question | null;
 }

@@ -2,122 +2,157 @@ import { useLocation } from "wouter";
 import { Shell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useCreateSession, useGetSession } from "@workspace/api-client-react";
-import { Map, Tent, Sparkles, MoveRight, Play } from "lucide-react";
+import {
+  useCreateSession,
+  useGetSession,
+  getGetSessionQueryKey,
+  type SessionEtapeCourante,
+} from "@workspace/api-client-react";
+import { Layers, Swords, SlidersHorizontal, MoveRight, Play } from "lucide-react";
 import { useEffect, useState } from "react";
-import { SessionEtapeCourante } from "@workspace/api-client-react";
+
+/** Où reprendre une partie selon l'étape enregistrée. */
+const chemins: Record<SessionEtapeCourante, string> = {
+  accueil: "cartes",
+  selection_cartes: "cartes",
+  confirmation_valeurs: "valeurs",
+  collisions: "partie",
+  bascules: "partie",
+  constellation: "constellation",
+};
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [existingSessionId, setExistingSessionId] = useState<string | null>(null);
-  
+  const [partieEnCours, setPartieEnCours] = useState<string | null>(null);
+
   useEffect(() => {
-    const id = localStorage.getItem('jdv_session_id');
-    if (id) setExistingSessionId(id);
+    setPartieEnCours(localStorage.getItem("jdv_session_id"));
   }, []);
 
-  const createSession = useCreateSession();
-  
-  const { data: session, isLoading: isLoadingSession } = useGetSession(existingSessionId || "", {
+  const creerSession = useCreateSession();
+  const { data: session, isError } = useGetSession(partieEnCours ?? "", {
     query: {
-      enabled: !!existingSessionId,
-      retry: false
-    }
+      enabled: !!partieEnCours,
+      retry: false,
+      queryKey: getGetSessionQueryKey(partieEnCours ?? ""),
+    },
   });
 
-  const handleStart = () => {
-    createSession.mutate(
+  // Une partie effacée côté serveur ne doit pas rester proposée ici.
+  useEffect(() => {
+    if (isError) {
+      localStorage.removeItem("jdv_session_id");
+      setPartieEnCours(null);
+    }
+  }, [isError]);
+
+  const commencer = () => {
+    creerSession.mutate(
       { data: { etapeCourante: "selection_cartes" } },
       {
-        onSuccess: (newSession) => {
-          localStorage.setItem('jdv_session_id', newSession.id);
-          setLocation(`/session/${newSession.id}/cartes`);
-        }
-      }
+        onSuccess: (nouvelle) => {
+          localStorage.setItem("jdv_session_id", nouvelle.id);
+          setLocation(`/session/${nouvelle.id}/cartes`);
+        },
+      },
     );
   };
 
-  const handleResume = () => {
+  const reprendre = () => {
     if (!session) return;
-    const pathMap: Record<SessionEtapeCourante, string> = {
-      accueil: "cartes", // Should not really happen
-      selection_cartes: "cartes",
-      confirmation_valeurs: "valeurs",
-      collisions: "collisions",
-      constellation: "constellation"
-    };
-    setLocation(`/session/${session.id}/${pathMap[session.etapeCourante]}`);
+    setLocation(`/session/${session.id}/${chemins[session.etapeCourante]}`);
   };
 
   return (
-    <Shell sessionId={existingSessionId || undefined}>
-      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-12">
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
-          <div className="inline-flex items-center justify-center p-4 bg-primary/10 rounded-full mb-4">
-            <CompassIcon className="w-12 h-12 text-primary" />
-          </div>
+    <Shell sessionId={session?.id}>
+      <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-10">
+        <div className="space-y-5 animate-in fade-in slide-in-from-bottom-8 duration-700">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-foreground font-semibold leading-tight">
-            Explorez votre <span className="text-primary italic">boussole</span> intérieure
+            Qu'est-ce qui gagne quand{" "}
+            <span className="text-primary italic">tout ne peut pas gagner</span> ?
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Un carnet de voyage interactif pour découvrir vos priorités, identifier vos lignes rouges et naviguer vos contradictions. 
+            Tu choisis tes cartes. Le jeu les met en duel. À la fin, tu vois ce
+            qui a tenu, ce qui a plié, et à partir d'où.
           </p>
         </div>
 
         <Card className="w-full bg-card/50 backdrop-blur-sm border-border/50 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-150">
-          <CardContent className="p-8 space-y-8">
+          <CardContent className="p-6 md:p-8 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-              <div className="space-y-3">
-                <Map className="w-6 h-6 text-secondary" />
-                <h3 className="font-semibold text-lg font-serif">1. Le paysage</h3>
-                <p className="text-sm text-muted-foreground">Sélectionnez les cartes qui résonnent avec vous. Famille par famille.</p>
+              <div className="space-y-2">
+                <Layers className="w-6 h-6 text-secondary" />
+                <h2 className="font-semibold text-base font-serif">1. Tes cartes</h2>
+                <p className="text-sm text-muted-foreground">
+                  Tes lignes rouges, tes horizons, tes trésors. Tu peux aussi
+                  écrire les tiennes.
+                </p>
               </div>
-              <div className="space-y-3">
-                <Tent className="w-6 h-6 text-accent" />
-                <h3 className="font-semibold text-lg font-serif">2. Les tensions</h3>
-                <p className="text-sm text-muted-foreground">Faites face à des dilemmes délicats pour voir comment vos valeurs interagissent.</p>
+              <div className="space-y-2">
+                <Swords className="w-6 h-6 text-primary" />
+                <h2 className="font-semibold text-base font-serif">2. Les duels</h2>
+                <p className="text-sm text-muted-foreground">
+                  Des situations où deux de tes cartes ne peuvent pas gagner
+                  ensemble. Tu tranches.
+                </p>
               </div>
-              <div className="space-y-3">
-                <Sparkles className="w-6 h-6 text-primary" />
-                <h3 className="font-semibold text-lg font-serif">3. La constellation</h3>
-                <p className="text-sm text-muted-foreground">Découvrez une cartographie nuancée de vos priorités, sans jugement.</p>
+              <div className="space-y-2">
+                <SlidersHorizontal className="w-6 h-6 text-accent" />
+                <h2 className="font-semibold text-base font-serif">
+                  3. Les bascules
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  La même situation, un seul réglage qui monte. Jusqu'où ta
+                  réponse tient-elle ?
+                </p>
               </div>
             </div>
 
-            <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground italic text-left border border-border/50">
-              <span className="font-semibold not-italic block mb-1">Avant de partir :</span>
-              Ceci n'est ni un test psychométrique, ni un diagnostic. C'est un espace de réflexion. Il n'y a pas de "bonnes" valeurs.
+            <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground text-left border border-border/50 space-y-2">
+              <p className="font-semibold text-foreground">Les règles du jeu</p>
+              <ul className="space-y-1 list-disc list-inside marker:text-primary/60">
+                <li>Aucune réponse ne rapporte de points. Il n'y a rien à gagner.</li>
+                <li>Tu peux passer n'importe quelle question, sans la justifier.</li>
+                <li>
+                  Ce que tu réponds reste sur cet appareil et sur le serveur du
+                  jeu, jusqu'à ce que tu effaces ta partie.
+                </li>
+                <li>
+                  Le jeu ne devine rien sur toi : ni humeur, ni croyance, ni
+                  quoi que ce soit d'autre. Il compte ce que tu as choisi.
+                </li>
+              </ul>
             </div>
 
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              {existingSessionId && (session || isLoadingSession) ? (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              {session ? (
                 <>
-                  <Button 
-                    size="lg" 
-                    onClick={handleResume} 
+                  <Button
+                    size="lg"
+                    onClick={reprendre}
                     className="w-full sm:w-auto text-base h-12 px-8"
-                    disabled={isLoadingSession}
                   >
-                    Reprendre mon exploration <MoveRight className="w-4 h-4 ml-2" />
+                    Reprendre ma partie <MoveRight className="w-4 h-4 ml-2" />
                   </Button>
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     variant="outline"
-                    onClick={handleStart} 
+                    onClick={commencer}
+                    disabled={creerSession.isPending}
                     className="w-full sm:w-auto text-base h-12 px-8"
                   >
-                    Recommencer à zéro
+                    Nouvelle partie
                   </Button>
                 </>
               ) : (
-                <Button 
-                  size="lg" 
-                  onClick={handleStart} 
+                <Button
+                  size="lg"
+                  onClick={commencer}
                   className="w-full sm:w-auto text-base h-12 px-8 shadow-md"
-                  disabled={createSession.isPending}
+                  disabled={creerSession.isPending}
                 >
                   <Play className="w-4 h-4 mr-2" fill="currentColor" />
-                  Commencer l'exploration
+                  Commencer
                 </Button>
               )}
             </div>
@@ -125,25 +160,5 @@ export default function Home() {
         </Card>
       </div>
     </Shell>
-  );
-}
-
-function CompassIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-    </svg>
   );
 }

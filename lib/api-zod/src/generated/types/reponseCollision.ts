@@ -35,6 +35,20 @@ export interface ReponseCollision {
      * @nullable
      */
   certitude?: number | null;
+  /**
+     * Série de bascule, si la réponse en fait partie
+     * @nullable
+     */
+  serieId?: string | null;
+  /** @nullable */
+  palier?: number | null;
+  /** @nullable */
+  dimension?: string | null;
+  /**
+     * Valeur que la personne dit avoir voulu protéger (jamais déduite)
+     * @nullable
+     */
+  valeurProtegee?: string | null;
   /** Numéro de version (incrémenter à chaque correction) */
   version: number;
   creeLe: Date;

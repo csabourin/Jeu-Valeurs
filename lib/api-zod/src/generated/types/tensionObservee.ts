@@ -11,5 +11,11 @@ export interface TensionObservee {
   valeurB: string;
   totalCollisions: number;
   incertitudes: number;
+  /** La personne a rarement tranché cette tension */
   estForte: boolean;
+  /**
+     * Null si la tension n'a été rencontrée qu'une fois. Sinon, vrai si la même tension a reçu la même réponse sous ses différentes formes.
+     * @nullable
+     */
+  estStable: boolean | null;
 }

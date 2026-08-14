@@ -59,20 +59,20 @@ paths:
                 items:
                   $ref: "#/components/schemas/CarteCatalogue"
 
-  /catalogue/dilemmes:
+  /catalogue/valeurs:
     get:
-      operationId: listDilemmes
+      operationId: listValeursCatalogue
       tags: [catalogue]
-      summary: Liste tous les dilemmes du catalogue
+      summary: Liste les valeurs de référence et leur description
       responses:
         "200":
-          description: Liste de dilemmes
+          description: Liste de valeurs
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Dilemme"
+                  $ref: "#/components/schemas/ValeurCatalogue"
 
   # ─── Sessions ────────────────────────────────────────────────────────────────
 
@@ -369,24 +369,65 @@ components:
         estPersonnalisable:
           type: boolean
 
-    Dilemme:
+    ValeurCatalogue:
       type: object
-      required: [id, valeurA, valeurB, texte]
+      required: [label, description, famille]
       properties:
-        id:
+        label:
+          type: string
+          description: Libellé canonique — sert d'identifiant partout
+        description:
+          type: string
+        famille:
+          type: string
+          enum: [ouverture, attention_aux_autres, continuite, affirmation]
+
+    Question:
+      type: object
+      description: >
+        Une situation concrète à trancher. `optionA` protège `valeurA`,
+        `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un
+        contexte donné ; une bascule reprend la même tension en ne faisant
+        bouger qu'une seule dimension d'un palier à l'autre.
+      required: [type, dilemmeId, valeurA, valeurB, situation, optionA, optionB, estVariante]
+      properties:
+        type:
+          type: string
+          enum: [duel, bascule]
+        dilemmeId:
           type: number
         valeurA:
           type: string
         valeurB:
           type: string
-        texte:
+        situation:
+          type: string
+        optionA:
+          type: string
+        optionB:
           type: string
         contexte:
           type: ["string", "null"]
-        familles:
-          type: array
-          items:
-            type: string
+          description: "Duel : amis, ecole, maison, en_ligne, equipe, public"
+        estVariante:
+          type: boolean
+          description: Vrai si cette tension a déjà été vue sous une autre forme
+        serieId:
+          type: ["string", "null"]
+        palier:
+          type: ["number", "null"]
+        dimension:
+          type: ["string", "null"]
+          description: >
+            Bascule : la seule dimension qui bouge — ampleur_impact,
+            proximite_sociale, certitude, cout_personnel, urgence,
+            nombre_personnes, reversibilite
+        reglage:
+          type: ["string", "null"]
+          description: "Bascule : le cran atteint à ce palier"
+        amorce:
+          type: ["string", "null"]
+          description: "Bascule : le décor, identique à tous les paliers de la série"
 
     # ─── Session ───────────────────────────────────────────────────────────────
 
@@ -398,7 +439,7 @@ components:
           type: string
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
         creeLe:
           type: string
           format: date-time
@@ -411,7 +452,7 @@ components:
       properties:
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
           default: accueil
 
     SessionUpdate:
@@ -419,7 +460,7 @@ components:
       properties:
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
 
     # ─── Cartes session ────────────────────────────────────────────────────────
 
@@ -524,6 +565,16 @@ components:
         certitude:
           type: ["number", "null"]
           description: 1 à 5, absent si choix=passer
+        serieId:
+          type: ["string", "null"]
+          description: Série de bascule, si la réponse en fait partie
+        palier:
+          type: ["number", "null"]
+        dimension:
+          type: ["string", "null"]
+        valeurProtegee:
+          type: ["string", "null"]
+          description: Valeur que la personne dit avoir voulu protéger (jamais déduite)
         version:
           type: number
           description: Numéro de version (incrémenter à chaque correction)
@@ -555,6 +606,14 @@ components:
           type: ["number", "null"]
         certitude:
           type: ["number", "null"]
+        serieId:
+          type: ["string", "null"]
+        palier:
+          type: ["number", "null"]
+        dimension:
+          type: ["string", "null"]
+        valeurProtegee:
+          type: ["string", "null"]
 
     ReponseCollisionUpdate:
       type: object
@@ -570,12 +629,30 @@ components:
           type: ["number", "null"]
         certitude:
           type: ["number", "null"]
+        valeurProtegee:
+          type: ["string", "null"]
 
     # ─── Constellation ─────────────────────────────────────────────────────────
 
     TendanceValeur:
       type: object
-      required: [valeur, scoreNet, totalCollisions, victoiresA, victoiresB, incertitudes, abandonnes, difficulteMovenne, certitudeMoyenne, territoireInexplore]
+      required:
+        [
+          valeur,
+          scoreNet,
+          totalCollisions,
+          foisPrivilegiee,
+          foisCedee,
+          incertitudes,
+          abandonnes,
+          difficulteMoyenne,
+          certitudeMoyenne,
+          territoireInexplore,
+          estProtegee,
+          domine,
+          cedeDevant,
+          contextesFavorables,
+        ]
       properties:
         valeur:
           type: string
@@ -584,10 +661,12 @@ components:
           description: Score net (victoires - défaites) / total significatifs
         totalCollisions:
           type: number
-        victoiresA:
+        foisPrivilegiee:
           type: number
-        victoiresB:
+          description: Fois où cette valeur est passée devant l'autre
+        foisCedee:
           type: number
+          description: Fois où cette valeur a cédé la place
         incertitudes:
           type: number
           description: ca_depend + je_ne_sais_pas
@@ -601,10 +680,31 @@ components:
         territoireInexplore:
           type: boolean
           description: Vrai si aucune collision résolue pour cette valeur
+        estProtegee:
+          type: boolean
+          description: >
+            Vrai si aucun compromis n'a encore été observé — la valeur a été
+            privilégiée à chaque fois qu'elle a été mise à l'épreuve. Ce n'est
+            pas un classement : c'est l'absence d'exception connue à ce jour.
+        domine:
+          type: array
+          items:
+            type: string
+          description: Valeurs devant lesquelles celle-ci est passée
+        cedeDevant:
+          type: array
+          items:
+            type: string
+          description: Valeurs devant lesquelles celle-ci a cédé
+        contextesFavorables:
+          type: array
+          items:
+            type: string
+          description: Contextes où cette valeur est passée devant
 
     TensionObservee:
       type: object
-      required: [valeurA, valeurB, totalCollisions, incertitudes, estForte]
+      required: [valeurA, valeurB, totalCollisions, incertitudes, estForte, estStable]
       properties:
         valeurA:
           type: string
@@ -616,6 +716,37 @@ components:
           type: number
         estForte:
           type: boolean
+          description: La personne a rarement tranché cette tension
+        estStable:
+          type: ["boolean", "null"]
+          description: >
+            Null si la tension n'a été rencontrée qu'une fois. Sinon, vrai si la
+            même tension a reçu la même réponse sous ses différentes formes.
+
+    PointDeBascule:
+      type: object
+      required: [serieId, valeurA, valeurB, dimension, choixInitial, paliers, reglageBascule]
+      properties:
+        serieId:
+          type: string
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        dimension:
+          type: string
+        choixInitial:
+          type: string
+          enum: [A, B]
+          description: Réponse au premier palier
+        paliers:
+          type: number
+          description: Nombre de paliers joués dans la série
+        reglageBascule:
+          type: ["string", "null"]
+          description: >
+            Le cran où la réponse a changé. Null si elle n'a pas changé sur
+            l'étendue jouée — le point de bascule est alors hors de portée du jeu.
 
     ObservationConstellation:
       type: object
@@ -628,7 +759,17 @@ components:
           description: Formulation prudente (ex. "Dans les situations explorées jusqu'ici…")
         type:
           type: string
-          enum: [tendance, tension, territoire_inexplore, stabilite, couverture]
+          enum:
+            [
+              tendance,
+              tension,
+              territoire_inexplore,
+              stabilite,
+              couverture,
+              point_de_bascule,
+              valeur_protegee,
+              contexte,
+            ]
         valeursConcernees:
           type: array
           items:
@@ -641,7 +782,18 @@ components:
 
     Constellation:
       type: object
-      required: [sessionId, version, tendances, tensions, observations, couverture, stabilite, versionCalcul]
+      required:
+        [
+          sessionId,
+          version,
+          tendances,
+          tensions,
+          bascules,
+          observations,
+          couverture,
+          stabilite,
+          versionCalcul,
+        ]
       properties:
         sessionId:
           type: string
@@ -655,6 +807,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TensionObservee"
+        bascules:
+          type: array
+          items:
+            $ref: "#/components/schemas/PointDeBascule"
         observations:
           type: array
           items:
@@ -664,7 +820,9 @@ components:
           description: Proportion de collisions possibles explorées (0 à 1)
         stabilite:
           type: number
-          description: Stabilité globale des choix (0 à 1, basée sur la certitude moyenne)
+          description: >
+            Part des tensions revues sous une autre forme qui ont reçu la même
+            réponse (0 à 1). Vaut 1 tant qu'aucune tension n'a été revue.
         versionCalcul:
           type: number
           description: Version du moteur de calcul utilisé
@@ -673,31 +831,47 @@ components:
 
     Progres:
       type: object
-      required: [sessionId, etapeCourante, nombreCartes, nombreValeurs, nombreCollisions, nombreReponses, prochaineDilemme]
+      required:
+        [
+          sessionId,
+          etapeCourante,
+          phase,
+          nombreCartes,
+          nombreValeurs,
+          duelsPlanifies,
+          duelsRepondus,
+          seriesPlanifiees,
+          seriesTerminees,
+          nombreReponses,
+          prochaineQuestion,
+        ]
       properties:
         sessionId:
           type: string
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, constellation]
+          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
+        phase:
+          type: string
+          enum: [duels, bascules, termine]
+          description: Où en est la partie, calculé depuis les réponses
         nombreCartes:
           type: number
         nombreValeurs:
           type: number
-        nombreCollisions:
+        duelsPlanifies:
           type: number
-          description: Nombre de collisions possibles (combinaisons C(n,2) des valeurs)
+          description: Nombre de duels prévus pour cette partie
+        duelsRepondus:
+          type: number
+        seriesPlanifiees:
+          type: number
+        seriesTerminees:
+          type: number
         nombreReponses:
           type: number
-          description: Nombre de collisions auxquelles une réponse a été donnée
-        prochaineDilemme:
-          type: ["object", "null"]
-          properties:
-            valeurA:
-              type: string
-            valeurB:
-              type: string
-            dilemmeId:
-              type: ["number", "null"]
-            texte:
-              type: ["string", "null"]
+          description: Toutes réponses confondues, duels et bascules
+        prochaineQuestion:
+          oneOf:
+            - $ref: "#/components/schemas/Question"
+            - type: "null"

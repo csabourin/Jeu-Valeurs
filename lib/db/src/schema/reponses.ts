@@ -35,6 +35,7 @@ export type FacteurDepend = (typeof facteursPossibles)[number];
 export const reponsesCollisionTable = pgTable("reponses_collision", {
   id: serial("id").primaryKey(),
   sessionId: text("session_id").notNull(),
+  /** Identifiant du duel ou du palier de bascule dans `@workspace/contenu`. */
   dilemmeId: integer("dilemme_id"),
   valeurA: text("valeur_a").notNull(),
   valeurB: text("valeur_b").notNull(),
@@ -43,6 +44,14 @@ export const reponsesCollisionTable = pgTable("reponses_collision", {
   facteurDependLibre: text("facteur_depend_libre"),
   difficulte: integer("difficulte"),
   certitude: integer("certitude"),
+  /** Série de bascule, si cette réponse en fait partie. */
+  serieId: text("serie_id"),
+  /** Rang du palier dans la série (1, 2, 3). */
+  palier: integer("palier"),
+  /** La seule dimension qui bouge dans la série. */
+  dimension: text("dimension"),
+  /** Valeur que la personne dit avoir voulu protéger, quand on le lui demande. */
+  valeurProtegee: text("valeur_protegee"),
   version: integer("version").notNull().default(1),
   creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
   miseAJourLe: timestamp("mise_a_jour_le", { withTimezone: true })

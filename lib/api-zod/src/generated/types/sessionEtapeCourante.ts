@@ -14,5 +14,6 @@ export const SessionEtapeCourante = {
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
   collisions: 'collisions',
+  bascules: 'bascules',
   constellation: 'constellation',
 } as const;

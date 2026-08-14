@@ -17,4 +17,6 @@ export interface ReponseCollisionUpdate {
   difficulte?: number | null;
   /** @nullable */
   certitude?: number | null;
+  /** @nullable */
+  valeurProtegee?: string | null;
 }

@@ -1,6 +1,10 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { sessionsTable } from "@workspace/db";
+import {
+  sessionsTable,
+  cartesSessionTable,
+  reponsesCollisionTable,
+} from "@workspace/db";
 import {
   CreateSessionBody,
   GetSessionParams,
@@ -96,6 +100,14 @@ router.patch("/sessions/:sessionId", async (req, res): Promise<void> => {
   });
 });
 
+/**
+ * Efface tout ce que la session a produit, pas seulement sa ligne.
+ *
+ * Les cartes et les réponses ne portent qu'un `session_id` — sans clé
+ * étrangère, rien ne les emporte automatiquement. L'interface promet une
+ * suppression complète : elle doit en être une, et en un seul aller-retour
+ * transactionnel pour ne jamais laisser de moitié effacée.
+ */
 router.delete("/sessions/:sessionId", async (req, res): Promise<void> => {
   const params = DeleteSessionParams.safeParse(req.params);
   if (!params.success) {
@@ -103,12 +115,23 @@ router.delete("/sessions/:sessionId", async (req, res): Promise<void> => {
     return;
   }
 
-  const [session] = await db
-    .delete(sessionsTable)
-    .where(eq(sessionsTable.id, params.data.sessionId))
-    .returning();
+  const { sessionId } = params.data;
 
-  if (!session) {
+  const supprimee = await db.transaction(async (tx) => {
+    await tx
+      .delete(reponsesCollisionTable)
+      .where(eq(reponsesCollisionTable.sessionId, sessionId));
+    await tx
+      .delete(cartesSessionTable)
+      .where(eq(cartesSessionTable.sessionId, sessionId));
+    const [session] = await tx
+      .delete(sessionsTable)
+      .where(eq(sessionsTable.id, sessionId))
+      .returning();
+    return session;
+  });
+
+  if (!supprimee) {
     res.status(404).json({ error: "Session introuvable" });
     return;
   }

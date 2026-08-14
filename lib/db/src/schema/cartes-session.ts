@@ -8,7 +8,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
-import type { Famille } from "./catalogue";
+import type { Famille } from "@workspace/contenu";
 
 export const cartesSessionTable = pgTable("cartes_session", {
   id: serial("id").primaryKey(),

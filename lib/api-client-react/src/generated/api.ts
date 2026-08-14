@@ -25,7 +25,6 @@ import type {
   CarteSessionInput,
   CarteSessionUpdate,
   Constellation,
-  Dilemme,
   HealthStatus,
   ListCartessCatalogueParams,
   Progres,
@@ -34,7 +33,8 @@ import type {
   ReponseCollisionUpdate,
   Session,
   SessionInput,
-  SessionUpdate
+  SessionUpdate,
+  ValeurCatalogue
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -225,20 +225,20 @@ export function useListCartessCatalogue<TData = Awaited<ReturnType<typeof listCa
 
 
 
-export const getListDilemmesUrl = () => {
+export const getListValeursCatalogueUrl = () => {
 
 
 
 
-  return `/api/catalogue/dilemmes`
+  return `/api/catalogue/valeurs`
 }
 
 /**
- * @summary Liste tous les dilemmes du catalogue
+ * @summary Liste les valeurs de référence et leur description
  */
-export const listDilemmes = async ( options?: Parameters<typeof customFetch>[1]): Promise<Dilemme[]> => {
+export const listValeursCatalogue = async ( options?: Parameters<typeof customFetch>[1]): Promise<ValeurCatalogue[]> => {
 
-  return customFetch<Dilemme[]>(getListDilemmesUrl(),
+  return customFetch<ValeurCatalogue[]>(getListValeursCatalogueUrl(),
   {
     ...options,
     method: 'GET'
@@ -251,45 +251,45 @@ export const listDilemmes = async ( options?: Parameters<typeof customFetch>[1])
 
 
 
-export const getListDilemmesQueryKey = () => {
+export const getListValeursCatalogueQueryKey = () => {
     return [
-    `/api/catalogue/dilemmes`
+    `/api/catalogue/valeurs`
     ] as const;
     }
 
 
-export const getListDilemmesQueryOptions = <TData = Awaited<ReturnType<typeof listDilemmes>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDilemmes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListValeursCatalogueQueryOptions = <TData = Awaited<ReturnType<typeof listValeursCatalogue>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listValeursCatalogue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListDilemmesQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListValeursCatalogueQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDilemmes>>> = ({ signal }) => listDilemmes({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listValeursCatalogue>>> = ({ signal }) => listValeursCatalogue({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDilemmes>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listValeursCatalogue>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ListDilemmesQueryResult = NonNullable<Awaited<ReturnType<typeof listDilemmes>>>
-export type ListDilemmesQueryError = ErrorType<unknown>
+export type ListValeursCatalogueQueryResult = NonNullable<Awaited<ReturnType<typeof listValeursCatalogue>>>
+export type ListValeursCatalogueQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Liste tous les dilemmes du catalogue
+ * @summary Liste les valeurs de référence et leur description
  */
 
-export function useListDilemmes<TData = Awaited<ReturnType<typeof listDilemmes>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDilemmes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useListValeursCatalogue<TData = Awaited<ReturnType<typeof listValeursCatalogue>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listValeursCatalogue>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListDilemmesQueryOptions(options)
+  const queryOptions = getListValeursCatalogueQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
