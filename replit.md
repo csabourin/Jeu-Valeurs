@@ -25,6 +25,20 @@ s'autorise à écrire.
 - Required env: `DATABASE_URL` — chaîne de connexion PostgreSQL
 - Le build du frontend exige `PORT` et `BASE_PATH`
 
+### Après avoir tiré des changements
+
+```bash
+pnpm install            # lie les paquets du workspace
+pnpm --filter db push   # applique les changements de schéma
+```
+
+Puis **redémarrer le serveur de dev** : Vite garde en cache les résolutions
+ratées, donc un paquet ajouté pendant qu'il tourne reste introuvable
+(`Failed to resolve import "@workspace/contenu"`) même après l'install.
+
+`scripts/post-merge.sh` fait déjà ces deux commandes, mais il ne se déclenche
+que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
+
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
