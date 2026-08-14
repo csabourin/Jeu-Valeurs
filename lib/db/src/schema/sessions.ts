@@ -7,6 +7,7 @@ export const etapesSession = [
   "selection_cartes",
   "confirmation_valeurs",
   "collisions",
+  "bascules",
   "constellation",
 ] as const;
 

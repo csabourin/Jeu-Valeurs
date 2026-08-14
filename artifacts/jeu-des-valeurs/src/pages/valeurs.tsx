@@ -1,118 +1,123 @@
 import { useParams, useLocation } from "wouter";
 import { Shell } from "@/components/shell";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   useListCartesSession,
   getListCartesSessionQueryKey,
+  useListValeursCatalogue,
+  getListValeursCatalogueQueryKey,
   useUpdateCarteSession,
-  useUpdateSession
+  useUpdateSession,
+  type CarteSessionFamille,
 } from "@workspace/api-client-react";
-import { useState, useEffect, useRef } from "react";
-import { MoveRight, MoveLeft, X, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MoveRight, MoveLeft, Plus, Check, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+
+/** Il faut au moins deux valeurs distinctes pour qu'un duel existe. */
+const MINIMUM_VALEURS = 2;
+
+const etiquettes: Record<CarteSessionFamille, string> = {
+  lignes_rouges: "🛑 Ligne rouge",
+  horizons: "🌅 Horizon",
+  tresors: "💎 Trésor",
+};
 
 export default function Valeurs() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: sessionCartes, isLoading } = useListCartesSession(sessionId, {
+  const { data: mesCartes, isLoading } = useListCartesSession(sessionId, {
     query: {
       enabled: !!sessionId,
-      queryKey: getListCartesSessionQueryKey(sessionId)
-    }
+      queryKey: getListCartesSessionQueryKey(sessionId),
+    },
   });
 
-  const updateCarte = useUpdateCarteSession();
-  const updateSession = useUpdateSession();
+  const { data: catalogueValeurs } = useListValeursCatalogue({
+    query: { queryKey: getListValeursCatalogueQueryKey() },
+  });
 
-  const [localValues, setLocalValues] = useState<Record<number, string[]>>({});
-  const [newValues, setNewValues] = useState<Record<number, string>>({});
+  const majCarte = useUpdateCarteSession();
+  const majSession = useUpdateSession();
 
+  const [confirmees, setConfirmees] = useState<Record<number, string[]>>({});
+  const [ouvert, setOuvert] = useState<number | null>(null);
+  const [saisie, setSaisie] = useState<Record<number, string>>({});
+
+  // Rien n'est coché d'avance : une suggestion du jeu n'est pas une réponse.
   useEffect(() => {
-    if (sessionCartes) {
-      const initial: Record<number, string[]> = {};
-      sessionCartes.forEach(c => {
-        // Initially, if valeursConfirmées is empty, prepopulate with valeursSuggérées
-        initial[c.id] = c.valeursConfirmées?.length ? c.valeursConfirmées : (c.valeursSuggérées || []);
-      });
-      setLocalValues(initial);
-    }
-  }, [sessionCartes]);
-
-  const handleToggleValue = (carteId: number, value: string) => {
-    setLocalValues(prev => {
-      const current = prev[carteId] || [];
-      const updated = current.includes(value)
-        ? current.filter(v => v !== value)
-        : [...current, value];
-      
-      // Fire mutation
-      updateCarte.mutate({
-        sessionId,
-        carteSessionId: carteId,
-        data: { valeursConfirmées: updated }
-      }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: getListCartesSessionQueryKey(sessionId) })
-      });
-      
-      return { ...prev, [carteId]: updated };
-    });
-  };
-
-  const handleAddValue = (carteId: number) => {
-    const val = newValues[carteId]?.trim();
-    if (!val) return;
-
-    setLocalValues(prev => {
-      const current = prev[carteId] || [];
-      if (current.includes(val)) return prev;
-      
-      const updated = [...current, val];
-      
-      updateCarte.mutate({
-        sessionId,
-        carteSessionId: carteId,
-        data: { valeursConfirmées: updated }
-      }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: getListCartesSessionQueryKey(sessionId) })
-      });
-
-      return { ...prev, [carteId]: updated };
-    });
-    setNewValues(prev => ({ ...prev, [carteId]: "" }));
-  };
-
-  const handleContinue = () => {
-    updateSession.mutate({
-      sessionId,
-      data: { etapeCourante: "collisions" }
-    }, {
-      onSuccess: () => {
-        setLocation(`/session/${sessionId}/collisions`);
+    if (!mesCartes) return;
+    setConfirmees((prev) => {
+      const suivant = { ...prev };
+      for (const c of mesCartes) {
+        if (suivant[c.id] === undefined) suivant[c.id] = c.valeursConfirmées ?? [];
       }
+      return suivant;
     });
+  }, [mesCartes]);
+
+  const enregistrer = (carteId: number, valeurs: string[]) => {
+    setConfirmees((prev) => ({ ...prev, [carteId]: valeurs }));
+    majCarte.mutate(
+      { sessionId, carteSessionId: carteId, data: { valeursConfirmées: valeurs } },
+      {
+        onSuccess: () =>
+          queryClient.invalidateQueries({
+            queryKey: getListCartesSessionQueryKey(sessionId),
+          }),
+      },
+    );
+  };
+
+  const basculer = (carteId: number, valeur: string) => {
+    const actuelles = confirmees[carteId] ?? [];
+    enregistrer(
+      carteId,
+      actuelles.includes(valeur)
+        ? actuelles.filter((v) => v !== valeur)
+        : [...actuelles, valeur],
+    );
+  };
+
+  const ajouterLibre = (carteId: number) => {
+    const texte = saisie[carteId]?.trim();
+    if (!texte) return;
+    const actuelles = confirmees[carteId] ?? [];
+    if (!actuelles.includes(texte)) enregistrer(carteId, [...actuelles, texte]);
+    setSaisie((prev) => ({ ...prev, [carteId]: "" }));
+  };
+
+  const toutesLesValeurs = Array.from(
+    new Set(Object.values(confirmees).flat()),
+  );
+
+  const continuer = () => {
+    majSession.mutate(
+      { sessionId, data: { etapeCourante: "collisions" } },
+      { onSuccess: () => setLocation(`/session/${sessionId}/partie`) },
+    );
   };
 
   if (isLoading) {
     return (
-      <Shell sessionId={sessionId}>
+      <Shell sessionId={sessionId} etape="valeurs">
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse text-primary">Chargement...</div>
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </Shell>
     );
   }
 
-  if (!sessionCartes || sessionCartes.length === 0) {
+  if (!mesCartes || mesCartes.length === 0) {
     return (
-      <Shell sessionId={sessionId}>
-        <div className="text-center py-20">
-          <h2 className="text-2xl font-serif mb-4">Aucune carte sélectionnée</h2>
+      <Shell sessionId={sessionId} etape="valeurs">
+        <div className="text-center py-20 space-y-4">
+          <h1 className="text-2xl font-serif">Il n'y a pas encore de cartes</h1>
           <Button onClick={() => setLocation(`/session/${sessionId}/cartes`)}>
-            Retourner aux cartes
+            Aller prendre des cartes
           </Button>
         </div>
       </Shell>
@@ -120,96 +125,187 @@ export default function Valeurs() {
   }
 
   return (
-    <Shell sessionId={sessionId}>
+    <Shell sessionId={sessionId} etape="valeurs">
       <div className="space-y-8 animate-in fade-in duration-500">
-        <header className="space-y-4">
-          <Button variant="ghost" size="sm" onClick={() => setLocation(`/session/${sessionId}/cartes`)} className="-ml-4 text-muted-foreground">
-            <MoveLeft className="w-4 h-4 mr-2" /> Cartes
+        <header className="space-y-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation(`/session/${sessionId}/cartes`)}
+            className="-ml-4 text-muted-foreground"
+          >
+            <MoveLeft className="w-4 h-4 mr-2" /> Mes cartes
           </Button>
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-            Affinez vos mots
+          <h1 className="text-3xl md:text-4xl font-serif font-bold">
+            Pourquoi cette carte ?
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Pour chaque carte retenue, confirmez les valeurs sous-jacentes. 
-            Gardez celles qui vous parlent, enlevez les autres, ou ajoutez vos propres mots.
+            Pour chaque carte, le jeu propose des raisons possibles. Garde
+            seulement celles qui sont vraies pour toi — et ajoute les tiennes si
+            aucune ne l'est. Rien n'est coché d'avance : ce n'est pas au jeu de
+            décider ce que tu voulais dire.
           </p>
         </header>
 
-        <div className="space-y-6">
-          {sessionCartes.map(carte => {
-            const confirmed = localValues[carte.id] || [];
-            // All suggestions + any custom confirmed that wasn't a suggestion
-            const allOptions = Array.from(new Set([...(carte.valeursSuggérées || []), ...confirmed]));
+        <div className="space-y-4">
+          {mesCartes.map((carte) => {
+            const cochees = confirmees[carte.id] ?? [];
+            const proposees = carte.valeursSuggérées ?? [];
+            const autres = (catalogueValeurs ?? []).filter(
+              (v) => !proposees.includes(v.label),
+            );
+            const horsCatalogue = cochees.filter(
+              (v) =>
+                !proposees.includes(v) &&
+                !(catalogueValeurs ?? []).some((c) => c.label === v),
+            );
 
             return (
-              <Card key={carte.id} className="border-border/60">
-                <CardHeader className="bg-muted/30 pb-4 border-b border-border/40">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      {carte.famille === 'lignes_rouges' ? '🛑 Ligne rouge' : 
-                       carte.famille === 'horizons' ? '🌅 Horizon' : '💎 Trésor'}
-                    </span>
-                  </div>
-                  <CardTitle className="text-xl">{carte.label}</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-6">
+              <section
+                key={carte.id}
+                className="border border-border/60 rounded-xl overflow-hidden bg-card"
+              >
+                <div className="bg-muted/30 px-5 py-4 border-b border-border/40">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {etiquettes[carte.famille]}
+                  </p>
+                  <h2 className="text-lg font-medium mt-1">{carte.label}</h2>
+                </div>
+
+                <div className="p-5 space-y-4">
+                  {proposees.length > 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Est-ce que c'est pour une de ces raisons ?
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      C'est ta carte, alors c'est toi qui dis pourquoi elle compte.
+                    </p>
+                  )}
+
                   <div className="flex flex-wrap gap-2">
-                    {allOptions.map(val => {
-                      const isSelected = confirmed.includes(val);
-                      return (
-                        <button
-                          key={val}
-                          onClick={() => handleToggleValue(carte.id, val)}
-                          className={`
-                            inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-all
-                            border
-                            ${isSelected 
-                              ? 'bg-primary text-primary-foreground border-primary' 
-                              : 'bg-background text-foreground border-border hover:border-primary/50'
-                            }
-                          `}
-                        >
-                          {val}
-                          {isSelected && <X className="w-3 h-3 ml-1.5 opacity-70" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 max-w-sm">
-                    <Input 
-                      placeholder="Ajouter une valeur (ex: Créativité)..." 
-                      value={newValues[carte.id] || ""}
-                      onChange={e => setNewValues(prev => ({ ...prev, [carte.id]: e.target.value }))}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddValue(carte.id);
-                        }
-                      }}
-                      className="bg-muted/30 border-border/50"
-                    />
-                    <Button 
-                      variant="secondary" 
-                      size="icon" 
-                      onClick={() => handleAddValue(carte.id)}
-                      disabled={!newValues[carte.id]?.trim()}
+                    {[...proposees, ...horsCatalogue].map((valeur) => (
+                      <ChipValeur
+                        key={valeur}
+                        valeur={valeur}
+                        actif={cochees.includes(valeur)}
+                        onClick={() => basculer(carte.id, valeur)}
+                      />
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOuvert(ouvert === carte.id ? null : carte.id)
+                      }
+                      aria-expanded={ouvert === carte.id}
+                      className="inline-flex items-center px-3 py-1.5 rounded-full text-sm border border-dashed border-border text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
                     >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                      <Plus className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />
+                      Autre chose
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
+
+                  {ouvert === carte.id && (
+                    <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={saisie[carte.id] ?? ""}
+                          onChange={(e) =>
+                            setSaisie((prev) => ({
+                              ...prev,
+                              [carte.id]: e.target.value,
+                            }))
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              ajouterLibre(carte.id);
+                            }
+                          }}
+                          aria-label="Écrire une raison dans mes mots"
+                          placeholder="Dans tes mots…"
+                          className="bg-background"
+                        />
+                        <Button
+                          variant="secondary"
+                          onClick={() => ajouterLibre(carte.id)}
+                          disabled={!saisie[carte.id]?.trim()}
+                        >
+                          Ajouter
+                        </Button>
+                      </div>
+
+                      {autres.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                            Ou choisis dans la liste
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {autres.map((v) => (
+                              <ChipValeur
+                                key={v.label}
+                                valeur={v.label}
+                                titre={v.description}
+                                actif={cochees.includes(v.label)}
+                                onClick={() => basculer(carte.id, v.label)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </section>
             );
           })}
         </div>
 
-        <div className="flex justify-end pt-8">
-          <Button size="lg" onClick={handleContinue}>
-            Plonger dans les tensions <MoveRight className="w-4 h-4 ml-2" />
+        <div className="sticky bottom-0 -mx-4 px-4 py-3 bg-background/90 backdrop-blur-md border-t border-border/40 flex items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            {toutesLesValeurs.length < MINIMUM_VALEURS
+              ? "Il faut au moins deux raisons différentes pour que le jeu puisse les opposer."
+              : `${toutesLesValeurs.length} raisons retenues`}
+          </p>
+          <Button
+            size="lg"
+            disabled={toutesLesValeurs.length < MINIMUM_VALEURS || majSession.isPending}
+            onClick={continuer}
+          >
+            Aux duels <MoveRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </div>
     </Shell>
+  );
+}
+
+function ChipValeur({
+  valeur,
+  actif,
+  titre,
+  onClick,
+}: {
+  valeur: string;
+  actif: boolean;
+  titre?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={actif}
+      title={titre}
+      onClick={onClick}
+      className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+        actif
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-background text-foreground border-border hover:border-primary/50"
+      }`}
+    >
+      {actif && <Check className="w-3.5 h-3.5 mr-1.5" aria-hidden="true" />}
+      {valeur}
+    </button>
   );
 }

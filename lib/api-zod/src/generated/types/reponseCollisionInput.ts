@@ -21,4 +21,12 @@ export interface ReponseCollisionInput {
   difficulte?: number | null;
   /** @nullable */
   certitude?: number | null;
+  /** @nullable */
+  serieId?: string | null;
+  /** @nullable */
+  palier?: number | null;
+  /** @nullable */
+  dimension?: string | null;
+  /** @nullable */
+  valeurProtegee?: string | null;
 }

@@ -35,17 +35,14 @@ export const ListCartessCatalogueResponse = zod.array(ListCartessCatalogueRespon
 
 
 /**
- * @summary Liste tous les dilemmes du catalogue
+ * @summary Liste les valeurs de référence et leur description
  */
-export const ListDilemmesResponseItem = zod.object({
-  "id": zod.number(),
-  "valeurA": zod.string(),
-  "valeurB": zod.string(),
-  "texte": zod.string(),
-  "contexte": zod.string().nullish(),
-  "familles": zod.array(zod.string()).optional()
+export const ListValeursCatalogueResponseItem = zod.object({
+  "label": zod.string().describe('Libellé canonique — sert d\'identifiant partout'),
+  "description": zod.string(),
+  "famille": zod.enum(['ouverture', 'attention_aux_autres', 'continuite', 'affirmation'])
 })
-export const ListDilemmesResponse = zod.array(ListDilemmesResponseItem)
+export const ListValeursCatalogueResponse = zod.array(ListValeursCatalogueResponseItem)
 
 
 /**
@@ -54,12 +51,12 @@ export const ListDilemmesResponse = zod.array(ListDilemmesResponseItem)
 export const createSessionBodyEtapeCouranteDefault = `accueil`;
 
 export const CreateSessionBody = zod.object({
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'constellation']).default(createSessionBodyEtapeCouranteDefault)
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']).default(createSessionBodyEtapeCouranteDefault)
 })
 
 export const CreateSessionResponse = zod.object({
   "id": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date()
 })
@@ -74,7 +71,7 @@ export const GetSessionParams = zod.object({
 
 export const GetSessionResponse = zod.object({
   "id": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date()
 })
@@ -88,12 +85,12 @@ export const UpdateSessionParams = zod.object({
 })
 
 export const UpdateSessionBody = zod.object({
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'constellation']).optional()
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']).optional()
 })
 
 export const UpdateSessionResponse = zod.object({
   "id": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date()
 })
@@ -219,6 +216,10 @@ export const ListReponsesResponseItem = zod.object({
   "facteurDependLibre": zod.string().nullish().describe('Réponse libre si facteurDepend = autre'),
   "difficulte": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "certitude": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
+  "serieId": zod.string().nullish().describe('Série de bascule, si la réponse en fait partie'),
+  "palier": zod.number().nullish(),
+  "dimension": zod.string().nullish(),
+  "valeurProtegee": zod.string().nullish().describe('Valeur que la personne dit avoir voulu protéger (jamais déduite)'),
   "version": zod.number().describe('Numéro de version (incrémenter à chaque correction)'),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date().optional()
@@ -241,7 +242,11 @@ export const CreateReponseBody = zod.object({
   "facteurDepend": zod.string().nullish(),
   "facteurDependLibre": zod.string().nullish(),
   "difficulte": zod.number().nullish(),
-  "certitude": zod.number().nullish()
+  "certitude": zod.number().nullish(),
+  "serieId": zod.string().nullish(),
+  "palier": zod.number().nullish(),
+  "dimension": zod.string().nullish(),
+  "valeurProtegee": zod.string().nullish()
 })
 
 export const CreateReponseResponse = zod.object({
@@ -255,6 +260,10 @@ export const CreateReponseResponse = zod.object({
   "facteurDependLibre": zod.string().nullish().describe('Réponse libre si facteurDepend = autre'),
   "difficulte": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "certitude": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
+  "serieId": zod.string().nullish().describe('Série de bascule, si la réponse en fait partie'),
+  "palier": zod.number().nullish(),
+  "dimension": zod.string().nullish(),
+  "valeurProtegee": zod.string().nullish().describe('Valeur que la personne dit avoir voulu protéger (jamais déduite)'),
   "version": zod.number().describe('Numéro de version (incrémenter à chaque correction)'),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date().optional()
@@ -274,7 +283,8 @@ export const UpdateReponseBody = zod.object({
   "facteurDepend": zod.string().nullish(),
   "facteurDependLibre": zod.string().nullish(),
   "difficulte": zod.number().nullish(),
-  "certitude": zod.number().nullish()
+  "certitude": zod.number().nullish(),
+  "valeurProtegee": zod.string().nullish()
 })
 
 export const UpdateReponseResponse = zod.object({
@@ -288,6 +298,10 @@ export const UpdateReponseResponse = zod.object({
   "facteurDependLibre": zod.string().nullish().describe('Réponse libre si facteurDepend = autre'),
   "difficulte": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
   "certitude": zod.number().nullish().describe('1 à 5, absent si choix=passer'),
+  "serieId": zod.string().nullish().describe('Série de bascule, si la réponse en fait partie'),
+  "palier": zod.number().nullish(),
+  "dimension": zod.string().nullish(),
+  "valeurProtegee": zod.string().nullish().describe('Valeur que la personne dit avoir voulu protéger (jamais déduite)'),
   "version": zod.number().describe('Numéro de version (incrémenter à chaque correction)'),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date().optional()
@@ -308,30 +322,44 @@ export const GetConstellationResponse = zod.object({
   "valeur": zod.string(),
   "scoreNet": zod.number().describe('Score net (victoires - défaites) \/ total significatifs'),
   "totalCollisions": zod.number(),
-  "victoiresA": zod.number(),
-  "victoiresB": zod.number(),
+  "foisPrivilegiee": zod.number().describe('Fois où cette valeur est passée devant l\'autre'),
+  "foisCedee": zod.number().describe('Fois où cette valeur a cédé la place'),
   "incertitudes": zod.number().describe('ca_depend + je_ne_sais_pas'),
   "abandonnes": zod.number().describe('passer'),
-  "difficulteMoyenne": zod.number().nullish(),
+  "difficulteMoyenne": zod.number().nullable(),
   "certitudeMoyenne": zod.number().nullable(),
-  "territoireInexplore": zod.boolean().describe('Vrai si aucune collision résolue pour cette valeur')
+  "territoireInexplore": zod.boolean().describe('Vrai si aucune collision résolue pour cette valeur'),
+  "estProtegee": zod.boolean().describe('Vrai si aucun compromis n\'a encore été observé — la valeur a été privilégiée à chaque fois qu\'elle a été mise à l\'épreuve. Ce n\'est pas un classement : c\'est l\'absence d\'exception connue à ce jour.\n'),
+  "domine": zod.array(zod.string()).describe('Valeurs devant lesquelles celle-ci est passée'),
+  "cedeDevant": zod.array(zod.string()).describe('Valeurs devant lesquelles celle-ci a cédé'),
+  "contextesFavorables": zod.array(zod.string()).describe('Contextes où cette valeur est passée devant')
 })),
   "tensions": zod.array(zod.object({
   "valeurA": zod.string(),
   "valeurB": zod.string(),
   "totalCollisions": zod.number(),
   "incertitudes": zod.number(),
-  "estForte": zod.boolean()
+  "estForte": zod.boolean().describe('La personne a rarement tranché cette tension'),
+  "estStable": zod.boolean().nullable().describe('Null si la tension n\'a été rencontrée qu\'une fois. Sinon, vrai si la même tension a reçu la même réponse sous ses différentes formes.\n')
+})),
+  "bascules": zod.array(zod.object({
+  "serieId": zod.string(),
+  "valeurA": zod.string(),
+  "valeurB": zod.string(),
+  "dimension": zod.string(),
+  "choixInitial": zod.enum(['A', 'B']).describe('Réponse au premier palier'),
+  "paliers": zod.number().describe('Nombre de paliers joués dans la série'),
+  "reglageBascule": zod.string().nullable().describe('Le cran où la réponse a changé. Null si elle n\'a pas changé sur l\'étendue jouée — le point de bascule est alors hors de portée du jeu.\n')
 })),
   "observations": zod.array(zod.object({
   "id": zod.string(),
   "texte": zod.string().describe('Formulation prudente (ex. \"Dans les situations explorées jusqu\'ici…\")'),
-  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture']),
+  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture', 'point_de_bascule', 'valeur_protegee', 'contexte']),
   "valeursConcernees": zod.array(zod.string()),
   "reponsesSources": zod.array(zod.number()).describe('IDs des réponses qui appuient cette observation')
 })),
   "couverture": zod.number().describe('Proportion de collisions possibles explorées (0 à 1)'),
-  "stabilite": zod.number().describe('Stabilité globale des choix (0 à 1, basée sur la certitude moyenne)'),
+  "stabilite": zod.number().describe('Part des tensions revues sous une autre forme qui ont reçu la même réponse (0 à 1). Vaut 1 tant qu\'aucune tension n\'a été revue.\n'),
   "versionCalcul": zod.number().describe('Version du moteur de calcul utilisé')
 })
 
@@ -345,17 +373,31 @@ export const GetProgresParams = zod.object({
 
 export const GetProgresResponse = zod.object({
   "sessionId": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
+  "phase": zod.enum(['duels', 'bascules', 'termine']).describe('Où en est la partie, calculé depuis les réponses'),
   "nombreCartes": zod.number(),
   "nombreValeurs": zod.number(),
-  "nombreCollisions": zod.number().describe('Nombre de collisions possibles (combinaisons C(n,2) des valeurs)'),
-  "nombreReponses": zod.number().describe('Nombre de collisions auxquelles une réponse a été donnée'),
-  "prochaineDilemme": zod.object({
-  "valeurA": zod.string().optional(),
-  "valeurB": zod.string().optional(),
-  "dilemmeId": zod.number().nullish(),
-  "texte": zod.string().nullish()
-}).nullable()
+  "duelsPlanifies": zod.number().describe('Nombre de duels prévus pour cette partie'),
+  "duelsRepondus": zod.number(),
+  "seriesPlanifiees": zod.number(),
+  "seriesTerminees": zod.number(),
+  "nombreReponses": zod.number().describe('Toutes réponses confondues, duels et bascules'),
+  "prochaineQuestion": zod.union([zod.object({
+  "type": zod.enum(['duel', 'bascule']),
+  "dilemmeId": zod.number(),
+  "valeurA": zod.string(),
+  "valeurB": zod.string(),
+  "situation": zod.string(),
+  "optionA": zod.string(),
+  "optionB": zod.string(),
+  "contexte": zod.string().nullish().describe('Duel : amis, ecole, maison, en_ligne, equipe, public'),
+  "estVariante": zod.boolean().describe('Vrai si cette tension a déjà été vue sous une autre forme'),
+  "serieId": zod.string().nullish(),
+  "palier": zod.number().nullish(),
+  "dimension": zod.string().nullish().describe('Bascule : la seule dimension qui bouge — ampleur_impact, proximite_sociale, certitude, cout_personnel, urgence, nombre_personnes, reversibilite\n'),
+  "reglage": zod.string().nullish().describe('Bascule : le cran atteint à ce palier'),
+  "amorce": zod.string().nullish().describe('Bascule : le décor, identique à tous les paliers de la série')
+}).describe('Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu\'une seule dimension d\'un palier à l\'autre.\n'),zod.null()])
 })
 
 

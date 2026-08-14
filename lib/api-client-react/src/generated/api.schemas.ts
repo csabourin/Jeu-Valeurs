@@ -28,14 +28,68 @@ export interface CarteCatalogue {
   estPersonnalisable?: boolean;
 }
 
-export interface Dilemme {
-  id: number;
+export type ValeurCatalogueFamille = typeof ValeurCatalogueFamille[keyof typeof ValeurCatalogueFamille];
+
+
+export const ValeurCatalogueFamille = {
+  ouverture: 'ouverture',
+  attention_aux_autres: 'attention_aux_autres',
+  continuite: 'continuite',
+  affirmation: 'affirmation',
+} as const;
+
+export interface ValeurCatalogue {
+  /** Libellé canonique — sert d'identifiant partout */
+  label: string;
+  description: string;
+  famille: ValeurCatalogueFamille;
+}
+
+export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
+
+
+export const QuestionType = {
+  duel: 'duel',
+  bascule: 'bascule',
+} as const;
+
+/**
+ * Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
+ */
+export interface Question {
+  type: QuestionType;
+  dilemmeId: number;
   valeurA: string;
   valeurB: string;
-  texte: string;
-  /** @nullable */
+  situation: string;
+  optionA: string;
+  optionB: string;
+  /**
+     * Duel : amis, ecole, maison, en_ligne, equipe, public
+     * @nullable
+     */
   contexte?: string | null;
-  familles?: string[];
+  /** Vrai si cette tension a déjà été vue sous une autre forme */
+  estVariante: boolean;
+  /** @nullable */
+  serieId?: string | null;
+  /** @nullable */
+  palier?: number | null;
+  /**
+     * Bascule : la seule dimension qui bouge — ampleur_impact, proximite_sociale, certitude, cout_personnel, urgence, nombre_personnes, reversibilite
+     * @nullable
+     */
+  dimension?: string | null;
+  /**
+     * Bascule : le cran atteint à ce palier
+     * @nullable
+     */
+  reglage?: string | null;
+  /**
+     * Bascule : le décor, identique à tous les paliers de la série
+     * @nullable
+     */
+  amorce?: string | null;
 }
 
 export type SessionEtapeCourante = typeof SessionEtapeCourante[keyof typeof SessionEtapeCourante];
@@ -46,6 +100,7 @@ export const SessionEtapeCourante = {
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
   collisions: 'collisions',
+  bascules: 'bascules',
   constellation: 'constellation',
 } as const;
 
@@ -64,6 +119,7 @@ export const SessionInputEtapeCourante = {
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
   collisions: 'collisions',
+  bascules: 'bascules',
   constellation: 'constellation',
 } as const;
 
@@ -79,6 +135,7 @@ export const SessionUpdateEtapeCourante = {
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
   collisions: 'collisions',
+  bascules: 'bascules',
   constellation: 'constellation',
 } as const;
 
@@ -177,6 +234,20 @@ export interface ReponseCollision {
      * @nullable
      */
   certitude?: number | null;
+  /**
+     * Série de bascule, si la réponse en fait partie
+     * @nullable
+     */
+  serieId?: string | null;
+  /** @nullable */
+  palier?: number | null;
+  /** @nullable */
+  dimension?: string | null;
+  /**
+     * Valeur que la personne dit avoir voulu protéger (jamais déduite)
+     * @nullable
+     */
+  valeurProtegee?: string | null;
   /** Numéro de version (incrémenter à chaque correction) */
   version: number;
   creeLe: string;
@@ -208,6 +279,14 @@ export interface ReponseCollisionInput {
   difficulte?: number | null;
   /** @nullable */
   certitude?: number | null;
+  /** @nullable */
+  serieId?: string | null;
+  /** @nullable */
+  palier?: number | null;
+  /** @nullable */
+  dimension?: string | null;
+  /** @nullable */
+  valeurProtegee?: string | null;
 }
 
 export type ReponseCollisionUpdateChoix = typeof ReponseCollisionUpdateChoix[keyof typeof ReponseCollisionUpdateChoix];
@@ -231,6 +310,8 @@ export interface ReponseCollisionUpdate {
   difficulte?: number | null;
   /** @nullable */
   certitude?: number | null;
+  /** @nullable */
+  valeurProtegee?: string | null;
 }
 
 export interface TendanceValeur {
@@ -238,18 +319,28 @@ export interface TendanceValeur {
   /** Score net (victoires - défaites) / total significatifs */
   scoreNet: number;
   totalCollisions: number;
-  victoiresA: number;
-  victoiresB: number;
+  /** Fois où cette valeur est passée devant l'autre */
+  foisPrivilegiee: number;
+  /** Fois où cette valeur a cédé la place */
+  foisCedee: number;
   /** ca_depend + je_ne_sais_pas */
   incertitudes: number;
   /** passer */
   abandonnes: number;
   /** @nullable */
-  difficulteMoyenne?: number | null;
+  difficulteMoyenne: number | null;
   /** @nullable */
   certitudeMoyenne: number | null;
   /** Vrai si aucune collision résolue pour cette valeur */
   territoireInexplore: boolean;
+  /** Vrai si aucun compromis n'a encore été observé — la valeur a été privilégiée à chaque fois qu'elle a été mise à l'épreuve. Ce n'est pas un classement : c'est l'absence d'exception connue à ce jour. */
+  estProtegee: boolean;
+  /** Valeurs devant lesquelles celle-ci est passée */
+  domine: string[];
+  /** Valeurs devant lesquelles celle-ci a cédé */
+  cedeDevant: string[];
+  /** Contextes où cette valeur est passée devant */
+  contextesFavorables: string[];
 }
 
 export interface TensionObservee {
@@ -257,7 +348,40 @@ export interface TensionObservee {
   valeurB: string;
   totalCollisions: number;
   incertitudes: number;
+  /** La personne a rarement tranché cette tension */
   estForte: boolean;
+  /**
+     * Null si la tension n'a été rencontrée qu'une fois. Sinon, vrai si la même tension a reçu la même réponse sous ses différentes formes.
+     * @nullable
+     */
+  estStable: boolean | null;
+}
+
+/**
+ * Réponse au premier palier
+ */
+export type PointDeBasculeChoixInitial = typeof PointDeBasculeChoixInitial[keyof typeof PointDeBasculeChoixInitial];
+
+
+export const PointDeBasculeChoixInitial = {
+  A: 'A',
+  B: 'B',
+} as const;
+
+export interface PointDeBascule {
+  serieId: string;
+  valeurA: string;
+  valeurB: string;
+  dimension: string;
+  /** Réponse au premier palier */
+  choixInitial: PointDeBasculeChoixInitial;
+  /** Nombre de paliers joués dans la série */
+  paliers: number;
+  /**
+     * Le cran où la réponse a changé. Null si elle n'a pas changé sur l'étendue jouée — le point de bascule est alors hors de portée du jeu.
+     * @nullable
+     */
+  reglageBascule: string | null;
 }
 
 export type ObservationConstellationType = typeof ObservationConstellationType[keyof typeof ObservationConstellationType];
@@ -269,6 +393,9 @@ export const ObservationConstellationType = {
   territoire_inexplore: 'territoire_inexplore',
   stabilite: 'stabilite',
   couverture: 'couverture',
+  point_de_bascule: 'point_de_bascule',
+  valeur_protegee: 'valeur_protegee',
+  contexte: 'contexte',
 } as const;
 
 export interface ObservationConstellation {
@@ -286,10 +413,11 @@ export interface Constellation {
   version: number;
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
+  bascules: PointDeBascule[];
   observations: ObservationConstellation[];
   /** Proportion de collisions possibles explorées (0 à 1) */
   couverture: number;
-  /** Stabilité globale des choix (0 à 1, basée sur la certitude moyenne) */
+  /** Part des tensions revues sous une autre forme qui ont reçu la même réponse (0 à 1). Vaut 1 tant qu'aucune tension n'a été revue. */
   stabilite: number;
   /** Version du moteur de calcul utilisé */
   versionCalcul: number;
@@ -303,32 +431,37 @@ export const ProgresEtapeCourante = {
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
   collisions: 'collisions',
+  bascules: 'bascules',
   constellation: 'constellation',
 } as const;
 
 /**
- * @nullable
+ * Où en est la partie, calculé depuis les réponses
  */
-export type ProgresProchaineDilemme = {
-  valeurA?: string;
-  valeurB?: string;
-  /** @nullable */
-  dilemmeId?: number | null;
-  /** @nullable */
-  texte?: string | null;
-} | null;
+export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
+
+
+export const ProgresPhase = {
+  duels: 'duels',
+  bascules: 'bascules',
+  termine: 'termine',
+} as const;
 
 export interface Progres {
   sessionId: string;
   etapeCourante: ProgresEtapeCourante;
+  /** Où en est la partie, calculé depuis les réponses */
+  phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
-  /** Nombre de collisions possibles (combinaisons C(n,2) des valeurs) */
-  nombreCollisions: number;
-  /** Nombre de collisions auxquelles une réponse a été donnée */
+  /** Nombre de duels prévus pour cette partie */
+  duelsPlanifies: number;
+  duelsRepondus: number;
+  seriesPlanifiees: number;
+  seriesTerminees: number;
+  /** Toutes réponses confondues, duels et bascules */
   nombreReponses: number;
-  /** @nullable */
-  prochaineDilemme: ProgresProchaineDilemme;
+  prochaineQuestion: Question | null;
 }
 
 export type ListCartessCatalogueParams = {

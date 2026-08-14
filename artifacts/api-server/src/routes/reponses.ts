@@ -1,6 +1,10 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { reponsesCollisionTable } from "@workspace/db";
+import {
+  reponsesCollisionTable,
+  facteursPossibles,
+  type FacteurDepend,
+} from "@workspace/db";
 import {
   ListReponsesParams,
   CreateReponseParams,
@@ -11,6 +15,18 @@ import {
 import { eq, and } from "drizzle-orm";
 
 const router: IRouter = Router();
+
+/**
+ * La colonne `facteur_depend` est une liste fermée ; l'API accepte du texte
+ * libre. Un facteur hors liste est rangé sous « autre » plutôt que rejeté : le
+ * détail reste lisible dans `facteurDependLibre`.
+ */
+function versFacteur(valeur: string | null | undefined): FacteurDepend | null {
+  if (!valeur) return null;
+  return (facteursPossibles as readonly string[]).includes(valeur)
+    ? (valeur as FacteurDepend)
+    : "autre";
+}
 
 function mapReponse(r: typeof reponsesCollisionTable.$inferSelect) {
   return {
@@ -24,6 +40,10 @@ function mapReponse(r: typeof reponsesCollisionTable.$inferSelect) {
     facteurDependLibre: r.facteurDependLibre ?? null,
     difficulte: r.difficulte ?? null,
     certitude: r.certitude ?? null,
+    serieId: r.serieId ?? null,
+    palier: r.palier ?? null,
+    dimension: r.dimension ?? null,
+    valeurProtegee: r.valeurProtegee ?? null,
     version: r.version,
     creeLe: r.creeLe.toISOString(),
     miseAJourLe: r.miseAJourLe.toISOString(),
@@ -73,7 +93,7 @@ router.post(
         choix: parsed.data.choix,
         facteurDepend:
           parsed.data.choix === "ca_depend"
-            ? (parsed.data.facteurDepend ?? null)
+            ? versFacteur(parsed.data.facteurDepend)
             : null,
         facteurDependLibre:
           parsed.data.choix === "ca_depend"
@@ -81,6 +101,11 @@ router.post(
             : null,
         difficulte: isPasser ? null : (parsed.data.difficulte ?? null),
         certitude: isPasser ? null : (parsed.data.certitude ?? null),
+        serieId: parsed.data.serieId ?? null,
+        palier: parsed.data.palier ?? null,
+        dimension: parsed.data.dimension ?? null,
+        // Jamais déduite : seulement ce que la personne a nommé elle-même.
+        valeurProtegee: isPasser ? null : (parsed.data.valeurProtegee ?? null),
         version: 1,
       })
       .returning();
@@ -130,7 +155,7 @@ router.patch(
     if (parsed.data.choix !== undefined) updates.choix = parsed.data.choix;
     if (newChoix === "ca_depend") {
       if (parsed.data.facteurDepend !== undefined)
-        updates.facteurDepend = parsed.data.facteurDepend;
+        updates.facteurDepend = versFacteur(parsed.data.facteurDepend);
       if (parsed.data.facteurDependLibre !== undefined)
         updates.facteurDependLibre = parsed.data.facteurDependLibre;
     } else {
@@ -143,9 +168,12 @@ router.patch(
         updates.difficulte = parsed.data.difficulte;
       if (parsed.data.certitude !== undefined)
         updates.certitude = parsed.data.certitude;
+      if (parsed.data.valeurProtegee !== undefined)
+        updates.valeurProtegee = parsed.data.valeurProtegee;
     } else {
       updates.difficulte = null;
       updates.certitude = null;
+      updates.valeurProtegee = null;
     }
 
     const [reponse] = await db

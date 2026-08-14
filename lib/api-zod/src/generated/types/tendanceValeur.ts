@@ -11,16 +11,26 @@ export interface TendanceValeur {
   /** Score net (victoires - défaites) / total significatifs */
   scoreNet: number;
   totalCollisions: number;
-  victoiresA: number;
-  victoiresB: number;
+  /** Fois où cette valeur est passée devant l'autre */
+  foisPrivilegiee: number;
+  /** Fois où cette valeur a cédé la place */
+  foisCedee: number;
   /** ca_depend + je_ne_sais_pas */
   incertitudes: number;
   /** passer */
   abandonnes: number;
   /** @nullable */
-  difficulteMoyenne?: number | null;
+  difficulteMoyenne: number | null;
   /** @nullable */
   certitudeMoyenne: number | null;
   /** Vrai si aucune collision résolue pour cette valeur */
   territoireInexplore: boolean;
+  /** Vrai si aucun compromis n'a encore été observé — la valeur a été privilégiée à chaque fois qu'elle a été mise à l'épreuve. Ce n'est pas un classement : c'est l'absence d'exception connue à ce jour. */
+  estProtegee: boolean;
+  /** Valeurs devant lesquelles celle-ci est passée */
+  domine: string[];
+  /** Valeurs devant lesquelles celle-ci a cédé */
+  cedeDevant: string[];
+  /** Contextes où cette valeur est passée devant */
+  contextesFavorables: string[];
 }

@@ -12,7 +12,7 @@ import {
 import Home from '@/pages/home';
 import Cartes from '@/pages/cartes';
 import Valeurs from '@/pages/valeurs';
-import Collisions from '@/pages/collisions';
+import Partie from '@/pages/partie';
 import Constellation from '@/pages/constellation';
 import NotFound from '@/pages/not-found';
 
@@ -25,7 +25,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/session/:sessionId/cartes" component={Cartes} />
         <Route path="/session/:sessionId/valeurs" component={Valeurs} />
-        <Route path="/session/:sessionId/collisions" component={Collisions} />
+        <Route path="/session/:sessionId/partie" component={Partie} />
         <Route path="/session/:sessionId/constellation" component={Constellation} />
         <Route component={NotFound} />
       </Switch>

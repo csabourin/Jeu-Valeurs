@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ObservationConstellation } from './observationConstellation';
+import type { PointDeBascule } from './pointDeBascule';
 import type { TendanceValeur } from './tendanceValeur';
 import type { TensionObservee } from './tensionObservee';
 
@@ -14,10 +15,11 @@ export interface Constellation {
   version: number;
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
+  bascules: PointDeBascule[];
   observations: ObservationConstellation[];
   /** Proportion de collisions possibles explorées (0 à 1) */
   couverture: number;
-  /** Stabilité globale des choix (0 à 1, basée sur la certitude moyenne) */
+  /** Part des tensions revues sous une autre forme qui ont reçu la même réponse (0 à 1). Vaut 1 tant qu'aucune tension n'a été revue. */
   stabilite: number;
   /** Version du moteur de calcul utilisé */
   versionCalcul: number;
