@@ -39,6 +39,34 @@ ratées, donc un paquet ajouté pendant qu'il tourne reste introuvable
 `scripts/post-merge.sh` fait déjà ces deux commandes, mais il ne se déclenche
 que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 
+### Si `db push` pose des questions
+
+Sur une base qui vient de la branche `codex/spec-v1-alignment`, drizzle-kit
+trouve six colonnes disparues (`texte_dilemme`, `contexte`, `pivot_dimension`,
+`supersedes_response_id`, `invalidated_at`, `invalidation_reason`) et quatre
+colonnes nouvelles, et demande pour chacune s'il s'agit d'un renommage.
+
+Le plus sûr — et le seul qui ne demande aucune touche, donc utilisable depuis un
+téléphone — est de retirer les colonnes obsolètes d'abord :
+
+```sql
+alter table reponses_collision
+  drop column if exists texte_dilemme,
+  drop column if exists contexte,
+  drop column if exists pivot_dimension,
+  drop column if exists supersedes_response_id,
+  drop column if exists invalidated_at,
+  drop column if exists invalidation_reason;
+```
+
+Puis `pnpm --filter db push` s'exécute sans poser une seule question.
+
+Autrement, `pnpm --filter db push-force` demande les quatre renommages (répondre
+Entrée à chaque fois : « create column » est l'option surlignée, et c'est la
+bonne — ces colonnes sont nouvelles) et saute la confirmation de suppression.
+Attention avec `push` tout court : sa dernière invite propose « No, abort » par
+défaut, donc Entrée y annule tout.
+
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
