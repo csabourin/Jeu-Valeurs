@@ -51,6 +51,8 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 
 - `lib/contenu/` — **tout le matériel du jeu, en code** : valeurs, cartes, duels,
   séries de bascule, et le planificateur de parcours
+- `lib/contenu/src/data/` — le jeu de 825 cartes importé, laissé tel quel
+- `lib/contenu/src/categories.ts` — les 70 catégories importées vers les valeurs
 - `lib/api-spec/openapi.yaml` — source de vérité de tous les contrats API
 - `lib/db/src/schema/` — sessions, cartes-session, réponses (**rien du contenu**)
 - `artifacts/api-server/src/lib/constellation-engine.ts` — moteur de résultats
@@ -62,12 +64,28 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 - **Le contenu est du code, pas des données.** `lib/contenu` est la source de
   vérité ; la base ne garde que ce qui appartient à la personne. Aucune étape
   d'amorçage : une partie est jouable dès le premier démarrage.
+- **Deux provenances de cartes, jamais confondues.** 60 cartes `maison`, écrites
+  et relues, au vocabulaire calibré ; 825 cartes `importee`, qui donnent le
+  volume. Les secondes tirent leurs valeurs suggérées de leur catégorie, pas
+  d'une relecture carte par carte — d'où le champ `origine`, qui dit ce qu'on
+  peut affirmer d'une carte et pas seulement d'où elle vient.
+- **On annote 70 catégories, pas 825 cartes.** Une correspondance carte par
+  carte serait impossible à relire et à garder cohérente. Le résultat reste une
+  hypothèse que la personne confirme ou jette à l'étape suivante.
+- **Chaque partie reçoit une main, pas le catalogue.** 885 cartes ne se
+  parcourent pas : `distribuerCartes(graine)` en tire 18 par famille, dont 6
+  maison garanties pour ancrer le ton. Stable pour une partie donnée.
 - **Le parcours est piloté par le contenu, pas par les paires de valeurs.** On ne
   pose que des situations écrites à la main. C'est ce qui empêche le jeu de
   retomber sur « Liberté ou Sécurité ? » posé à froid. Une paire sans situation
   écrite n'est simplement jamais posée.
-- **Déterminisme complet.** Aucun LLM, aucun tirage au hasard : mêmes cartes +
-  mêmes réponses ⇒ même partie. Rafraîchir la page ne rejoue rien.
+- **Hasard reproductible, pas déterminisme figé.** Chaque partie tire une
+  `graine` à sa création (colonne `sessions.graine`) ; tout le tirage de
+  situations en découle. Deux parties bâties sur les mêmes cartes ne servent
+  donc pas les mêmes duels, alors qu'une partie donnée reste identique à
+  elle-même — rafraîchir la page ne rejoue rien. Un `Math.random()` direct
+  casserait la seconde propriété, puisque le parcours est recalculé à chaque
+  requête de progrès. Aucun LLM nulle part.
 - **Une bascule ne fait bouger qu'une chose.** Les deux options d'une série sont
   définies au niveau de la série, jamais du palier : seule la situation change.
   C'est ce qui rend le point de bascule interprétable.
@@ -87,13 +105,14 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 ## Le parcours
 
 1. **Accueil** — présente le jeu et ses règles, reprend une partie existante
-2. **Cartes** — 3 familles (🛑 lignes rouges, 🌅 horizons, 💎 trésors), 60 cartes
-   concrètes + carte libre. Minimum 3 cartes.
+2. **Cartes** — 3 familles (🛑 lignes rouges, 🌅 horizons, 💎 trésors). Une main
+   de 54 cartes tirée parmi 885, plus la carte libre. Minimum 3 cartes.
 3. **Tes mots** — la personne confirme les raisons derrière chaque carte. **Rien
    n'est coché d'avance** : une suggestion du jeu n'est pas une réponse. Minimum
    2 raisons distinctes.
-4. **Duels** — jusqu'à 12 situations concrètes (A / B / Ça dépend / Je ne sais
-   pas / Passer). Les variantes rejouent une même tension autrement, en fin de
+4. **Duels** — jusqu'à 12 situations, tirées par la graine parmi toutes celles
+   que tes cartes rendent possibles. Réponses : A / B / Ça dépend / Je ne sais
+   pas / Passer. Les variantes rejouent une même tension autrement, en fin de
    phase. « Ça dépend » demande de quoi.
 5. **Bascules** — jusqu'à 3 séries de 3 paliers, servies pour les tensions déjà
    tranchées franchement. La série s'arrête dès que la réponse change : le point
@@ -120,6 +139,13 @@ Les règles sont en tête de `duels.ts` et `bascules.ts`. En résumé :
 
 - **Comparaisons par paires / Best-Worst Scaling** entre les cartes de la
   personne (le brief le prévoit ; le parcours n'a que duels et bascules).
+- **Relecture des 825 cartes importées** : registre inégal (plusieurs supposent
+  un contexte adulte — travail, patrimoine, conjoint) et 29 libellés dépassent
+  110 caractères. Elles sont marquées `origine: "importee"`, ce qui permet de
+  les reprendre par lots sans toucher au deck maison.
+- **Les 30 dilemmes importés** (`data/dilemmas.json`) ont servi de squelettes
+  aux duels 201-230 ; le fichier reste comme trace, il n'est pas lu à
+  l'exécution.
 - **Comparaison entre deux profils**, avec consentement.
 - Reprise fine à l'intérieur d'une série après fermeture de l'onglet (on reprend
   au palier suivant, ce qui est correct, mais l'étape affichée reste large).
@@ -136,5 +162,14 @@ Les règles sont en tête de `duels.ts` et `bascules.ts`. En résumé :
   importer depuis `/src/generated/api.schemas`.
 - Après chaque changement de spec OpenAPI : `pnpm --filter @workspace/api-spec run codegen`.
 - `artifacts/mockup-sandbox` échoue au build sans `PORT` : c'est indépendant du jeu.
+- Les identifiants de carte sont **textuels** (`JV1001`, `LR042`) et ceux des
+  situations **numériques**. Les deux espaces sont séparés ; ne pas les mélanger.
 - `constellation-engine.ts` : `VERSION_CALCUL = 2`. Incrémenter à chaque
   changement d'algorithme.
+- Une erreur de base de données remonte en JSON via le gestionnaire de
+  `app.ts` — Drizzle enveloppe l'erreur PostgreSQL, donc il faut lire
+  `err.cause` (le code `42P01` signale un schéma non poussé), jamais
+  `err.message` seul.
+- Toute mutation dont dépend la suite du jeu doit brancher `onError` sur
+  `useSignalerErreur()` : sans ça, un serveur en échec donne un bouton qui ne
+  fait rien, sans aucune trace à l'écran.

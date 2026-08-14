@@ -1,0 +1,9 @@
+slug,label,value_type,examples,notes
+personal_cost,Coût personnel,numeric_or_ordinal,"10 $ → 100 $ → 1 000 $; 1 h → 1 jour","Peut être monétaire, temporel ou effort selon le template; éviter de mélanger unités dans une même séquence"
+impact_magnitude,Importance de la conséquence,ordinal,"désagrément → problème sérieux → conséquence majeure","Magnitude, pas jugement moral"
+social_proximity,Proximité sociale,ordinal,"inconnu → connaissance → ami → famille proche","La hiérarchie réelle peut varier selon l'utilisateur"
+affected_scope,Portée / personnes touchées,numeric,"1 → 5 → 50 → 1 000","Éviter de supposer une proportionnalité morale"
+certainty,Certitude,numeric,"20% → 50% → 80% → certain","Normalisable 0..1"
+reversibility,Réversibilité,ordinal,"facilement → partiellement → difficilement → irréversible","Important pour pertes de trésors"
+urgency,Urgence,ordinal,"plusieurs mois → semaine → aujourd'hui → immédiat","Ne pas confondre urgence avec magnitude"
+responsibility,Responsabilité personnelle,ordinal,"témoin → participant → décideur → cause directe","Mesure le rôle causal/décisionnel, pas la culpabilité"

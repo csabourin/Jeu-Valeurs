@@ -11,7 +11,7 @@ export interface CarteSession {
   id: number;
   sessionId: string;
   /** @nullable */
-  catalogueCarteId?: number | null;
+  catalogueCarteId?: string | null;
   famille: CarteSessionFamille;
   label: string;
   /** @nullable */

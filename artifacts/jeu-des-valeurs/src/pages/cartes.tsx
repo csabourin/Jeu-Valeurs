@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-  useListCartessCatalogue,
-  getListCartessCatalogueQueryKey,
+  useListCartesProposees,
+  getListCartesProposeesQueryKey,
   useListCartesSession,
   getListCartesSessionQueryKey,
   useAddCarteSession,
@@ -20,6 +20,7 @@ import {
 import { useState, useMemo } from "react";
 import { Check, Plus, MoveRight, Loader2, PenLine } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSignalerErreur } from "@/hooks/use-erreur";
 
 /** En dessous, il n'y a pas assez de matière pour construire des duels. */
 const MINIMUM_CARTES = 3;
@@ -63,9 +64,15 @@ export default function Cartes() {
   const [ongletActif, setOngletActif] = useState<CarteCatalogueFamille>("lignes_rouges");
   const [saisieLibre, setSaisieLibre] = useState<Record<string, string>>({});
 
-  const { data: catalogue, isLoading: chargeCatalogue } = useListCartessCatalogue(
-    undefined,
-    { query: { queryKey: getListCartessCatalogueQueryKey() } },
+  // La main tirée pour cette partie, pas les 885 cartes du catalogue.
+  const { data: catalogue, isLoading: chargeCatalogue } = useListCartesProposees(
+    sessionId,
+    {
+      query: {
+        enabled: !!sessionId,
+        queryKey: getListCartesProposeesQueryKey(sessionId),
+      },
+    },
   );
 
   const { data: mesCartes, isLoading: chargeMesCartes } = useListCartesSession(
@@ -81,6 +88,7 @@ export default function Cartes() {
   const ajouter = useAddCarteSession();
   const retirer = useRemoveCarteSession();
   const majSession = useUpdateSession();
+  const signaler = useSignalerErreur();
 
   const rafraichir = () =>
     queryClient.invalidateQueries({
@@ -88,7 +96,7 @@ export default function Cartes() {
     });
 
   const choisies = useMemo(() => {
-    const parId = new Map<number, CarteSession>();
+    const parId = new Map<string, CarteSession>();
     for (const c of mesCartes ?? []) {
       if (c.catalogueCarteId != null) parId.set(c.catalogueCarteId, c);
     }
@@ -100,7 +108,7 @@ export default function Cartes() {
     if (deja) {
       retirer.mutate(
         { sessionId, carteSessionId: deja.id },
-        { onSuccess: rafraichir },
+        { onSuccess: rafraichir, onError: signaler("Carte pas retirée") },
       );
       return;
     }
@@ -116,7 +124,7 @@ export default function Cartes() {
           estPersonnalisée: false,
         },
       },
-      { onSuccess: rafraichir },
+      { onSuccess: rafraichir, onError: signaler("Carte pas ajoutée") },
     );
   };
 
@@ -140,6 +148,7 @@ export default function Cartes() {
           setSaisieLibre((prev) => ({ ...prev, [famille]: "" }));
           rafraichir();
         },
+        onError: signaler("Carte pas ajoutée"),
       },
     );
   };
@@ -147,7 +156,10 @@ export default function Cartes() {
   const continuer = () => {
     majSession.mutate(
       { sessionId, data: { etapeCourante: "confirmation_valeurs" } },
-      { onSuccess: () => setLocation(`/session/${sessionId}/valeurs`) },
+      {
+        onSuccess: () => setLocation(`/session/${sessionId}/valeurs`),
+        onError: signaler("Impossible de continuer"),
+      },
     );
   };
 
@@ -170,9 +182,10 @@ export default function Cartes() {
         <header className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-serif font-bold">Prends tes cartes</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Choisis ce qui compte pour toi dans les trois piles. Trois cartes
-            suffisent pour commencer, mais plus tu en prends, plus les duels
-            seront serrés.
+            Voici ta main : des cartes tirées pour cette partie-ci. Une autre
+            partie t'en proposera d'autres. Choisis ce qui compte pour toi dans
+            les trois piles — trois cartes suffisent pour commencer, mais plus
+            tu en prends, plus les duels seront serrés.
           </p>
         </header>
 

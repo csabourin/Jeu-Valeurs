@@ -90,6 +90,7 @@ router.get(
     const resultat = calculerConstellation(
       donnees.reponses.map(versReponseSource),
       donnees.valeursConfirmees,
+      donnees.session.graine,
     );
 
     // La version suit les corrections : une réponse rectifiée fait avancer la
@@ -129,6 +130,7 @@ router.get("/sessions/:sessionId/progres", async (req, res): Promise<void> => {
   const parcours = calculerParcours(
     donnees.valeursConfirmees,
     donnees.reponses.map(versReponseConnue),
+    donnees.session.graine,
   );
 
   res.json({

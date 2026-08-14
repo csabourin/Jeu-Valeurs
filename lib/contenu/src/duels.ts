@@ -492,7 +492,322 @@ export const duels: DuelContenu[] = [
     optionB: "Tu laisses passer.",
     contexte: "amis",
   },
+
+  // ── Deuxième série ────────────────────────────────────────────────────────
+  // Tensions reprises du jeu de dilemmes importé (30 situations de registre
+  // adulte : procédures, carrière, organisation), réécrites ici en situations
+  // ordinaires. Le squelette de tension est conservé ; le décor, le vocabulaire
+  // et le découpage en deux actions sont refaits.
+  {
+    id: 201,
+    valeurA: V.autonomie,
+    valeurB: V.regles,
+    situation:
+      "Le prof impose une méthode pour résoudre le problème. Tu en connais une autre qui marche et qui va deux fois plus vite.",
+    optionA: "Tu fais à ta manière.",
+    optionB: "Tu suis la méthode demandée.",
+    contexte: "ecole",
+  },
+  {
+    id: 202,
+    valeurA: V.loyaute,
+    valeurB: V.justice,
+    situation:
+      "Il reste une place dans l'équipe. Ton ami la veut, mais quelqu'un d'autre s'était inscrit avant lui.",
+    optionA: "Tu donnes la place à ton ami.",
+    optionB: "Tu respectes l'ordre d'inscription.",
+    contexte: "equipe",
+  },
+  {
+    id: 203,
+    valeurA: V.securite,
+    valeurB: V.entraide,
+    situation:
+      "Ton voisin te demande un coup de main pour descendre quelque chose de lourd. Tu risques de te faire mal au dos.",
+    optionA: "Tu dis que tu ne peux pas.",
+    optionB: "Tu l'aides.",
+    contexte: "maison",
+  },
+  {
+    id: 204,
+    valeurA: V.loyaute,
+    valeurB: V.liberte,
+    situation:
+      "Tu avais promis d'aider un ami samedi. Une occasion que tu attendais depuis longtemps tombe exactement le même jour.",
+    optionA: "Tu tiens ta promesse.",
+    optionB: "Tu y vas et tu le préviens.",
+    contexte: "amis",
+  },
+  {
+    id: 205,
+    valeurA: V.reussite,
+    valeurB: V.securite,
+    situation:
+      "On t'offre une place dans un groupe beaucoup plus fort que toi. Tu pourrais progresser vite, ou couler.",
+    optionA: "Tu prends la place.",
+    optionB: "Tu restes là où tu réussis déjà.",
+    contexte: "public",
+  },
+  {
+    id: 206,
+    valeurA: V.famille,
+    valeurB: V.appartenance,
+    situation:
+      "Chez toi, on fait les choses de la même façon depuis toujours. Quelqu'un qui vient d'arriver dans la famille demande qu'on change pour s'y sentir à sa place.",
+    optionA: "Tu gardes la tradition telle quelle.",
+    optionB: "Tu proposes de la changer.",
+    contexte: "maison",
+  },
+  {
+    id: 207,
+    valeurA: V.reconnaissance,
+    valeurB: V.courage,
+    situation:
+      "Une décision que tout le monde applaudit te semble mauvaise. La critiquer tout haut ferait baisser ce que certains pensent de toi.",
+    optionA: "Tu gardes ça pour toi.",
+    optionB: "Tu le dis quand même.",
+    contexte: "public",
+  },
+  {
+    id: 208,
+    valeurA: V.regles,
+    valeurB: V.justice,
+    situation:
+      "Deux personnes ont fait la même gaffe. L'une savait ce qu'elle faisait, l'autre non. Le règlement prévoit la même conséquence pour les deux.",
+    optionA: "Tu appliques la même conséquence.",
+    optionB: "Tu tiens compte de ce que chacune savait.",
+    contexte: "ecole",
+  },
+  {
+    id: 209,
+    valeurA: V.creativite,
+    valeurB: V.loyaute,
+    situation:
+      "Le projet est commencé et l'équipe s'est mise d'accord. Tu trouves une bien meilleure idée, mais tout le monde devrait refaire une partie.",
+    optionA: "Tu proposes ta nouvelle idée.",
+    optionB: "Tu t'en tiens à ce qui a été décidé.",
+    contexte: "equipe",
+  },
+  {
+    id: 210,
+    valeurA: V.justice,
+    valeurB: V.plaisir,
+    situation:
+      "Il reste des collations pour le groupe. Tu peux en prendre plus que ta part, personne ne compte.",
+    optionA: "Tu prends ta part.",
+    optionB: "Tu te sers davantage.",
+    contexte: "amis",
+  },
+  {
+    id: 211,
+    valeurA: V.securite,
+    valeurB: V.autonomie,
+    situation:
+      "C'est toi le responsable du résultat. Tu peux imposer ta méthode, que tu sais efficace, ou laisser chacun faire à sa façon.",
+    optionA: "Tu imposes ta méthode.",
+    optionB: "Tu laisses chacun choisir.",
+    contexte: "equipe",
+  },
+  {
+    id: 212,
+    valeurA: V.tranquillite,
+    valeurB: V.reconnaissance,
+    situation:
+      "On félicite l'équipe. La partie qui a tout changé, c'est toi qui l'as faite, et personne ne le mentionne.",
+    optionA: "Tu laisses passer.",
+    optionB: "Tu dis que c'était toi.",
+    contexte: "public",
+    variante: true,
+  },
+  {
+    id: 213,
+    valeurA: V.viePrivee,
+    valeurB: V.entraide,
+    situation:
+      "Un ami te demande ton mot de passe pour utiliser ton compte le temps d'une soirée.",
+    optionA: "Tu refuses.",
+    optionB: "Tu le lui donnes.",
+    contexte: "en_ligne",
+  },
+  {
+    id: 214,
+    valeurA: V.nature,
+    valeurB: V.plaisir,
+    situation:
+      "Le raccourci passe à travers un endroit protégé. Le contourner ajoute quarante minutes de marche.",
+    optionA: "Tu contournes.",
+    optionB: "Tu passes à travers.",
+    contexte: "amis",
+    variante: true,
+  },
+  {
+    id: 215,
+    valeurA: V.curiosite,
+    valeurB: V.appartenance,
+    situation:
+      "Ta gang refait l'activité que vous avez faite cent fois. Au même moment, tu pourrais essayer quelque chose de complètement nouveau, seul.",
+    optionA: "Tu essaies la nouveauté.",
+    optionB: "Tu restes avec eux.",
+    contexte: "amis",
+  },
+  {
+    id: 216,
+    valeurA: V.honnetete,
+    valeurB: V.reussite,
+    situation:
+      "Le prof s'est trompé en corrigeant : il t'a donné dix points de trop.",
+    optionA: "Tu le signales.",
+    optionB: "Tu gardes la note.",
+    contexte: "ecole",
+    variante: true,
+  },
+  {
+    id: 217,
+    valeurA: V.famille,
+    valeurB: V.liberte,
+    situation:
+      "Chez toi, on tient à ce que tout le monde soupe ensemble à la même heure. Ça tombe exactement quand tu es le plus efficace.",
+    optionA: "Tu soupes avec eux.",
+    optionB: "Tu manges plus tard, de ton côté.",
+    contexte: "maison",
+    variante: true,
+  },
+  {
+    id: 218,
+    valeurA: V.securite,
+    valeurB: V.courage,
+    situation:
+      "Quelqu'un se fait démolir dans les commentaires. Prendre sa défense va retourner le groupe contre toi.",
+    optionA: "Tu ne t'en mêles pas.",
+    optionB: "Tu prends sa défense.",
+    contexte: "en_ligne",
+    variante: true,
+  },
+  {
+    id: 219,
+    valeurA: V.reussite,
+    valeurB: V.tranquillite,
+    situation:
+      "Tu peux t'inscrire au programme qui t'ouvrirait le plus de portes. Il demande deux heures de plus par jour.",
+    optionA: "Tu t'inscris.",
+    optionB: "Tu gardes tes soirées.",
+    contexte: "ecole",
+  },
+  {
+    id: 220,
+    valeurA: V.regles,
+    valeurB: V.courage,
+    situation:
+      "Le règlement dit de ne pas intervenir soi-même et d'aller chercher un adulte. Le temps que tu y ailles, ce sera fini.",
+    optionA: "Tu vas chercher un adulte.",
+    optionB: "Tu interviens tout de suite.",
+    contexte: "ecole",
+  },
+  {
+    id: 221,
+    valeurA: V.viePrivee,
+    valeurB: V.justice,
+    situation:
+      "Tu as la preuve, dans une conversation privée, que quelqu'un a menti — et que c'est une autre personne qui se fait accuser.",
+    optionA: "Tu gardes la conversation privée.",
+    optionB: "Tu montres la conversation.",
+    contexte: "en_ligne",
+  },
+  {
+    id: 222,
+    valeurA: V.creativite,
+    valeurB: V.appartenance,
+    situation:
+      "Le groupe s'habille pareil pour l'événement. Toi, tu avais préparé quelque chose de complètement différent.",
+    optionA: "Tu mets ce que tu avais préparé.",
+    optionB: "Tu fais comme eux.",
+    contexte: "amis",
+  },
+  {
+    id: 223,
+    valeurA: V.entraide,
+    valeurB: V.autonomie,
+    situation:
+      "Quelqu'un te demande de lui expliquer la même chose pour la quatrième fois. Tu commences à penser qu'il ne cherche plus par lui-même.",
+    optionA: "Tu réexpliques.",
+    optionB: "Tu lui dis de chercher seul.",
+    contexte: "ecole",
+  },
+  {
+    id: 224,
+    valeurA: V.plaisir,
+    valeurB: V.loyaute,
+    situation:
+      "Ton ami file mal et voudrait que tu restes. La soirée où tu voulais aller commence dans vingt minutes.",
+    optionA: "Tu y vas.",
+    optionB: "Tu restes avec lui.",
+    contexte: "amis",
+  },
+  {
+    id: 225,
+    valeurA: V.nature,
+    valeurB: V.reussite,
+    situation:
+      "Ton projet serait nettement meilleur avec beaucoup de matériel jetable.",
+    optionA: "Tu fais avec ce que tu as déjà.",
+    optionB: "Tu prends le matériel.",
+    contexte: "ecole",
+    variante: true,
+  },
+  {
+    id: 226,
+    valeurA: V.viePrivee,
+    valeurB: V.liberte,
+    situation:
+      "Tes parents proposent un marché : tu installes l'application qui montre où tu es en tout temps, et tu peux sortir beaucoup plus souvent.",
+    optionA: "Tu refuses l'application.",
+    optionB: "Tu l'installes et tu sors plus.",
+    contexte: "maison",
+  },
+  {
+    id: 227,
+    valeurA: V.honnetete,
+    valeurB: V.famille,
+    situation:
+      "Tes parents te demandent comment s'est passée ta journée. La vérité les inquiéterait beaucoup, pour quelque chose de déjà réglé.",
+    optionA: "Tu racontes ce qui s'est passé.",
+    optionB: "Tu dis que tout va bien.",
+    contexte: "maison",
+  },
+  {
+    id: 228,
+    valeurA: V.justice,
+    valeurB: V.appartenance,
+    situation:
+      "Ton équipe a gagné grâce à une erreur d'arbitrage que tu es le seul à avoir vue.",
+    optionA: "Tu la signales.",
+    optionB: "Tu laisses la victoire à ton équipe.",
+    contexte: "equipe",
+    variante: true,
+  },
+  {
+    id: 229,
+    valeurA: V.curiosite,
+    valeurB: V.securite,
+    situation:
+      "Un séjour à l'étranger s'ouvre. Tu ne connais personne là-bas et tu parles mal la langue.",
+    optionA: "Tu t'inscris.",
+    optionB: "Tu restes.",
+    contexte: "public",
+    variante: true,
+  },
+  {
+    id: 230,
+    valeurA: V.reconnaissance,
+    valeurB: V.entraide,
+    situation:
+      "Tu peux présenter le projet devant tout le monde, ou laisser la place à quelqu'un qui n'a jamais eu l'occasion et qui en rêve.",
+    optionA: "Tu présentes.",
+    optionB: "Tu lui laisses la place.",
+    contexte: "equipe",
+  },
 ];
+
 
 const duelsParId = new Map(duels.map((d) => [d.id, d]));
 

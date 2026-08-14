@@ -1,0 +1,1802 @@
+[
+  {
+    "id": "T001",
+    "category": "Relations proches et attachement",
+    "label": "La confiance de mon partenaire ou d’une personne très proche.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T002",
+    "category": "Relations proches et attachement",
+    "label": "Une relation dans laquelle je peux être pleinement moi-même.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T003",
+    "category": "Relations proches et attachement",
+    "label": "L’affection de mes enfants ou de personnes dont je prends soin.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T004",
+    "category": "Relations proches et attachement",
+    "label": "Une amitié qui dure depuis longtemps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T005",
+    "category": "Relations proches et attachement",
+    "label": "Les personnes sur lesquelles je peux réellement compter.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T006",
+    "category": "Relations proches et attachement",
+    "label": "Le sentiment d’être aimé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T007",
+    "category": "Relations proches et attachement",
+    "label": "Quelqu’un avec qui je peux parler de presque tout.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T008",
+    "category": "Relations proches et attachement",
+    "label": "Une relation où je ne me sens pas constamment jugé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T009",
+    "category": "Relations proches et attachement",
+    "label": "Le respect mutuel dans mes relations importantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T010",
+    "category": "Relations proches et attachement",
+    "label": "La complicité que j’ai avec certaines personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T011",
+    "category": "Relations proches et attachement",
+    "label": "Le sentiment d’être important pour quelqu’un.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T012",
+    "category": "Relations proches et attachement",
+    "label": "La possibilité d’être seul sans perdre mes relations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T013",
+    "category": "Relations proches et attachement",
+    "label": "La confiance que certaines personnes placent en moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T014",
+    "category": "Relations proches et attachement",
+    "label": "La proximité avec ma famille élargie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T015",
+    "category": "Relations proches et attachement",
+    "label": "Les souvenirs partagés avec ceux que j’aime.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T016",
+    "category": "Famille, foyer et continuité",
+    "label": "L’unité de ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T017",
+    "category": "Famille, foyer et continuité",
+    "label": "Le foyer que nous avons construit.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T018",
+    "category": "Famille, foyer et continuité",
+    "label": "Les traditions propres à ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T019",
+    "category": "Famille, foyer et continuité",
+    "label": "La relation que j’ai avec mes enfants.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T020",
+    "category": "Famille, foyer et continuité",
+    "label": "Le respect de mes enfants ou des plus jeunes de ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T021",
+    "category": "Famille, foyer et continuité",
+    "label": "La possibilité de voir régulièrement mes proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T022",
+    "category": "Famille, foyer et continuité",
+    "label": "Ma place actuelle dans ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T023",
+    "category": "Famille, foyer et continuité",
+    "label": "La capacité de prendre soin de ceux qui dépendent de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T024",
+    "category": "Famille, foyer et continuité",
+    "label": "L’histoire familiale que je connais.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T025",
+    "category": "Famille, foyer et continuité",
+    "label": "Les objets familiaux transmis entre générations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T026",
+    "category": "Famille, foyer et continuité",
+    "label": "La langue ou les expressions propres à ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T027",
+    "category": "Famille, foyer et continuité",
+    "label": "La réputation de ma famille dans notre entourage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T028",
+    "category": "Famille, foyer et continuité",
+    "label": "La liberté de vivre ma vie différemment de ma famille sans perdre son affection.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T029",
+    "category": "Famille, foyer et continuité",
+    "label": "La possibilité de transmettre certaines valeurs aux générations suivantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T030",
+    "category": "Famille, foyer et continuité",
+    "label": "Le sentiment d’avoir des racines.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T031",
+    "category": "Autonomie et liberté acquise",
+    "label": "La liberté de décider comment organiser mes journées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T032",
+    "category": "Autonomie et liberté acquise",
+    "label": "La possibilité de choisir mon travail ou mes projets.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T033",
+    "category": "Autonomie et liberté acquise",
+    "label": "Le droit de dire non.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T034",
+    "category": "Autonomie et liberté acquise",
+    "label": "La liberté de penser ce que je veux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T035",
+    "category": "Autonomie et liberté acquise",
+    "label": "La possibilité d’exprimer mes opinions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T036",
+    "category": "Autonomie et liberté acquise",
+    "label": "La liberté de choisir mes relations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T037",
+    "category": "Autonomie et liberté acquise",
+    "label": "La capacité de quitter une situation qui ne me convient plus.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T038",
+    "category": "Autonomie et liberté acquise",
+    "label": "Mon indépendance financière actuelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T039",
+    "category": "Autonomie et liberté acquise",
+    "label": "La capacité de prendre mes propres décisions importantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T040",
+    "category": "Autonomie et liberté acquise",
+    "label": "Ma vie privée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T041",
+    "category": "Autonomie et liberté acquise",
+    "label": "La possibilité de garder certaines choses uniquement pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T042",
+    "category": "Autonomie et liberté acquise",
+    "label": "La liberté de me déplacer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T043",
+    "category": "Autonomie et liberté acquise",
+    "label": "La possibilité de changer de carrière ou de direction.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T044",
+    "category": "Autonomie et liberté acquise",
+    "label": "Le contrôle que j’ai sur mon espace personnel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T045",
+    "category": "Autonomie et liberté acquise",
+    "label": "Le fait de ne pas devoir demander la permission pour mes choix ordinaires.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T046",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Un revenu relativement stable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T047",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "La certitude de pouvoir payer mes besoins essentiels.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T048",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Un logement stable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T049",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Une routine qui fonctionne pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T050",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "La prévisibilité de mon quotidien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T051",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Une réserve financière pour les imprévus.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T052",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "L’accès aux services dont je dépends.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T053",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Un environnement où je me sens en sécurité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T054",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Une situation professionnelle stable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T055",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "La possibilité de planifier l’avenir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T056",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "La stabilité de mon environnement social.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T057",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Des règles claires dans les milieux où j’évolue.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T058",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "La capacité d’absorber un problème imprévu sans tout perdre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T059",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Mon sentiment d’avoir une certaine maîtrise sur ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T060",
+    "category": "Sécurité, stabilité et prévisibilité",
+    "label": "Le fait que les personnes importantes de ma vie soient relativement prévisibles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T061",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Mon niveau de confort actuel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T062",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Le temps libre dont je dispose.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T063",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Mes loisirs réguliers.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T064",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La possibilité de prendre du temps pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T065",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Mon sommeil et mes périodes de repos.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T066",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La tranquillité de mon domicile.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T067",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La possibilité de manger les choses que j’aime.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T068",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La possibilité de voyager occasionnellement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T069",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Mon accès aux activités qui me passionnent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T070",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La possibilité de ne rien faire parfois.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T071",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Un rythme de vie qui me convient.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T072",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La capacité de me retirer du bruit et de l’agitation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T073",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "Mes petits plaisirs quotidiens.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T074",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "L’espace physique dont je dispose.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T075",
+    "category": "Confort, habitudes et qualité de vie",
+    "label": "La facilité de ma vie quotidienne.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T076",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Les compétences que j’ai acquises.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T077",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Mon expérience professionnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T078",
+    "category": "Travail, compétence et accomplissements",
+    "label": "La reconnaissance que j’ai gagnée dans mon travail.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T079",
+    "category": "Travail, compétence et accomplissements",
+    "label": "La confiance de mes collègues.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T080",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Mon autonomie professionnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T081",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Le niveau de responsabilité que j’ai atteint.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T082",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Le sentiment d’être compétent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T083",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Ma réputation de personne capable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T084",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Un travail qui correspond à une partie importante de mon identité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T085",
+    "category": "Travail, compétence et accomplissements",
+    "label": "La possibilité de faire un travail dont je suis fier.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T086",
+    "category": "Travail, compétence et accomplissements",
+    "label": "La confiance qu’on m’accorde pour travailler sans surveillance constante.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T087",
+    "category": "Travail, compétence et accomplissements",
+    "label": "La possibilité d’apprendre dans mon travail.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T088",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Un poste ou rôle difficilement remplaçable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T089",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Le réseau professionnel que j’ai construit.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T090",
+    "category": "Travail, compétence et accomplissements",
+    "label": "Les projets importants que j’ai déjà réalisés.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T091",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Le respect que les autres ont pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T092",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Ma bonne réputation.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T093",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Mon statut dans un groupe important.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T094",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Le fait d’être considéré comme compétent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T095",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "L’influence que j’ai actuellement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T096",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "La reconnaissance de mes réalisations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T097",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Être pris au sérieux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T098",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "L’admiration de certaines personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T099",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Une position qui me donne accès à des personnes importantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T100",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Le prestige associé à mon rôle ou à mon métier.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T101",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Le fait d’être connu comme quelqu’un de fiable.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T102",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "L’avantage que me donne mon expertise.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T103",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "La possibilité d’être entendu avant d’autres personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T104",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Le respect associé à mon âge, mon expérience ou mon rôle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T105",
+    "category": "Statut, prestige et reconnaissance",
+    "label": "Le sentiment d’avoir « fait ma place ».",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T106",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Le pouvoir de prendre certaines décisions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T107",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "L’influence que j’ai sur un groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T108",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "La capacité de protéger mes intérêts.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T109",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "La possibilité de décider comment certaines ressources sont utilisées.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T110",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Mon rôle de personne de référence.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T111",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Le fait que les autres demandent mon avis avant d’agir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T112",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "La capacité de négocier d’égal à égal.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T113",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Mon pouvoir de dire non sans conséquences importantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T114",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "La capacité de défendre efficacement mes proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T115",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "La possibilité de contrôler ce qui se passe dans mon environnement immédiat.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T116",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "L’autorité qui m’a été confiée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T117",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "La capacité d’obtenir rapidement l’attention de personnes décisionnaires.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T118",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Mon indépendance vis-à-vis de personnes plus puissantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T119",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Les marges de manœuvre que j’ai acquises au fil du temps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T120",
+    "category": "Pouvoir, influence et contrôle acquis",
+    "label": "Le fait que mes décisions aient un effet réel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T121",
+    "category": "Identité et sentiment de soi",
+    "label": "La personne que je suis devenu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T122",
+    "category": "Identité et sentiment de soi",
+    "label": "Ma capacité à rester fidèle à mes convictions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T123",
+    "category": "Identité et sentiment de soi",
+    "label": "La façon dont je me définis indépendamment du regard des autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T124",
+    "category": "Identité et sentiment de soi",
+    "label": "Mon sentiment d’avoir une identité propre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T125",
+    "category": "Identité et sentiment de soi",
+    "label": "Mon lien avec ma culture.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T126",
+    "category": "Identité et sentiment de soi",
+    "label": "Ma langue.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T127",
+    "category": "Identité et sentiment de soi",
+    "label": "Mes souvenirs importants.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T128",
+    "category": "Identité et sentiment de soi",
+    "label": "Mon histoire personnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T129",
+    "category": "Identité et sentiment de soi",
+    "label": "Les convictions qui structurent ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T130",
+    "category": "Identité et sentiment de soi",
+    "label": "Le sentiment d’être libre de changer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T131",
+    "category": "Identité et sentiment de soi",
+    "label": "Mon sens de l’humour.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T132",
+    "category": "Identité et sentiment de soi",
+    "label": "Mes goûts et préférences personnelles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T133",
+    "category": "Identité et sentiment de soi",
+    "label": "Mes passions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T134",
+    "category": "Identité et sentiment de soi",
+    "label": "La façon particulière dont je vois le monde.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T135",
+    "category": "Identité et sentiment de soi",
+    "label": "Le sentiment de savoir qui je suis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T136",
+    "category": "Culture, langue et héritage collectif",
+    "label": "La langue de ma communauté ou de mes ancêtres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T137",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les traditions que je pratique encore.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T138",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les histoires transmises dans ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T139",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les cérémonies ou rituels auxquels je participe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T140",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Le lien entre ma communauté et son territoire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T141",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les savoirs transmis par les générations précédentes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T142",
+    "category": "Culture, langue et héritage collectif",
+    "label": "La possibilité de célébrer mes traditions publiquement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T143",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les lieux importants pour l’histoire de ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T144",
+    "category": "Culture, langue et héritage collectif",
+    "label": "La mémoire collective de ce que notre groupe a vécu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T145",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les façons particulières de faire de ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T146",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les liens entre les générations de ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T147",
+    "category": "Culture, langue et héritage collectif",
+    "label": "La capacité de ma communauté à décider pour elle-même.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T148",
+    "category": "Culture, langue et héritage collectif",
+    "label": "Les symboles qui ont une signification particulière pour mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T149",
+    "category": "Culture, langue et héritage collectif",
+    "label": "La possibilité pour les jeunes d’apprendre les traditions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T150",
+    "category": "Culture, langue et héritage collectif",
+    "label": "La possibilité pour les jeunes de transformer ces traditions sans les perdre complètement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T151",
+    "category": "Communauté et appartenance collective",
+    "label": "Mon sentiment d’appartenir à une communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T152",
+    "category": "Communauté et appartenance collective",
+    "label": "Les personnes qui connaissent mon histoire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T153",
+    "category": "Communauté et appartenance collective",
+    "label": "Le soutien mutuel dans mon entourage.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T154",
+    "category": "Communauté et appartenance collective",
+    "label": "La confiance qui existe dans mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T155",
+    "category": "Communauté et appartenance collective",
+    "label": "Le sentiment que les gens s’entraident.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T156",
+    "category": "Communauté et appartenance collective",
+    "label": "Ma place dans une communauté qui compte pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T157",
+    "category": "Communauté et appartenance collective",
+    "label": "La possibilité de contribuer à mon groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T158",
+    "category": "Communauté et appartenance collective",
+    "label": "La possibilité d’être entendu par ma communauté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T159",
+    "category": "Communauté et appartenance collective",
+    "label": "Le sentiment que ma communauté prendra soin de ses membres en difficulté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T160",
+    "category": "Communauté et appartenance collective",
+    "label": "Les relations de voisinage que j’ai construites.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T161",
+    "category": "Communauté et appartenance collective",
+    "label": "La capacité de mon groupe à résoudre lui-même certains problèmes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T162",
+    "category": "Communauté et appartenance collective",
+    "label": "Les espaces où ma communauté peut se réunir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T163",
+    "category": "Communauté et appartenance collective",
+    "label": "Le sentiment d’être reconnu comme membre à part entière.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T164",
+    "category": "Communauté et appartenance collective",
+    "label": "L’entraide informelle entre les gens que je connais.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T165",
+    "category": "Communauté et appartenance collective",
+    "label": "Le sentiment que mon groupe a un avenir.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T166",
+    "category": "Nature, territoire et environnement",
+    "label": "Un lieu naturel auquel je suis profondément attaché.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T167",
+    "category": "Nature, territoire et environnement",
+    "label": "L’accès à des espaces naturels près de chez moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T168",
+    "category": "Nature, territoire et environnement",
+    "label": "La qualité de l’air, de l’eau ou du sol de mon environnement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T169",
+    "category": "Nature, territoire et environnement",
+    "label": "La présence d’animaux ou de plantes familières dans mon environnement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T170",
+    "category": "Nature, territoire et environnement",
+    "label": "Un paysage qui fait partie de mon sentiment d’être chez moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T171",
+    "category": "Nature, territoire et environnement",
+    "label": "La possibilité de pratiquer des activités traditionnelles liées au territoire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T172",
+    "category": "Nature, territoire et environnement",
+    "label": "L’accès à une ressource naturelle dont ma communauté dépend.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T173",
+    "category": "Nature, territoire et environnement",
+    "label": "Le calme d’un espace naturel important pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T174",
+    "category": "Nature, territoire et environnement",
+    "label": "La possibilité de transmettre un lieu naturel en bon état aux générations suivantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T175",
+    "category": "Nature, territoire et environnement",
+    "label": "Un jardin, une terre ou un espace que je cultive.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T176",
+    "category": "Nature, territoire et environnement",
+    "label": "La connaissance que j’ai de mon environnement local.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T177",
+    "category": "Nature, territoire et environnement",
+    "label": "La possibilité de vivre près du territoire auquel je suis attaché.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T178",
+    "category": "Nature, territoire et environnement",
+    "label": "Les saisons et rythmes naturels auxquels ma vie est liée.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T179",
+    "category": "Nature, territoire et environnement",
+    "label": "La possibilité de marcher librement dans certains espaces.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T180",
+    "category": "Nature, territoire et environnement",
+    "label": "Un environnement qui n’est pas entièrement transformé par l’activité humaine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T181",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Ce que j’ai appris au fil de ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T182",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Mon expertise dans un domaine.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T183",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Ma capacité de comprendre des problèmes complexes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T184",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Ma curiosité.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T185",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Ma capacité de changer d’avis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T186",
+    "category": "Savoir, expertise et compréhension",
+    "label": "La possibilité d’accéder librement à l’information.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T187",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Mes livres, archives ou ressources de référence.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T188",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Les personnes auprès desquelles je peux apprendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T189",
+    "category": "Savoir, expertise et compréhension",
+    "label": "La capacité d’enseigner ce que je sais.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T190",
+    "category": "Savoir, expertise et compréhension",
+    "label": "La reconnaissance de mon expertise.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T191",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Ma capacité de résoudre des problèmes par moi-même.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T192",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Le droit de poser des questions sans être ridiculisé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T193",
+    "category": "Savoir, expertise et compréhension",
+    "label": "L’accès à plusieurs perspectives différentes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T194",
+    "category": "Savoir, expertise et compréhension",
+    "label": "Mon indépendance intellectuelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T195",
+    "category": "Savoir, expertise et compréhension",
+    "label": "La possibilité de transmettre mes connaissances avant qu’elles se perdent.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T196",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "Mon sentiment d’agir en accord avec mes principes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T197",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "La confiance que j’ai en mon propre jugement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T198",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "Ma capacité de dire ce que je crois vrai.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T199",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "Ma réputation de personne intègre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T200",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "La possibilité de refuser quelque chose que je juge contraire à mes convictions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T201",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "Une pratique spirituelle ou philosophique qui donne du sens à ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T202",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "Ma capacité de reconnaître mes erreurs sans perdre complètement ma valeur à mes propres yeux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T203",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "Le sentiment que mes actions ont une certaine cohérence avec ce que je prétends défendre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T204",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "La liberté de ne pas partager les convictions dominantes autour de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T205",
+    "category": "Valeurs, convictions et intégrité",
+    "label": "La possibilité de participer à des traditions qui comptent pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T206",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "L’image positive que les autres ont de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T207",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "Le fait que mes erreurs passées ne définissent pas entièrement qui je suis aujourd’hui.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T208",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "La possibilité de choisir ce que je montre de moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T209",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "La distinction entre ma vie privée et ma vie publique.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T210",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "Le respect de mes confidences.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T211",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "Le contrôle sur mes données personnelles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T212",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "Ma réputation auprès des personnes qui comptent pour moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T213",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "Le droit d’être oublié pour certaines erreurs mineures du passé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T214",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "La possibilité d’avoir plusieurs facettes selon les contextes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T215",
+    "category": "Image, réputation et maîtrise de ce que les autres voient",
+    "label": "Le droit de ne pas tout expliquer sur ma vie.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T216",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Ma maison ou mon logement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T217",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Mes économies.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T218",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Les objets auxquels je suis sentimentalement attaché.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T219",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Les outils dont j’ai besoin pour mes activités.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T220",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Les objets que j’ai fabriqués moi-même.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T221",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Mon patrimoine accumulé au fil du temps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T222",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "La possibilité de posséder mes biens sans devoir les partager.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T223",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "La possibilité de partager librement ce que je possède avec ceux que je choisis.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T224",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "Une propriété transmise par ma famille.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T225",
+    "category": "Possessions, patrimoine et ressources matérielles",
+    "label": "La possibilité de laisser quelque chose matériellement aux générations suivantes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T226",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Le niveau de vie auquel je suis habitué.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T227",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Les avantages associés à mon emploi ou à ma position.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T228",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Le fait d’avoir davantage de choix que beaucoup d’autres personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T229",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Le traitement préférentiel que mon expérience me procure.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T230",
+    "category": "Position sociale et privilèges acquis",
+    "label": "La possibilité d’éviter certaines tâches que je ne veux plus faire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T231",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Le respect automatique associé à mon titre.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T232",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Ma capacité de payer pour gagner du temps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T233",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Le fait de ne pas devoir expliquer constamment mes compétences.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T234",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Mon accès privilégié à certaines ressources ou personnes.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T235",
+    "category": "Position sociale et privilèges acquis",
+    "label": "La capacité de déléguer certaines responsabilités.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T236",
+    "category": "Position sociale et privilèges acquis",
+    "label": "La possibilité de choisir parmi plusieurs bonnes options.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T237",
+    "category": "Position sociale et privilèges acquis",
+    "label": "La sécurité qu’offre ma position actuelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T238",
+    "category": "Position sociale et privilèges acquis",
+    "label": "Le fait que mon opinion ait davantage de poids qu’autrefois.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T239",
+    "category": "Position sociale et privilèges acquis",
+    "label": "La possibilité de ne pas accepter n’importe quel travail.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T240",
+    "category": "Position sociale et privilèges acquis",
+    "label": "La marge de confort que j’ai accumulée au fil des années.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T241",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "Le temps que je peux consacrer à mes proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T242",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "Le temps que je peux consacrer à mes passions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T243",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "Mes fins de semaine ou périodes sans obligations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T244",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "La possibilité de travailler à mon propre rythme.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T245",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "La capacité de prendre une pause lorsque j’en ai besoin.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T246",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "Du temps pour réfléchir avant de décider.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T247",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "La possibilité de ne pas être disponible en permanence.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T248",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "Le temps nécessaire pour entretenir mes relations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T249",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "Une frontière relativement claire entre travail et vie personnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T250",
+    "category": "Temps, disponibilité et rythme de vie",
+    "label": "La possibilité d’avoir des journées sans programme.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T251",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "La paix dans mon foyer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T252",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "De bonnes relations entre les personnes qui me sont proches.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T253",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "Une relation sans conflits constants.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T254",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "La possibilité d’éviter les affrontements inutiles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T255",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "Ma capacité de rester calme dans les situations difficiles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T256",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "La réputation d’être quelqu’un de conciliant.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T257",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "Un environnement où les désaccords restent respectueux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T258",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "La possibilité de vivre sans devoir constamment choisir un camp.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T259",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "La stabilité d’un groupe qui fonctionne bien.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T260",
+    "category": "Paix, harmonie et absence de conflit",
+    "label": "Une vie relativement exempte de drames sociaux.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T261",
+    "category": "Créativité, expression et projets personnels",
+    "label": "Ma capacité de créer.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T262",
+    "category": "Créativité, expression et projets personnels",
+    "label": "Les projets personnels auxquels j’ai consacré beaucoup de temps.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T263",
+    "category": "Créativité, expression et projets personnels",
+    "label": "La possibilité d’expérimenter sans devoir tout justifier.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T264",
+    "category": "Créativité, expression et projets personnels",
+    "label": "Mes œuvres, créations ou réalisations.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T265",
+    "category": "Créativité, expression et projets personnels",
+    "label": "Ma capacité d’imaginer de nouvelles solutions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T266",
+    "category": "Créativité, expression et projets personnels",
+    "label": "La liberté de faire les choses à ma manière.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T267",
+    "category": "Créativité, expression et projets personnels",
+    "label": "La possibilité de poursuivre une passion même si elle n’est pas productive.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T268",
+    "category": "Créativité, expression et projets personnels",
+    "label": "Un espace où je peux créer sans être interrompu.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T269",
+    "category": "Créativité, expression et projets personnels",
+    "label": "Le sentiment d’avoir encore des projets.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T270",
+    "category": "Créativité, expression et projets personnels",
+    "label": "La possibilité de montrer mes créations aux autres.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T271",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Le sentiment d’être utile.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T272",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Le fait que des gens comptent sur moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T273",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Mon rôle de personne qui trouve souvent des solutions.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T274",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "La possibilité d’aider concrètement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T275",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Le sentiment que mon travail sert à quelque chose.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T276",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Ma place comme personne de référence dans un groupe.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T277",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "La possibilité de transmettre ce que je sais.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T278",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Le sentiment d’apporter quelque chose que d’autres n’apportent pas.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T279",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Être quelqu’un vers qui on se tourne en cas de difficulté.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T280",
+    "category": "Utilité, rôle et sentiment d’être nécessaire",
+    "label": "Le fait que mon absence aurait un impact réel.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T281",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "Le sentiment d’avoir encore plusieurs chemins possibles devant moi.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T282",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "La possibilité de recommencer ailleurs.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T283",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "La possibilité d’apprendre quelque chose de complètement nouveau.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T284",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "La possibilité de changer d’avis sur mes projets.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T285",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "Le sentiment que mon avenir n’est pas entièrement décidé.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T286",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "Des ressources qui me permettent de saisir une occasion imprévue.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T287",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "Le droit de faire des erreurs sans que tout soit irréversible.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T288",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "La possibilité de changer d’environnement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T289",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "La capacité de prendre certains risques sans mettre tout le reste en danger.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T290",
+    "category": "Choix, possibilités et avenir ouvert",
+    "label": "La possibilité de choisir entre stabilité et changement.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T291",
+    "category": "Ordre, règles et institutions",
+    "label": "Des institutions auxquelles je peux généralement faire confiance.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T292",
+    "category": "Ordre, règles et institutions",
+    "label": "Des règles qui s’appliquent de façon prévisible.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T293",
+    "category": "Ordre, règles et institutions",
+    "label": "La possibilité de contester une décision selon une procédure claire.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T294",
+    "category": "Ordre, règles et institutions",
+    "label": "Un système qui protège certains droits même lorsqu’ils sont impopulaires.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T295",
+    "category": "Ordre, règles et institutions",
+    "label": "Des normes sociales qui rendent les comportements des autres relativement prévisibles.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T296",
+    "category": "Ordre, règles et institutions",
+    "label": "Une certaine stabilité politique ou institutionnelle.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T297",
+    "category": "Ordre, règles et institutions",
+    "label": "La possibilité pour mon groupe de conserver ses propres règles dans certains domaines.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T298",
+    "category": "Ordre, règles et institutions",
+    "label": "Des règles suffisamment souples pour tenir compte des circonstances.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T299",
+    "category": "Ordre, règles et institutions",
+    "label": "Le sentiment que les décisions importantes ne sont pas complètement arbitraires.",
+    "status": "candidate_unvalidated"
+  },
+  {
+    "id": "T300",
+    "category": "Ordre, règles et institutions",
+    "label": "La possibilité de savoir qui est responsable lorsqu’une décision est prise.",
+    "status": "candidate_unvalidated"
+  }
+]

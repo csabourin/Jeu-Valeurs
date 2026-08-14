@@ -14,6 +14,7 @@ import {
 import { useState, useEffect } from "react";
 import { MoveRight, MoveLeft, Plus, Check, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSignalerErreur } from "@/hooks/use-erreur";
 
 /** Il faut au moins deux valeurs distinctes pour qu'un duel existe. */
 const MINIMUM_VALEURS = 2;
@@ -42,6 +43,7 @@ export default function Valeurs() {
 
   const majCarte = useUpdateCarteSession();
   const majSession = useUpdateSession();
+  const signaler = useSignalerErreur();
 
   const [confirmees, setConfirmees] = useState<Record<number, string[]>>({});
   const [ouvert, setOuvert] = useState<number | null>(null);
@@ -68,6 +70,7 @@ export default function Valeurs() {
           queryClient.invalidateQueries({
             queryKey: getListCartesSessionQueryKey(sessionId),
           }),
+        onError: signaler("Choix pas enregistré"),
       },
     );
   };
@@ -97,7 +100,10 @@ export default function Valeurs() {
   const continuer = () => {
     majSession.mutate(
       { sessionId, data: { etapeCourante: "collisions" } },
-      { onSuccess: () => setLocation(`/session/${sessionId}/partie`) },
+      {
+        onSuccess: () => setLocation(`/session/${sessionId}/partie`),
+        onError: signaler("Impossible de continuer"),
+      },
     );
   };
 

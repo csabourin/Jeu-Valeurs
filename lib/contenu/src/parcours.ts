@@ -1,9 +1,10 @@
 /**
  * Parcours — quelle question vient ensuite.
  *
- * Entièrement déterministe : mêmes valeurs confirmées + mêmes réponses
- * ⇒ même question suivante. Aucun tirage au hasard, donc rafraîchir la page ne
- * change jamais la partie en cours.
+ * Reproductible, sans être identique d'une partie à l'autre : mêmes valeurs
+ * confirmées + mêmes réponses + **même graine** ⇒ même question suivante.
+ * Rafraîchir la page ne change donc rien à la partie en cours, alors que deux
+ * parties tirent des sélections différentes dans le même contenu.
  *
  * Le parcours est piloté par le contenu, pas par les paires : on ne pose que
  * des situations écrites à la main. C'est ce qui garantit qu'aucune question
@@ -17,6 +18,7 @@
 
 import { duels, clePaire, type DuelContenu } from "./duels";
 import { series, type SerieBascule } from "./bascules";
+import { generateurAleatoire, melanger } from "./hasard";
 
 /** Combien de duels au maximum dans une partie. */
 const MAX_DUELS = 12;
@@ -77,19 +79,21 @@ function estDecisif(choix: string): boolean {
 /**
  * Répartit les duels pour ne pas enchaîner deux situations sur la même paire :
  * on prend un duel par paire, puis un deuxième, et ainsi de suite.
+ *
+ * L'ordre des paires et le choix à l'intérieur d'une paire viennent de la
+ * graine de la partie : c'est ce qui fait que deux parties bâties sur les mêmes
+ * cartes ne servent pas la même sélection.
  */
-function repartir(liste: DuelContenu[]): DuelContenu[] {
+function repartir(liste: DuelContenu[], suivant: () => number): DuelContenu[] {
   const groupes = new Map<string, DuelContenu[]>();
-  for (const d of [...liste].sort((a, b) => a.id - b.id)) {
+  for (const d of melanger(liste, suivant)) {
     const cle = clePaire(d.valeurA, d.valeurB);
     const groupe = groupes.get(cle);
     if (groupe) groupe.push(d);
     else groupes.set(cle, [d]);
   }
 
-  const ordonnes = Array.from(groupes.values()).sort(
-    (a, b) => a[0].id - b[0].id,
-  );
+  const ordonnes = melanger(Array.from(groupes.values()), suivant);
 
   const resultat: DuelContenu[] = [];
   const profondeurMax = Math.max(0, ...ordonnes.map((g) => g.length));
@@ -109,9 +113,14 @@ function repartir(liste: DuelContenu[]): DuelContenu[] {
  * au besoin avec des situations qui n'en engagent qu'une (elles font découvrir
  * une valeur voisine) ; les variantes ferment la marche, loin de leur jumelle.
  */
-export function planifierDuels(valeursConfirmees: string[]): DuelContenu[] {
+export function planifierDuels(
+  valeursConfirmees: string[],
+  graine = 0,
+): DuelContenu[] {
   const connues = new Set(valeursConfirmees);
   if (connues.size === 0) return [];
+
+  const suivant = generateurAleatoire(graine);
 
   const deuxValeurs = duels.filter(
     (d) => connues.has(d.valeurA) && connues.has(d.valeurB),
@@ -120,21 +129,32 @@ export function planifierDuels(valeursConfirmees: string[]): DuelContenu[] {
     (d) => connues.has(d.valeurA) !== connues.has(d.valeurB),
   );
 
-  const variantes = repartir(deuxValeurs.filter((d) => d.variante)).slice(
-    0,
-    MAX_VARIANTES,
+  const variantesPossibles = repartir(
+    deuxValeurs.filter((d) => d.variante),
+    suivant,
   );
-  const principaux = repartir(deuxValeurs.filter((d) => !d.variante));
-  const complement = repartir(uneValeur);
+  const principaux = repartir(
+    deuxValeurs.filter((d) => !d.variante),
+    suivant,
+  );
+  const complement = repartir(uneValeur, suivant);
 
-  const plafondPrincipaux = MAX_DUELS - variantes.length;
+  const plafondPrincipaux = MAX_DUELS - Math.min(variantesPossibles.length, MAX_VARIANTES);
   let plan = principaux.slice(0, plafondPrincipaux);
 
   if (plan.length < MIN_DUELS) {
     plan = plan.concat(complement.slice(0, MIN_DUELS - plan.length));
   }
 
-  return plan.concat(variantes).slice(0, MAX_DUELS);
+  // Une variante ne part que si sa jumelle est effectivement dans la partie :
+  // sinon l'écran annonce « déjà croisé, autrement » à propos d'une tension
+  // jamais vue, et le calcul de stabilité n'aurait rien à comparer.
+  const pairesRetenues = new Set(plan.map((d) => clePaire(d.valeurA, d.valeurB)));
+  const variantes = variantesPossibles
+    .filter((d) => pairesRetenues.has(clePaire(d.valeurA, d.valeurB)))
+    .slice(0, MAX_VARIANTES);
+
+  return plan.slice(0, MAX_DUELS - variantes.length).concat(variantes);
 }
 
 /**
@@ -182,6 +202,7 @@ function etatSerie(
 export function planifierSeries(
   valeursConfirmees: string[],
   reponses: ReponseConnue[],
+  graine = 0,
 ): SerieBascule[] {
   const connues = new Set(valeursConfirmees);
   const tranchees = new Set(
@@ -201,7 +222,10 @@ export function planifierSeries(
     return paireTranchee || deuxValeursConnues;
   });
 
-  return eligibles
+  // À priorité égale, c'est la graine qui départage — deux parties identiques
+  // sur le papier n'explorent pas les mêmes bascules.
+  const suivant = generateurAleatoire(graine ^ 0x5eed);
+  return melanger(eligibles, suivant)
     .map((serie, rang) => ({
       serie,
       rang,
@@ -258,8 +282,9 @@ function versQuestionBascule(serie: SerieBascule, palier: number): Question | nu
 export function calculerParcours(
   valeursConfirmees: string[],
   reponses: ReponseConnue[],
+  graine = 0,
 ): Parcours {
-  const plan = planifierDuels(valeursConfirmees);
+  const plan = planifierDuels(valeursConfirmees, graine);
   const repondus = new Set(
     reponses.filter((r) => r.dilemmeId != null).map((r) => r.dilemmeId as number),
   );
@@ -267,7 +292,7 @@ export function calculerParcours(
   const duelRestant = plan.find((d) => !repondus.has(d.id));
   const duelsRepondus = plan.filter((d) => repondus.has(d.id)).length;
 
-  const seriesPlan = planifierSeries(valeursConfirmees, reponses);
+  const seriesPlan = planifierSeries(valeursConfirmees, reponses, graine);
   const etats = seriesPlan.map((s) => ({ serie: s, ...etatSerie(s, reponses) }));
   const seriesTerminees = etats.filter((e) => e.terminee).length;
 

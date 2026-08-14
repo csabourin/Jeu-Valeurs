@@ -145,7 +145,15 @@ export default function Partie() {
   const terminer = () => {
     majSession.mutate(
       { sessionId, data: { etapeCourante: "constellation" } },
-      { onSuccess: () => setLocation(`/session/${sessionId}/constellation`) },
+      {
+        onSuccess: () => setLocation(`/session/${sessionId}/constellation`),
+        onError: (erreur) =>
+          toast({
+            title: "Impossible d'afficher ta carte",
+            description: erreur.message,
+            variant: "destructive",
+          }),
+      },
     );
   };
 

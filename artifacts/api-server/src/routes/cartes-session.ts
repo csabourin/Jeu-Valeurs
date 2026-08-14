@@ -1,7 +1,10 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { cartesSessionTable } from "@workspace/db";
+import { cartesSessionTable, sessionsTable } from "@workspace/db";
+import { distribuerCartes } from "@workspace/contenu";
+import { mapCarteCatalogue } from "./catalogue";
 import {
+  ListCartesProposeesParams,
   ListCartesSessionParams,
   AddCarteSessionParams,
   AddCarteSessionBody,
@@ -17,7 +20,7 @@ function mapCarte(c: typeof cartesSessionTable.$inferSelect) {
   return {
     id: c.id,
     sessionId: c.sessionId,
-    catalogueCarteId: c.catalogueCarteId ? Number(c.catalogueCarteId) : null,
+    catalogueCarteId: c.catalogueCarteId ?? null,
     famille: c.famille,
     label: c.label,
     description: c.description ?? null,
@@ -27,6 +30,35 @@ function mapCarte(c: typeof cartesSessionTable.$inferSelect) {
     creeLe: c.creeLe.toISOString(),
   };
 }
+
+/**
+ * La main de cette partie.
+ *
+ * Le tirage suit la graine de la session : revenir sur l'écran de sélection ne
+ * rebat pas les cartes, et une carte déjà prise reste sous les yeux.
+ */
+router.get(
+  "/sessions/:sessionId/cartes-proposees",
+  async (req, res): Promise<void> => {
+    const params = ListCartesProposeesParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const [session] = await db
+      .select()
+      .from(sessionsTable)
+      .where(eq(sessionsTable.id, params.data.sessionId));
+
+    if (!session) {
+      res.status(404).json({ error: "Session introuvable" });
+      return;
+    }
+
+    res.json(distribuerCartes(session.graine).map(mapCarteCatalogue));
+  },
+);
 
 router.get(
   "/sessions/:sessionId/cartes",
@@ -65,9 +97,7 @@ router.post(
       .insert(cartesSessionTable)
       .values({
         sessionId: params.data.sessionId,
-        catalogueCarteId: parsed.data.catalogueCarteId
-          ? String(parsed.data.catalogueCarteId)
-          : null,
+        catalogueCarteId: parsed.data.catalogueCarteId ?? null,
         famille: parsed.data.famille,
         label: parsed.data.label,
         description: parsed.data.description ?? null,

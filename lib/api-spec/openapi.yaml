@@ -146,6 +146,29 @@ paths:
 
   # ─── Cartes session ──────────────────────────────────────────────────────────
 
+  /sessions/{sessionId}/cartes-proposees:
+    get:
+      operationId: listCartesProposees
+      tags: [cartes]
+      summary: La main de cartes tirée pour cette partie
+      description: >
+        825 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main
+        tirée avec sa graine : stable pour une partie donnée, différente d'une
+        partie à l'autre.
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Cartes proposées
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CarteCatalogue"
+        "404":
+          description: Session introuvable
+
   /sessions/{sessionId}/cartes:
     get:
       operationId: listCartesSession
@@ -351,10 +374,11 @@ components:
 
     CarteCatalogue:
       type: object
-      required: [id, famille, label, valeursSuggérées]
+      required: [id, famille, label, valeursSuggérées, origine]
       properties:
         id:
-          type: number
+          type: string
+          description: "Identifiant stable du contenu (ex. JV1001, LR042)"
         famille:
           type: string
           enum: [lignes_rouges, horizons, tresors]
@@ -366,6 +390,14 @@ components:
           type: array
           items:
             type: string
+        origine:
+          type: string
+          enum: [maison, importee]
+          description: >
+            `maison` : carte écrite et relue à la main. `importee` : carte du
+            jeu de 825, dont les valeurs suggérées sont déduites de sa catégorie.
+        categorie:
+          type: ["string", "null"]
         estPersonnalisable:
           type: boolean
 
@@ -473,7 +505,7 @@ components:
         sessionId:
           type: string
         catalogueCarteId:
-          type: ["number", "null"]
+          type: ["string", "null"]
         famille:
           type: string
           enum: [lignes_rouges, horizons, tresors]
@@ -500,7 +532,7 @@ components:
       required: [famille, label]
       properties:
         catalogueCarteId:
-          type: ["number", "null"]
+          type: ["string", "null"]
         famille:
           type: string
           enum: [lignes_rouges, horizons, tresors]
