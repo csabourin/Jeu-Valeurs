@@ -20,7 +20,12 @@ trauma. Voir « Écrire du contenu ».
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — serveur API (port géré par le workflow)
+- `pnpm --filter @workspace/api-server run dev` — serveur API. **À lancer par le
+  bouton Run / le workflow, pas depuis le shell** : c'est le workflow qui
+  injecte `PORT` (le serveur refuse de démarrer sans, sans valeur par défaut) et
+  qui enregistre le service auprès du routeur pour que `/api` l'atteigne. Depuis
+  le shell il faut `PORT=8080 pnpm --filter @workspace/api-server run start`, et
+  ça entre en conflit avec l'instance du workflow si elle tourne déjà.
 - `pnpm --filter @workspace/jeu-des-valeurs run dev` — frontend React/Vite
 - `pnpm run typecheck` — vérification TypeScript complète
 - `pnpm run test` — tests unitaires (vitest) de tous les packages qui en ont
