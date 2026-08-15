@@ -19,7 +19,14 @@ import {
 } from "@workspace/contenu";
 import type { Contexte, Dimension } from "@workspace/contenu";
 import { useMemo } from "react";
-import { Loader2, ShieldCheck, SlidersHorizontal, Swords, Compass } from "lucide-react";
+import {
+  Loader2,
+  ShieldCheck,
+  SlidersHorizontal,
+  Swords,
+  Compass,
+  Scale,
+} from "lucide-react";
 
 /** Icône et titre de section par type d'observation. */
 const rubriques: Record<
@@ -34,6 +41,11 @@ const rubriques: Record<
   contexte: { titre: "Question de contexte", ton: "border-border bg-card" },
   territoire_inexplore: { titre: "Pas encore exploré", ton: "border-border bg-muted/30" },
   couverture: { titre: "Ce que ça couvre", ton: "border-border bg-muted/30" },
+  arbitrage: { titre: "Cartes en main", ton: "border-border bg-card" },
+  ecart_declare: {
+    titre: "Dit à froid, joué en situation",
+    ton: "border-accent/40 bg-accent/5",
+  },
 };
 
 /** Retrouve la situation jouée derrière une réponse, pour pouvoir la remontrer. */
@@ -107,7 +119,9 @@ export default function Constellation() {
     );
   }
 
-  const { tendances, bascules, observations, couverture } = constellation;
+  const { tendances, bascules, observations, couverture, cartesJugees } =
+    constellation;
+  const classees = cartesJugees.filter((c) => c.apparitions > 0);
   const misesALepreuve = tendances.filter((t) => !t.territoireInexplore);
   const protegees = tendances.filter((t) => t.estProtegee);
   const bousculees = bascules.filter((b) => b.reglageBascule !== null);
@@ -189,6 +203,38 @@ export default function Constellation() {
                     </div>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {classees.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
+                  <Scale className="w-5 h-5 text-primary" aria-hidden="true" />
+                  Tes cartes, mises côte à côte
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Ça, c'est avant les situations — juste tes cartes les unes à
+                  côté des autres. Ce n'est pas ce qui a tenu quand ça coûtait
+                  quelque chose : c'est ce que tu disais compter, à froid.
+                </p>
+                <ol className="grid gap-2">
+                  {classees.map((carte, rang) => (
+                    <li
+                      key={carte.carteId}
+                      className="rounded-lg border border-border/60 bg-card p-3 flex items-baseline gap-3"
+                    >
+                      <span className="text-sm text-muted-foreground tabular-nums shrink-0">
+                        {rang + 1}.
+                      </span>
+                      <span className="flex-1 leading-snug">{carte.label}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {carte.foisMeilleure > 0 && `${carte.foisMeilleure}× devant`}
+                        {carte.foisMeilleure > 0 && carte.foisPire > 0 && " · "}
+                        {carte.foisPire > 0 && `${carte.foisPire}× derrière`}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
               </section>
             )}
 

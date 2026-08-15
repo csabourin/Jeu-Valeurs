@@ -4,6 +4,7 @@ import {
   sessionsTable,
   cartesSessionTable,
   reponsesCollisionTable,
+  arbitragesTable,
 } from "@workspace/db";
 import {
   CreateSessionBody,
@@ -128,6 +129,9 @@ router.delete("/sessions/:sessionId", async (req, res): Promise<void> => {
     await tx
       .delete(reponsesCollisionTable)
       .where(eq(reponsesCollisionTable.sessionId, sessionId));
+    await tx
+      .delete(arbitragesTable)
+      .where(eq(arbitragesTable.sessionId, sessionId));
     await tx
       .delete(cartesSessionTable)
       .where(eq(cartesSessionTable.sessionId, sessionId));

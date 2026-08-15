@@ -10,15 +10,23 @@
  * des situations écrites à la main. C'est ce qui garantit qu'aucune question
  * n'arrive sous la forme « Liberté ou Sécurité ? » posée à froid.
  *
- * Deux phases :
- *   1. duels    — situations concrètes entre deux valeurs de la personne ;
- *   2. bascules — séries où un seul réglage bouge, servies pour les tensions
- *                 que la personne a tranchées franchement.
+ * Trois phases :
+ *   1. arbitrages — les cartes de la personne comparées entre elles, à froid,
+ *                   avant que la moindre situation ait pu déplacer l'ordre ;
+ *   2. duels      — situations concrètes entre deux valeurs de la personne ;
+ *   3. bascules   — séries où un seul réglage bouge, servies pour les tensions
+ *                   que la personne a tranchées franchement.
  */
 
 import { duels, clePaire, type DuelContenu } from "./duels";
 import { series, type SerieBascule } from "./bascules";
 import { generateurAleatoire, melanger } from "./hasard";
+import {
+  prochainArbitrage,
+  type BlocArbitrage,
+  type CarteArbitrable,
+  type ReponseArbitrage,
+} from "./arbitrages";
 
 /** Combien de duels au maximum dans une partie. */
 const MAX_DUELS = 12;
@@ -41,7 +49,7 @@ export interface ReponseConnue {
   palier?: number | null;
 }
 
-export type PhaseParcours = "duels" | "bascules" | "termine";
+export type PhaseParcours = "arbitrages" | "duels" | "bascules" | "termine";
 
 export interface Question {
   type: "duel" | "bascule";
@@ -66,10 +74,28 @@ export interface Question {
 export interface Parcours {
   phase: PhaseParcours;
   prochaine: Question | null;
+  /**
+   * Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une
+   * `Question` : il ne pose pas de situation et n'oppose pas deux valeurs, donc
+   * il voyage à part plutôt que d'ajouter huit champs nullables à `Question`.
+   */
+  prochainBloc: BlocArbitrage | null;
+  arbitragesPlanifies: number;
+  arbitragesRepondus: number;
   duelsPlanifies: number;
   duelsRepondus: number;
   seriesPlanifiees: number;
   seriesTerminees: number;
+}
+
+/** Ce que le parcours a besoin de savoir de la partie en cours. */
+export interface EtatPartie {
+  valeursConfirmees: string[];
+  reponses: ReponseConnue[];
+  /** Les cartes retenues par la personne. Vide ⇒ pas de phase d'arbitrage. */
+  cartes?: CarteArbitrable[];
+  arbitrages?: ReponseArbitrage[];
+  graine?: number;
 }
 
 function estDecisif(choix: string): boolean {
@@ -278,12 +304,21 @@ function versQuestionBascule(serie: SerieBascule, palier: number): Question | nu
   };
 }
 
-/** Où en est la partie, et quelle question vient maintenant. */
-export function calculerParcours(
-  valeursConfirmees: string[],
-  reponses: ReponseConnue[],
+/**
+ * Où en est la partie, et quelle question vient maintenant.
+ *
+ * Les arbitrages passent avant les duels : une fois qu'on a joué douze
+ * situations, on ne classe plus ses cartes à froid, on classe ce que les
+ * situations viennent de remuer.
+ */
+export function calculerParcours({
+  valeursConfirmees,
+  reponses,
+  cartes = [],
+  arbitrages = [],
   graine = 0,
-): Parcours {
+}: EtatPartie): Parcours {
+  const arbitrage = prochainArbitrage(cartes, arbitrages, graine);
   const plan = planifierDuels(valeursConfirmees, graine);
   const repondus = new Set(
     reponses.filter((r) => r.dilemmeId != null).map((r) => r.dilemmeId as number),
@@ -297,11 +332,23 @@ export function calculerParcours(
   const seriesTerminees = etats.filter((e) => e.terminee).length;
 
   const base = {
+    prochainBloc: null,
+    arbitragesPlanifies: arbitrage.plan.length,
+    arbitragesRepondus: arbitrage.repondus,
     duelsPlanifies: plan.length,
     duelsRepondus,
     seriesPlanifiees: seriesPlan.length,
     seriesTerminees,
   };
+
+  if (arbitrage.prochain) {
+    return {
+      ...base,
+      phase: "arbitrages",
+      prochaine: null,
+      prochainBloc: arbitrage.prochain,
+    };
+  }
 
   if (duelRestant) {
     return {
