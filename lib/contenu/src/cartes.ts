@@ -43,6 +43,7 @@
  */
 
 import { V } from "./valeurs";
+import { limitesSimples } from "./limites-simples";
 
 export const familles = ["lignes_rouges", "horizons", "tresors"] as const;
 export type Famille = (typeof familles)[number];
@@ -132,8 +133,10 @@ const lignesRouges: CarteContenu[] = [
   {
     id: "JV1007",
     famille: "lignes_rouges",
-    label: "Laisser tomber quelqu'un à la dernière minute pour une meilleure offre",
-    description: "C'était prévu depuis deux semaines, mais quelque chose de mieux arrive.",
+    label:
+      "Laisser tomber quelqu'un à la dernière minute pour une meilleure offre",
+    description:
+      "C'était prévu depuis deux semaines, mais quelque chose de mieux arrive.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.loyaute, V.honnetete],
@@ -169,7 +172,8 @@ const lignesRouges: CarteContenu[] = [
     id: "JV1011",
     famille: "lignes_rouges",
     label: "Promettre quelque chose que je sais que je ne ferai pas",
-    description: "Ça règle la conversation tout de suite, c'est tout ce qui compte sur le coup.",
+    description:
+      "Ça règle la conversation tout de suite, c'est tout ce qui compte sur le coup.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.honnetete, V.loyaute],
@@ -196,7 +200,8 @@ const lignesRouges: CarteContenu[] = [
     id: "JV1014",
     famille: "lignes_rouges",
     label: "Faire semblant d'être quelqu'un d'autre pour être accepté",
-    description: "Tu changes ce que tu aimes, ce que tu dis, ce que tu écoutes.",
+    description:
+      "Tu changes ce que tu aimes, ce que tu dis, ce que tu écoutes.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.autonomie, V.honnetete],
@@ -213,7 +218,8 @@ const lignesRouges: CarteContenu[] = [
   {
     id: "JV1016",
     famille: "lignes_rouges",
-    label: "Prendre quelque chose qui ne m'appartient pas quand personne ne regarde",
+    label:
+      "Prendre quelque chose qui ne m'appartient pas quand personne ne regarde",
     description: "Ça ne manquerait à personne et tu le sais.",
     origine: "maison" as const,
     categorie: null,
@@ -249,7 +255,8 @@ const lignesRouges: CarteContenu[] = [
     id: "JV1021",
     famille: "lignes_rouges",
     label: "Frapper quelqu'un qui ne peut pas se défendre",
-    description: "Tu sais qu'il ne rendra pas le coup. C'est ce qui rend ça possible.",
+    description:
+      "Tu sais qu'il ne rendra pas le coup. C'est ce qui rend ça possible.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.justice, V.courage],
@@ -258,7 +265,8 @@ const lignesRouges: CarteContenu[] = [
     id: "JV1022",
     famille: "lignes_rouges",
     label: "Voler de l'argent à quelqu'un qui en manque",
-    description: "Tu en as besoin. Cette personne aussi, et elle ne le verra pas tout de suite.",
+    description:
+      "Tu en as besoin. Cette personne aussi, et elle ne le verra pas tout de suite.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.honnetete, V.justice],
@@ -303,7 +311,8 @@ const lignesRouges: CarteContenu[] = [
     id: "JV1027",
     famille: "lignes_rouges",
     label: "Tromper la personne avec qui je vis",
-    description: "Elle ne se doute de rien, et tu comptes bien que ça reste comme ça.",
+    description:
+      "Elle ne se doute de rien, et tu comptes bien que ça reste comme ça.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.loyaute, V.honnetete],
@@ -375,7 +384,8 @@ const lignesRouges: CarteContenu[] = [
     id: "JV1035",
     famille: "lignes_rouges",
     label: "Obéir à un ordre que je trouve injuste pour garder ma place",
-    description: "Ce n'est pas toi qui décides. C'est quand même toi qui le fais.",
+    description:
+      "Ce n'est pas toi qui décides. C'est quand même toi qui le fais.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.courage, V.regles],
@@ -406,7 +416,8 @@ const horizons: CarteContenu[] = [
     id: "JV2001",
     famille: "horizons",
     label: "Devenir vraiment bon dans quelque chose que j'aime",
-    description: "Assez bon pour que ça se remarque sans que tu aies à le dire.",
+    description:
+      "Assez bon pour que ça se remarque sans que tu aies à le dire.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.reussite, V.plaisir],
@@ -433,7 +444,8 @@ const horizons: CarteContenu[] = [
     id: "JV2004",
     famille: "horizons",
     label: "Créer quelque chose que d'autres utilisent vraiment",
-    description: "Un objet, un jeu, une chanson, un outil — quelque chose qui sort de toi.",
+    description:
+      "Un objet, un jeu, une chanson, un outil — quelque chose qui sort de toi.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.creativite, V.reconnaissance],
@@ -582,8 +594,25 @@ const horizons: CarteContenu[] = [
     categorie: null,
     valeursSuggerees: [V.creativite, V.liberte],
   },
+  {
+    id: "JV2021",
+    famille: "horizons",
+    label: "Nourrir ma famille",
+    description: "Que personne à la maison ne manque de l'essentiel.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.famille, V.securite],
+  },
+  {
+    id: "JV2022",
+    famille: "horizons",
+    label: "Enrichir ma famille",
+    description: "Donner aux miens plus d'argent et plus de choix.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.famille, V.reussite],
+  },
 ];
-
 /** 3000-3999 : trésors. */
 const tresors: CarteContenu[] = [
   {
@@ -680,7 +709,8 @@ const tresors: CarteContenu[] = [
     id: "JV3011",
     famille: "tresors",
     label: "Mes projets personnels",
-    description: "Ce sur quoi tu travailles sans que ce soit demandé par personne.",
+    description:
+      "Ce sur quoi tu travailles sans que ce soit demandé par personne.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.creativite, V.autonomie],
@@ -698,7 +728,8 @@ const tresors: CarteContenu[] = [
     id: "JV3013",
     famille: "tresors",
     label: "Ma famille proche",
-    description: "Le monde qui était là avant que tu choisisses quoi que ce soit.",
+    description:
+      "Le monde qui était là avant que tu choisisses quoi que ce soit.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.famille, V.loyaute],
@@ -734,7 +765,8 @@ const tresors: CarteContenu[] = [
     id: "JV3017",
     famille: "tresors",
     label: "Le fait que personne ne lit mes messages",
-    description: "Ce que tu écris reste entre toi et la personne à qui tu l'écris.",
+    description:
+      "Ce que tu écris reste entre toi et la personne à qui tu l'écris.",
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.viePrivee, V.securite],
@@ -773,4 +805,12 @@ export const cartesMaison: CarteContenu[] = [
   ...lignesRouges,
   ...horizons,
   ...tresors,
-];
+].map((carte) =>
+  carte.famille === "lignes_rouges"
+    ? {
+        ...carte,
+        label: limitesSimples[carte.id] ?? carte.label,
+        description: null,
+      }
+    : carte,
+);

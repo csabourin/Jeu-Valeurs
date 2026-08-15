@@ -6,6 +6,8 @@ import {
   getGetConstellationQueryKey,
   useListReponses,
   getListReponsesQueryKey,
+  useListCartesSession,
+  getListCartesSessionQueryKey,
   type ObservationConstellation,
   type ReponseCollision,
   type TendanceValeur,
@@ -16,8 +18,13 @@ import {
   trouverPalier,
   libellesDimension,
   libellesContexte,
+  combatsCartesPossibles,
 } from "@workspace/contenu";
-import type { Contexte, Dimension } from "@workspace/contenu";
+import type {
+  CombatCarteContenu,
+  Contexte,
+  Dimension,
+} from "@workspace/contenu";
 import { useMemo } from "react";
 import {
   Loader2,
@@ -26,6 +33,8 @@ import {
   Swords,
   Compass,
   Scale,
+  Users,
+  Ban,
 } from "lucide-react";
 
 /** Icône et titre de section par type d'observation. */
@@ -33,13 +42,28 @@ const rubriques: Record<
   ObservationConstellation["type"],
   { titre: string; ton: string }
 > = {
-  valeur_protegee: { titre: "N'a pas plié", ton: "border-secondary/30 bg-secondary/5" },
-  tendance: { titre: "Ce qui est passé devant", ton: "border-primary/30 bg-primary/5" },
-  point_de_bascule: { titre: "Point de bascule", ton: "border-accent/40 bg-accent/5" },
+  valeur_protegee: {
+    titre: "N'a pas plié",
+    ton: "border-secondary/30 bg-secondary/5",
+  },
+  tendance: {
+    titre: "Ce qui est passé devant",
+    ton: "border-primary/30 bg-primary/5",
+  },
+  point_de_bascule: {
+    titre: "Point de bascule",
+    ton: "border-accent/40 bg-accent/5",
+  },
   tension: { titre: "Tension ouverte", ton: "border-border bg-card" },
-  stabilite: { titre: "Même conflit, autre forme", ton: "border-border bg-card" },
+  stabilite: {
+    titre: "Même conflit, autre forme",
+    ton: "border-border bg-card",
+  },
   contexte: { titre: "Question de contexte", ton: "border-border bg-card" },
-  territoire_inexplore: { titre: "Pas encore exploré", ton: "border-border bg-muted/30" },
+  territoire_inexplore: {
+    titre: "Pas encore exploré",
+    ton: "border-border bg-muted/30",
+  },
   couverture: { titre: "Ce que ça couvre", ton: "border-border bg-muted/30" },
   arbitrage: { titre: "Cartes en main", ton: "border-border bg-card" },
   ecart_declare: {
@@ -49,7 +73,10 @@ const rubriques: Record<
 };
 
 /** Retrouve la situation jouée derrière une réponse, pour pouvoir la remontrer. */
-function decrireReponse(r: ReponseCollision): { situation: string; choix: string } | null {
+function decrireReponse(
+  r: ReponseCollision,
+  combats: Map<number, CombatCarteContenu>,
+): { situation: string; choix: string } | null {
   if (r.serieId && r.palier != null) {
     const serie = trouverSerie(r.serieId);
     const palier = trouverPalier(r.serieId, r.palier);
@@ -65,6 +92,19 @@ function decrireReponse(r: ReponseCollision): { situation: string; choix: string
     };
   }
   if (r.dilemmeId == null) return null;
+  const combat = combats.get(r.dilemmeId);
+  if (combat) {
+    return {
+      situation: combat.situation,
+      choix:
+        r.choix === "A"
+          ? combat.optionA
+          : r.choix === "B"
+            ? combat.optionB
+            : libelleChoix(r.choix),
+    };
+  }
+
   const duel = trouverDuel(r.dilemmeId);
   if (!duel) return null;
   return {
@@ -99,8 +139,36 @@ export default function Constellation() {
   });
 
   const { data: reponses } = useListReponses(sessionId, {
-    query: { enabled: !!sessionId, queryKey: getListReponsesQueryKey(sessionId) },
+    query: {
+      enabled: !!sessionId,
+      queryKey: getListReponsesQueryKey(sessionId),
+    },
   });
+
+  const { data: cartes } = useListCartesSession(sessionId, {
+    query: {
+      enabled: !!sessionId,
+      queryKey: getListCartesSessionQueryKey(sessionId),
+    },
+  });
+
+  const combatsPossibles = useMemo(
+    () =>
+      combatsCartesPossibles(
+        (cartes ?? []).map((carte) => ({
+          id: String(carte.id),
+          famille: carte.famille,
+          label: carte.label,
+          valeursConfirmees: carte.valeursConfirmées,
+        })),
+      ),
+    [cartes],
+  );
+
+  const combatsParId = useMemo(
+    () => new Map(combatsPossibles.map((combat) => [combat.id, combat])),
+    [combatsPossibles],
+  );
 
   const parId = useMemo(() => {
     const index = new Map<number, ReponseCollision>();
@@ -113,7 +181,9 @@ export default function Constellation() {
       <Shell sessionId={sessionId} etape="constellation">
         <div className="flex-1 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground font-serif">On compte les points…</p>
+          <p className="text-muted-foreground font-serif">
+            On relie tes choix…
+          </p>
         </div>
       </Shell>
     );
@@ -133,56 +203,203 @@ export default function Constellation() {
   const protegees = tendances.filter((t) => t.estProtegee);
   const bousculees = bascules.filter((b) => b.reglageBascule !== null);
   const rien = misesALepreuve.length === 0;
+  const reponseParDilemme = new Map(
+    (reponses ?? [])
+      .filter((reponse) => reponse.dilemmeId != null)
+      .map((reponse) => [reponse.dilemmeId as number, reponse]),
+  );
+  const combatsJoues = combatsPossibles
+    .map((combat) => ({
+      combat,
+      reponse: reponseParDilemme.get(combat.id),
+    }))
+    .filter(
+      (
+        entree,
+      ): entree is {
+        combat: CombatCarteContenu;
+        reponse: ReponseCollision;
+      } => entree.reponse !== undefined,
+    );
+  const combatsParLimite = new Map<
+    string,
+    { combat: CombatCarteContenu; reponse: ReponseCollision }[]
+  >();
+  for (const entree of combatsJoues) {
+    const groupe = combatsParLimite.get(entree.combat.limiteId);
+    if (groupe) groupe.push(entree);
+    else combatsParLimite.set(entree.combat.limiteId, [entree]);
+  }
+  const groupesDecisifs = Array.from(combatsParLimite.values())
+    .map((groupe) =>
+      groupe.filter(
+        (entree) =>
+          entree.reponse.choix === "A" || entree.reponse.choix === "B",
+      ),
+    )
+    .filter((groupe) => groupe.length > 0);
+  const limitesFermes = groupesDecisifs.filter((groupe) =>
+    groupe.every((entree) => entree.reponse.choix === "B"),
+  );
+  const limitesFranchies = groupesDecisifs.filter((groupe) =>
+    groupe.some((entree) => entree.reponse.choix === "A"),
+  );
+  const basculesCartes = groupesDecisifs
+    .map((groupe) => ({
+      refuse: groupe.find((entree) => entree.reponse.choix === "B"),
+      accepte: groupe.find((entree) => entree.reponse.choix === "A"),
+    }))
+    .filter(
+      (
+        bascule,
+      ): bascule is {
+        refuse: { combat: CombatCarteContenu; reponse: ReponseCollision };
+        accepte: { combat: CombatCarteContenu; reponse: ReponseCollision };
+      } => bascule.refuse !== undefined && bascule.accepte !== undefined,
+    );
 
   return (
     <Shell sessionId={sessionId} etape="constellation">
-      <div className="space-y-10 animate-in fade-in duration-700">
-        <header className="space-y-3 text-center max-w-2xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold">Ta carte</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            Voici ce que tes choix donnent, dans les situations que tu as jouées
-            et rien de plus. Une autre journée, d'autres situations, et la carte
-            pourrait être différente.
+      <div className="max-w-4xl mx-auto w-full space-y-10 animate-in fade-in duration-700">
+        <header className="space-y-4 text-center max-w-2xl mx-auto">
+          <p className="eyebrow mx-auto">Étape 4 · Découvrir</p>
+          <h1 className="text-4xl md:text-5xl font-serif font-semibold">
+            Ce que tes choix révèlent
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Quelles limites ont tenu, lesquelles ont bougé, et ce qui avait
+            assez de poids pour changer ta réponse. Ce portrait parle seulement
+            des combats que tu viens de jouer.
           </p>
         </header>
 
-        {rien ? (
+        {rien && combatsJoues.length === 0 ? (
           <div className="text-center space-y-4 py-12">
             <p className="text-muted-foreground">
               Il n'y a pas encore assez de choix tranchés pour dessiner quoi que
               ce soit.
             </p>
             <Button onClick={() => setLocation(`/session/${sessionId}/partie`)}>
-              Jouer quelques duels
+              Jouer quelques combats
             </Button>
           </div>
         ) : (
           <>
+            {limitesFermes.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
+                  <ShieldCheck
+                    className="w-5 h-5 text-secondary"
+                    aria-hidden="true"
+                  />
+                  Tes limites qui ont tenu
+                </h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {limitesFermes.map((groupe) => (
+                    <div
+                      key={groupe[0].combat.limiteId}
+                      className="rounded-xl border border-secondary/30 bg-secondary/5 p-4"
+                    >
+                      <p className="font-medium">
+                        {groupe[0].combat.limiteLabel}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Tu as dit non face à {groupe.length} enjeu
+                        {groupe.length > 1 ? "x" : ""} différent
+                        {groupe.length > 1 ? "s" : ""}. Jusqu'ici, cette limite
+                        n'a pas bougé.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {limitesFranchies.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
+                  <Ban className="w-5 h-5 text-primary" aria-hidden="true" />
+                  Ce qui pourrait te faire franchir une limite
+                </h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {limitesFranchies.map((groupe) => {
+                    const oui = groupe.filter(
+                      (entree) => entree.reponse.choix === "A",
+                    );
+                    return (
+                      <div
+                        key={groupe[0].combat.limiteId}
+                        className="rounded-xl border border-primary/30 bg-primary/5 p-4"
+                      >
+                        <p className="font-medium">
+                          {groupe[0].combat.limiteLabel}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Tu as répondu oui pour{" "}
+                          {oui
+                            .map((entree) => formulerEnjeu(entree.combat))
+                            .join(" · ")}
+                          .
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {basculesCartes.length > 0 && (
+              <section className="space-y-4">
+                <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
+                  <SlidersHorizontal
+                    className="w-5 h-5 text-accent"
+                    aria-hidden="true"
+                  />
+                  Là où ta réponse bascule
+                </h2>
+                <div className="space-y-3">
+                  {basculesCartes.map(({ refuse, accepte }) => (
+                    <div
+                      key={refuse.combat.limiteId}
+                      className="rounded-xl border border-accent/30 bg-accent/5 p-4"
+                    >
+                      <p className="font-medium">{refuse.combat.limiteLabel}</p>
+                      <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                        Tu as refusé de franchir cette limite pour{" "}
+                        {formulerEnjeu(refuse.combat)}, mais tu as répondu oui
+                        pour {formulerEnjeu(accepte.combat)}.
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Tuile
                 valeur={`${Math.round(couverture * 100)} %`}
                 label="des situations prévues"
               />
               <Tuile
-                valeur={String(misesALepreuve.length)}
+                valeur={String(combatsJoues.length)}
                 label={pluriel(
-                  misesALepreuve.length,
-                  "raison mise à l'épreuve",
-                  "raisons mises à l'épreuve",
+                  combatsJoues.length,
+                  "combat joué",
+                  "combats joués",
                 )}
               />
               <Tuile
-                valeur={String(protegees.length)}
+                valeur={String(limitesFermes.length)}
                 label={pluriel(
-                  protegees.length,
-                  "raison qui n'a pas plié",
-                  "raisons qui n'ont pas plié",
+                  limitesFermes.length,
+                  "limite restée ferme",
+                  "limites restées fermes",
                 )}
               />
               <Tuile
-                valeur={String(bousculees.length)}
+                valeur={String(basculesCartes.length + bousculees.length)}
                 label={pluriel(
-                  bousculees.length,
+                  basculesCartes.length + bousculees.length,
                   "point de bascule",
                   "points de bascule",
                 )}
@@ -192,7 +409,10 @@ export default function Constellation() {
             {protegees.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-secondary" aria-hidden="true" />
+                  <ShieldCheck
+                    className="w-5 h-5 text-secondary"
+                    aria-hidden="true"
+                  />
                   Ce qui n'a pas plié
                 </h2>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -203,9 +423,9 @@ export default function Constellation() {
                     >
                       <p className="font-medium">{t.valeur}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Choisie {t.foisPrivilegiee} fois sur {t.foisPrivilegiee},
-                        contre {t.domine.join(", ")}. Aucune situation jouée ne
-                        l'a fait céder — jusqu'ici.
+                        Choisie {t.foisPrivilegiee} fois sur {t.foisPrivilegiee}
+                        , contre {t.domine.join(", ")}. Aucune situation jouée
+                        ne l'a fait céder — jusqu'ici.
                       </p>
                     </div>
                   ))}
@@ -235,7 +455,8 @@ export default function Constellation() {
                       </span>
                       <span className="flex-1 leading-snug">{carte.label}</span>
                       <span className="text-xs text-muted-foreground shrink-0">
-                        {carte.foisMeilleure > 0 && `${carte.foisMeilleure}× devant`}
+                        {carte.foisMeilleure > 0 &&
+                          `${carte.foisMeilleure}× devant`}
                         {carte.foisMeilleure > 0 && carte.foisPire > 0 && " · "}
                         {carte.foisPire > 0 && `${carte.foisPire}× derrière`}
                       </span>
@@ -262,19 +483,23 @@ export default function Constellation() {
                     >
                       <p className="text-xs uppercase tracking-wider text-muted-foreground">
                         {b.valeurA} contre {b.valeurB} — on faisait monter{" "}
-                        {libellesDimension[b.dimension as Dimension] ?? b.dimension}
+                        {libellesDimension[b.dimension as Dimension] ??
+                          b.dimension}
                       </p>
                       <p className="mt-2">
                         {b.reglageBascule ? (
                           <>
                             Ta réponse a changé à :{" "}
-                            <span className="font-medium">{b.reglageBascule}</span>.
+                            <span className="font-medium">
+                              {b.reglageBascule}
+                            </span>
+                            .
                           </>
                         ) : (
                           <>
-                            Ta réponse n'a pas bougé, même au dernier cran. Si un
-                            point de bascule existe, il est plus loin que ce que
-                            le jeu est allé.
+                            Ta réponse n'a pas bougé, même au dernier cran. Si
+                            un point de bascule existe, il est plus loin que ce
+                            que le jeu est allé.
                           </>
                         )}
                       </p>
@@ -297,6 +522,7 @@ export default function Constellation() {
                     reponses={obs.reponsesSources
                       .map((id) => parId.get(id))
                       .filter((r): r is ReponseCollision => r !== undefined)}
+                    combats={combatsParId}
                   />
                 ))}
               </div>
@@ -304,7 +530,10 @@ export default function Constellation() {
 
             <section className="space-y-4">
               <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
-                <Swords className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+                <Swords
+                  className="w-5 h-5 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 Le détail
               </h2>
               <div className="grid gap-2">
@@ -315,7 +544,9 @@ export default function Constellation() {
             </section>
 
             <div className="rounded-xl border border-border bg-muted/30 p-5 text-sm text-muted-foreground space-y-2">
-              <p className="font-medium text-foreground">Ce que ça ne dit pas</p>
+              <p className="font-medium text-foreground">
+                Ce que ça ne dit pas
+              </p>
               <p>
                 Rien ici ne prédit ce que tu ferais pour vrai. Une situation
                 jouée sur un écran ne coûte rien ; une vraie, oui. Le jeu compte
@@ -327,6 +558,12 @@ export default function Constellation() {
         )}
 
         <div className="flex flex-wrap justify-center gap-3 pt-4">
+          <Button
+            size="lg"
+            onClick={() => setLocation(`/session/${sessionId}/comparer`)}
+          >
+            <Users className="size-4 mr-2" /> Comparer avec quelqu'un
+          </Button>
           <Button
             variant="outline"
             size="lg"
@@ -347,6 +584,15 @@ export default function Constellation() {
   );
 }
 
+function formulerEnjeu(combat: CombatCarteContenu): string {
+  const label =
+    combat.enjeuLabel.length > 0
+      ? combat.enjeuLabel[0].toLocaleLowerCase("fr") +
+        combat.enjeuLabel.slice(1)
+      : combat.enjeuLabel;
+  return combat.enjeuFamille === "tresors" ? `garder ${label}` : label;
+}
+
 /** En français, zéro et un prennent le singulier. */
 function pluriel(n: number, singulier: string, plurielForme: string): string {
   return n <= 1 ? singulier : plurielForme;
@@ -364,15 +610,18 @@ function Tuile({ valeur, label }: { valeur: string; label: string }) {
 function Observation({
   obs,
   reponses,
+  combats,
 }: {
   obs: ObservationConstellation;
   reponses: ReponseCollision[];
+  combats: Map<number, CombatCarteContenu>;
 }) {
   const rubrique = rubriques[obs.type];
   const sources = reponses
-    .map((r) => ({ id: r.id, detail: decrireReponse(r) }))
-    .filter((s): s is { id: number; detail: { situation: string; choix: string } } =>
-      s.detail !== null,
+    .map((r) => ({ id: r.id, detail: decrireReponse(r, combats) }))
+    .filter(
+      (s): s is { id: number; detail: { situation: string; choix: string } } =>
+        s.detail !== null,
     );
 
   return (
@@ -411,8 +660,10 @@ function LigneTendance({ tendance }: { tendance: TendanceValeur }) {
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
         <span className="font-medium">{tendance.valeur}</span>
         <span className="text-sm text-muted-foreground">
-          {tendance.foisPrivilegiee} fois devant · {tendance.foisCedee} fois derrière
-          {tendance.incertitudes > 0 && ` · ${tendance.incertitudes} non tranchée${tendance.incertitudes > 1 ? "s" : ""}`}
+          {tendance.foisPrivilegiee} fois devant · {tendance.foisCedee} fois
+          derrière
+          {tendance.incertitudes > 0 &&
+            ` · ${tendance.incertitudes} non tranchée${tendance.incertitudes > 1 ? "s" : ""}`}
         </span>
       </div>
       <dl className="mt-2 space-y-1 text-sm text-muted-foreground">

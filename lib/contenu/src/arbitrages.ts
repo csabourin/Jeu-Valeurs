@@ -41,6 +41,8 @@ export interface CarteArbitrable {
   id: string;
   famille: Famille;
   label: string;
+  /** Sert aux combats entre cartes après l'arbitrage. */
+  valeursConfirmees?: string[];
 }
 
 export interface BlocArbitrage {

@@ -14,5 +14,6 @@ export * from "./catalogue";
 export * from "./duels";
 export * from "./bascules";
 export * from "./arbitrages";
+export * from "./combats-cartes";
 export * from "./hasard";
 export * from "./parcours";
