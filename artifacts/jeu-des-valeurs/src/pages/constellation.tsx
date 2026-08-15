@@ -121,7 +121,14 @@ export default function Constellation() {
 
   const { tendances, bascules, observations, couverture, cartesJugees } =
     constellation;
-  const classees = cartesJugees.filter((c) => c.apparitions > 0);
+  // Le contrat annonce `cartesJugees` comme obligatoire, et le serveur en
+  // renvoie toujours un tableau — vide au pire. Mais le frontend est un paquet
+  // statique et l'API un service à part : les deux ne se déploient pas au même
+  // instant. Un serveur d'avant les arbitrages répond sans ce champ, et la page
+  // entière tombait alors sur « Cannot read properties of undefined ». Un champ
+  // récent se lit donc en supposant qu'il puisse manquer — la section disparaît,
+  // le reste de la carte s'affiche.
+  const classees = (cartesJugees ?? []).filter((c) => c.apparitions > 0);
   const misesALepreuve = tendances.filter((t) => !t.territoireInexplore);
   const protegees = tendances.filter((t) => t.estProtegee);
   const bousculees = bascules.filter((b) => b.reglageBascule !== null);
