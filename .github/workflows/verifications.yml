@@ -1,0 +1,80 @@
+# Les vérifications qui tournent sur chaque PR.
+#
+# Ce sont exactement les commandes de « Run & Operate » dans replit.md, dans
+# l'ordre où elles se cassent le plus vite. Rien de propre à CI : ce qui passe
+# ici passe dans le shell Replit, et l'inverse.
+#
+# Ce que ça attrape et qui, sinon, ne se voit qu'au déploiement :
+#   • un `pnpm-lock.yaml` en retard sur les `package.json` — `--frozen-lockfile`
+#     échoue net, là où un `pnpm install` ordinaire réparerait en silence ;
+#   • du code généré qui ne correspond plus à `openapi.yaml`, parce que le
+#     codegen n'a pas été relancé après une modification de la spec ;
+#   • un contenu incohérent, ou une partie qui ne se termine pas.
+
+name: Vérifications
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Une PR poussée trois fois de suite n'a pas besoin de trois exécutions.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier:
+    name: Typecheck, tests et contenu
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm avant setup-node : c'est `cache: pnpm` qui a besoin de le trouver.
+      # Version épinglée à 10 ici plutôt que dans un champ `packageManager` du
+      # package.json — celui-ci s'imposerait aussi à Replit, qui installe avec
+      # sa propre version.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # `--frozen-lockfile` est le garde-fou, pas un détail de vitesse : c'est
+      # ce qui refuse une dépendance ajoutée sans que le lockfile suive.
+      - name: Installer
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Tests
+        run: pnpm run test
+
+      - name: Contenu cohérent, et toute partie se termine
+        run: pnpm --filter @workspace/scripts run verifier-contenu
+
+      # Le code généré est commité. S'il ne correspond plus à la spec, le build
+      # casse au déploiement avec une erreur qui ne parle pas d'OpenAPI — un
+      # symbole manquant, quelque part dans un écran.
+      - name: Code généré à jour avec openapi.yaml
+        run: |
+          pnpm --filter @workspace/api-spec run codegen
+          if ! git diff --quiet -- lib/api-client-react/src/generated lib/api-zod/src/generated; then
+            echo "::error::Le code généré ne correspond pas à openapi.yaml. Lancer « pnpm --filter @workspace/api-spec run codegen » et commiter le résultat."
+            git diff --stat -- lib/api-client-react/src/generated lib/api-zod/src/generated
+            exit 1
+          fi
+
+      # Le typecheck ne voit pas tout : plugins Vite, esbuild, variables
+      # d'environnement exigées au build.
+      - name: Build
+        env:
+          PORT: "26183"
+          BASE_PATH: /
+        run: pnpm -r --if-present run build
