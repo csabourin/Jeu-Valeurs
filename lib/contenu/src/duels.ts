@@ -1,7 +1,7 @@
 /**
  * Duels — les collisions concrètes du jeu.
  *
- * Un duel met exactement deux valeurs en tension dans une situation ordinaire.
+ * Un duel met exactement deux valeurs en tension dans une situation concrète.
  * Contrat d'écriture, appliqué à chaque entrée :
  *   • la situation tient en une ou deux phrases et se passe quelque part de précis ;
  *   • `optionA` protège `valeurA`, `optionB` protège `valeurB` — jamais les deux,
@@ -9,8 +9,17 @@
  *   • les deux options coûtent quelque chose : aucune n'est la « bonne réponse » ;
  *   • une seule chose change entre les deux options (pas de coût caché ajouté
  *     d'un seul côté) ;
- *   • rien de traumatisant, sexuel, violent ou criminellement grave quand une
- *     situation ordinaire teste la même tension.
+ *   • **la situation a le droit de coûter cher.** Un renvoi, une plainte à la
+ *     police, un couple qui casse, de l'argent qu'on ne reverra pas : c'est là
+ *     que deux valeurs se départagent vraiment. Une situation sans conséquence
+ *     donne une réponse sans intérêt ;
+ *   • une seule limite : pas de gore, pas de scène susceptible de rouvrir un
+ *     trauma. On pose ce qui est en jeu, on ne décrit pas le pire. La retenue
+ *     porte sur le niveau de détail, jamais sur la gravité du sujet.
+ *
+ * Le public visé est adulte, tous niveaux de scolarité confondus : phrases
+ * courtes et mots de tous les jours, mais le vocabulaire de la vie adulte
+ * (travail, loyer, conjoint, police, dettes) est à sa place.
  *
  * `contexte` sert au moteur : il permet d'observer *où* une valeur passe devant
  * une autre, plutôt que de prétendre à un classement unique et hors sol.
@@ -805,6 +814,135 @@ export const duels: DuelContenu[] = [
     optionA: "Tu présentes.",
     optionB: "Tu lui laisses la place.",
     contexte: "equipe",
+  },
+
+  // ── Quand ça coûte vraiment ────────────────────────────────────────────────
+  //
+  // Les situations qui précèdent se règlent dans la journée. Celles-ci laissent
+  // des traces : un emploi perdu, une plainte déposée, quelqu'un qui ne
+  // rappellera plus. Sans elles, le jeu ne mesure que ce qu'on est prêt à faire
+  // quand ce n'est pas cher.
+  {
+    id: 231,
+    valeurA: V.honnetete,
+    valeurB: V.securite,
+    situation:
+      "Ton employeur maquille des chiffres. Tu es le seul à l'avoir vu, et tu as un loyer à payer le mois prochain.",
+    optionA: "Tu le signales.",
+    optionB: "Tu fermes les yeux.",
+    contexte: "equipe",
+  },
+  {
+    id: 232,
+    valeurA: V.loyaute,
+    valeurB: V.justice,
+    situation:
+      "Ton frère a volé de l'argent à quelqu'un que tu connais. La police te demande où il était ce soir-là.",
+    optionA: "Tu dis la vérité.",
+    optionB: "Tu lui donnes un alibi.",
+    contexte: "maison",
+  },
+  {
+    id: 233,
+    valeurA: V.famille,
+    valeurB: V.autonomie,
+    situation:
+      "Ton parent perd son autonomie. Le prendre chez toi veut dire renoncer au poste pour lequel tu déménageais.",
+    optionA: "Tu le prends chez toi.",
+    optionB: "Tu prends le poste.",
+    contexte: "maison",
+  },
+  {
+    id: 234,
+    valeurA: V.honnetete,
+    valeurB: V.entraide,
+    situation:
+      "Une amie te demande de confirmer sa version à son conjoint. Elle a menti, et elle te dit que la vérité va tout casser.",
+    optionA: "Tu refuses de mentir.",
+    optionB: "Tu confirmes sa version.",
+    contexte: "amis",
+  },
+  {
+    id: 235,
+    valeurA: V.justice,
+    valeurB: V.tranquillite,
+    situation:
+      "Un collègue en harcèle un autre depuis des mois. Témoigner te met en travers de toute l'équipe.",
+    optionA: "Tu témoignes.",
+    optionB: "Tu restes en dehors de ça.",
+    contexte: "equipe",
+  },
+  {
+    id: 236,
+    valeurA: V.securite,
+    valeurB: V.liberte,
+    situation:
+      "Ton emploi te pèse depuis des années. Partir maintenant, c'est vivre sur tes économies sans savoir combien de temps.",
+    optionA: "Tu restes.",
+    optionB: "Tu pars.",
+    contexte: "public",
+  },
+  {
+    id: 237,
+    valeurA: V.regles,
+    valeurB: V.entraide,
+    situation:
+      "Quelqu'un que tu héberges n'a pas de papiers. Le formulaire que tu remplis demande qui vit chez toi.",
+    optionA: "Tu remplis honnêtement.",
+    optionB: "Tu ne le mentionnes pas.",
+    contexte: "maison",
+  },
+  {
+    id: 238,
+    valeurA: V.reussite,
+    valeurB: V.honnetete,
+    situation:
+      "Le contrat se joue à peu de chose. Personne ne saura que tu as gonflé ton expérience sur le dossier.",
+    optionA: "Tu laisses ton dossier tel quel.",
+    optionB: "Tu gonfles un peu.",
+    contexte: "public",
+  },
+  {
+    id: 239,
+    valeurA: V.viePrivee,
+    valeurB: V.securite,
+    situation:
+      "Tu trouves sur le téléphone de ton adolescent des messages qui t'inquiètent. Les lire, c'est fouiller ; ne pas les lire, c'est ne pas savoir.",
+    optionA: "Tu n'y touches pas.",
+    optionB: "Tu lis tout.",
+    contexte: "maison",
+  },
+  {
+    id: 240,
+    valeurA: V.courage,
+    valeurB: V.securite,
+    situation:
+      "Dans l'autobus, un homme s'en prend à quelqu'un. Personne ne bouge, et il est plus costaud que toi.",
+    optionA: "Tu interviens.",
+    optionB: "Tu ne bouges pas.",
+    contexte: "public",
+  },
+  {
+    id: 241,
+    valeurA: V.loyaute,
+    valeurB: V.justice,
+    situation:
+      "Ton meilleur ami conduit régulièrement après avoir bu. Il transporte ses enfants.",
+    optionA: "Tu le signales à quelqu'un.",
+    optionB: "Tu lui en parles et tu en restes là.",
+    contexte: "amis",
+    variante: true,
+  },
+  {
+    id: 242,
+    valeurA: V.honnetete,
+    valeurB: V.securite,
+    situation:
+      "L'erreur vient de toi et elle a coûté cher. Personne ne l'a encore remontée jusqu'à toi.",
+    optionA: "Tu l'annonces.",
+    optionB: "Tu laisses courir.",
+    contexte: "equipe",
+    variante: true,
   },
 ];
 

@@ -6,11 +6,35 @@
  *   • horizons      — « je veux obtenir, réussir, devenir ou vivre ça »
  *   • tresors       — « j'ai ça et je ne veux pas le perdre »
  *
- * Règles d'écriture appliquées ici :
+ * ## Pour qui
+ *
+ * Des adultes, quel que soit leur niveau de scolarité. C'est une contrainte de
+ * **lisibilité**, pas de contenu : phrases courtes, mots de tous les jours, pas
+ * de jargon moral ni de tournure abstraite. Ça ne veut pas dire ménager le
+ * lecteur, et ça ne réduit pas ce dont une carte a le droit de parler. Une
+ * personne qui n'a pas fait d'études longues a déjà un métier, de l'argent à
+ * perdre, des gens qui dépendent d'elle : le vocabulaire de la vie adulte
+ * (« mon travail », « mon conjoint », « mes économies ») est à sa place ici.
+ *
+ * ## Ce qu'une ligne rouge doit être
+ *
+ * Une vraie ligne rouge, c'est ce qu'on ne franchit pas. Voler, frapper,
+ * trahir, dénoncer, mentir sous serment, humilier quelqu'un pour de l'argent :
+ * ces cartes doivent être **nommées franchement**, sinon la famille entière ne
+ * sert à rien. Une carte tiède ne fait rien découvrir — si personne n'hésite en
+ * la lisant, elle ne mesure rien.
+ *
+ * ## La seule limite
+ *
+ * Pas de gore, pas de description susceptible de rouvrir un trauma : on ne
+ * détaille pas une scène, on **nomme un acte**. « Frapper quelqu'un qui ne peut
+ * pas se défendre » est une carte ; raconter les coups n'en est pas une. La
+ * différence est dans le niveau de détail, jamais dans la gravité du sujet.
+ *
+ * ## Le reste
+ *
  *   • une carte décrit une action ou une chose précise, jamais une abstraction
  *     (« Répéter un secret » et non « L'importance de la confiance ») ;
- *   • pas de scénario traumatisant, sexuel, violent ou criminel grave quand une
- *     situation ordinaire teste exactement la même valeur ;
  *   • les valeurs suggérées sont des hypothèses à confirmer par la personne,
  *     jamais une lecture imposée.
  *
@@ -212,6 +236,149 @@ const lignesRouges: CarteContenu[] = [
     origine: "maison" as const,
     categorie: null,
     valeursSuggerees: [V.entraide, V.reussite],
+  },
+  // ── Ce qu'on ne franchit pas ──────────────────────────────────────────────
+  //
+  // Les cartes qui précèdent tiennent dans une journée ordinaire. Celles-ci
+  // nomment des actes qu'on ne commet pas — et il en faut, sinon la famille
+  // « lignes rouges » ne mesure rien : personne n'hésite devant une ligne
+  // qu'il n'a jamais eu envie de franchir.
+  //
+  // On nomme l'acte, on ne décrit pas la scène. C'est la seule retenue.
+  {
+    id: "JV1021",
+    famille: "lignes_rouges",
+    label: "Frapper quelqu'un qui ne peut pas se défendre",
+    description: "Tu sais qu'il ne rendra pas le coup. C'est ce qui rend ça possible.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.justice, V.courage],
+  },
+  {
+    id: "JV1022",
+    famille: "lignes_rouges",
+    label: "Voler de l'argent à quelqu'un qui en manque",
+    description: "Tu en as besoin. Cette personne aussi, et elle ne le verra pas tout de suite.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.honnetete, V.justice],
+  },
+  {
+    id: "JV1023",
+    famille: "lignes_rouges",
+    label: "Mentir devant un tribunal pour faire condamner quelqu'un",
+    description: "Ta version tient debout. La sienne ne tiendra pas.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.honnetete, V.justice],
+  },
+  {
+    id: "JV1024",
+    famille: "lignes_rouges",
+    label: "Dénoncer un proche pour m'éviter des ennuis",
+    description: "Il ne saura jamais que ça vient de toi.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.loyaute, V.securite],
+  },
+  {
+    id: "JV1025",
+    famille: "lignes_rouges",
+    label: "Laisser quelqu'un dans le trouble alors que je pouvais l'aider",
+    description: "Personne ne saura que tu étais là.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.entraide, V.courage],
+  },
+  {
+    id: "JV1026",
+    famille: "lignes_rouges",
+    label: "Coucher avec quelqu'un pour obtenir quelque chose",
+    description: "Ce n'est pas ce que tu veux. C'est ce que ça t'ouvre.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.honnetete, V.autonomie],
+  },
+  {
+    id: "JV1027",
+    famille: "lignes_rouges",
+    label: "Tromper la personne avec qui je vis",
+    description: "Elle ne se doute de rien, et tu comptes bien que ça reste comme ça.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.loyaute, V.honnetete],
+  },
+  {
+    id: "JV1028",
+    famille: "lignes_rouges",
+    label: "Me ridiculiser devant tout le monde pour de l'argent",
+    description: "Une seule fois, et de quoi payer ce que tu dois.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.reconnaissance, V.securite],
+  },
+  {
+    id: "JV1029",
+    famille: "lignes_rouges",
+    label: "Faire porter la faute à un collègue pour sauver mon emploi",
+    description: "Il sera renvoyé à ta place, et tu garderas ton salaire.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.honnetete, V.securite],
+  },
+  {
+    id: "JV1030",
+    famille: "lignes_rouges",
+    label: "Vendre quelque chose que je sais dangereux",
+    description: "Le client ne le saura pas. Toi, oui.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.honnetete, V.reussite],
+  },
+  {
+    id: "JV1031",
+    famille: "lignes_rouges",
+    label: "Prendre le volant après avoir bu, avec des gens dans l'auto",
+    description: "Le trajet est court et tu l'as déjà fait sans problème.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.securite, V.regles],
+  },
+  {
+    id: "JV1032",
+    famille: "lignes_rouges",
+    label: "Couper les ponts avec quelqu'un de ma famille pour de bon",
+    description: "Tu ne rappelles pas. Ni cette année, ni après.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.famille, V.tranquillite],
+  },
+  {
+    id: "JV1033",
+    famille: "lignes_rouges",
+    label: "Menacer quelqu'un pour qu'il se taise",
+    description: "Tu n'as pas besoin d'aller plus loin : il a compris.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.justice, V.securite],
+  },
+  {
+    id: "JV1034",
+    famille: "lignes_rouges",
+    label: "Signer un faux document pour de l'argent",
+    description: "Personne ne vérifie jamais ces papiers-là.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.honnetete, V.regles],
+  },
+  {
+    id: "JV1035",
+    famille: "lignes_rouges",
+    label: "Obéir à un ordre que je trouve injuste pour garder ma place",
+    description: "Ce n'est pas toi qui décides. C'est quand même toi qui le fais.",
+    origine: "maison" as const,
+    categorie: null,
+    valeursSuggerees: [V.courage, V.regles],
   },
   {
     id: "JV1019",

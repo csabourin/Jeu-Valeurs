@@ -1,10 +1,22 @@
 /**
- * Réécriture des cartes importées pour le registre 12-14 ans.
+ * Réécriture des cartes importées pour qu'elles se lisent d'un coup.
  *
- * Les 825 cartes importées sont arrivées en registre adulte : phrases longues,
- * vocabulaire abstrait (« déshumaniser », « réciprocité », « instrumentaliser »),
- * et des précautions d'essai (« uniquement parce que », « systématiquement »,
- * « automatiquement ») qui diluent ce qu'il y a à ressentir.
+ * Les 825 cartes importées sont arrivées en registre universitaire : phrases
+ * longues, vocabulaire abstrait (« déshumaniser », « réciprocité »,
+ * « instrumentaliser »), et des précautions d'essai (« uniquement parce que »,
+ * « systématiquement », « automatiquement ») qui diluent ce qu'il y a à
+ * ressentir.
+ *
+ * ⚠️ **Cette passe a été faite sous une consigne erronée** — « registre
+ * 12-14 ans » — qui a été lue comme « contenu pour enfants » alors qu'elle ne
+ * visait que la lisibilité. Le jeu s'adresse à des adultes de tous niveaux de
+ * scolarité. Certaines réécritures ont donc vidé des cartes de leur objet en
+ * leur retirant ce qu'un adulte possède réellement — `T077` avait transformé
+ * « Mon expérience professionnelle » en « Tout ce que j'ai appris en le
+ * faisant », ce qui n'est plus la même chose : on peut perdre un emploi, pas
+ * ce qu'on a appris. Les cartes de travail et d'argent ont été reprises ; le
+ * reste des 494 réécritures n'a pas été réaudité sous la bonne consigne. Les
+ * libellés d'origine sont intacts dans `data/*.json`, donc rien n'est perdu.
  *
  * Ce fichier ne remplace pas les données d'origine : `data/*.json` reste intact,
  * et la réécriture est une couche par-dessus, indexée par identifiant. On peut
@@ -476,7 +488,7 @@ export const reecritures: Record<string, string> = {
   T046: "De l'argent qui rentre régulièrement.",
   T047: "Savoir que l'essentiel sera toujours payé.",
   T051: "Un montant mis de côté pour les imprévus.",
-  T054: "Savoir que ma place ne sera pas remise en question.",
+  T054: "Un emploi qui ne va pas disparaître.",
   T056: "Le fait que mon entourage ne change pas tout le temps.",
   T058: "Pouvoir encaisser un imprévu sans tout perdre.",
   T059: "Le sentiment d'avoir une prise sur ma vie.",
@@ -487,10 +499,10 @@ export const reecritures: Record<string, string> = {
   T074: "L'espace que j'ai à moi.",
   T075: "Le fait que mon quotidien soit simple.",
 
-  T077: "Tout ce que j'ai appris en le faisant.",
+  T077: "Tout ce que je sais faire dans mon métier.",
   T078: "La reconnaissance que j'ai gagnée pour mon travail.",
   T079: "La confiance de ceux avec qui je travaille.",
-  T080: "Le fait qu'on me laisse faire à ma façon.",
+  T080: "Le fait qu'on me laisse faire mon travail à ma façon.",
   T081: "Les responsabilités qu'on m'a confiées.",
   T084: "Ce que je fais et qui dit une bonne partie de qui je suis.",
   T085: "Pouvoir faire un travail dont je suis fier.",
