@@ -75,10 +75,17 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo): void {
+    const normalisee = toError(error);
+    // Tout est passé en chaînes, pas en objet Error.
+    //
+    // `message` et `stack` ne sont pas énumérables sur une Error : un
+    // collecteur de logs qui sérialise les arguments de `console.error` en
+    // JSON — celui de Replit, entre autres — n'en tire que « {} ». L'erreur
+    // arrive donc vide dans les logs, au moment précis où on la cherche.
     console.error(
-      'ErrorBoundary caught an error:',
-      toError(error),
-      info.componentStack,
+      `ErrorBoundary : ${normalisee.message || String(normalisee)}`,
+      `\n${normalisee.stack ?? '(pas de pile)'}`,
+      `\nComposants : ${info.componentStack ?? '(inconnu)'}`,
     );
   }
 
