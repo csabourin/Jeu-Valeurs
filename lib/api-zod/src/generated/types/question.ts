@@ -5,10 +5,11 @@
  * Jeu des valeurs — API
  * OpenAPI spec version: 0.1.0
  */
+import type { QuestionPhase } from './questionPhase';
 import type { QuestionType } from './questionType';
 
 /**
- * Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
+ * Une comparaison à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs — soit à travers deux cartes de la personne, soit à travers une situation écrite ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
  */
 export interface Question {
   type: QuestionType;
@@ -19,12 +20,37 @@ export interface Question {
   optionA: string;
   optionB: string;
   /**
-     * Duel : amis, ecole, maison, en_ligne, equipe, public
+     * Situation écrite : amis, ecole, maison, en_ligne, equipe, public
      * @nullable
      */
   contexte?: string | null;
   /** Vrai si cette tension a déjà été vue sous une autre forme */
   estVariante: boolean;
+  /**
+     * Carte de session qui manifeste `valeurA`, si la question vient des cartes
+     * @nullable
+     */
+  carteA?: string | null;
+  /** @nullable */
+  carteB?: string | null;
+  /** @nullable */
+  carteALabel?: string | null;
+  /** @nullable */
+  carteBLabel?: string | null;
+  /** Phase à enregistrer avec la réponse */
+  phase: QuestionPhase;
+  /**
+     * Mise à l'épreuve : pourquoi cette tension maintenant — reponses_variables, forces_proches, ca_depend_frequent, paire_jamais_vue, jamais_secondaire, domine_presque_tout
+     * @nullable
+     */
+  motif?: string | null;
+  /**
+     * Le motif, en une phrase affichable
+     * @nullable
+     */
+  motifTexte?: string | null;
+  /** Vrai quand le jeu a le droit de poser ses questions de relance (difficulté, valeur protégée, ce qui aurait pu changer la réponse). Toujours faux pendant la première passe. */
+  approfondir: boolean;
   /** @nullable */
   serieId?: string | null;
   /** @nullable */

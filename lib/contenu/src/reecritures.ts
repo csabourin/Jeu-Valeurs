@@ -160,7 +160,9 @@ export const reecritures: Record<string, string> = {
   LR100: "Faire de l'argent avec ce qui est sacré pour d'autres, en sachant que ça les blesse.",
 
   // Communauté, entraide et réciprocité
-  LR101: "Ne jamais aider mon monde tout en comptant sur lui.",
+  // « Ne jamais aider … tout en comptant sur lui » empilait deux idées dans une
+  // phrase : ce qu'on ne fait pas, et ce qu'on fait quand même.
+  LR101: "Compter sur mon monde sans jamais l'aider.",
   LR102: "Laisser quelqu'un affronter seul un gros problème alors que je pouvais aider.",
   LR103: "Garder pour moi ce dont je n'ai pas besoin quand d'autres en manquent.",
   LR104: "Garder mes trucs pour moi pour rester le seul à savoir.",

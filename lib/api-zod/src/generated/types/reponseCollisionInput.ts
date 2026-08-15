@@ -12,7 +12,18 @@ export interface ReponseCollisionInput {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  /** @nullable */
+  carteA?: string | null;
+  /** @nullable */
+  carteB?: string | null;
   choix: ReponseCollisionInputChoix;
+  /** @nullable */
+  contexte?: string | null;
+  /**
+     * ordination (défaut) ou epreuve
+     * @nullable
+     */
+  phase?: string | null;
   /** @nullable */
   facteurDepend?: string | null;
   /** @nullable */
@@ -29,4 +40,6 @@ export interface ReponseCollisionInput {
   dimension?: string | null;
   /** @nullable */
   valeurProtegee?: string | null;
+  /** @nullable */
+  ceQuiChangerait?: string | null;
 }

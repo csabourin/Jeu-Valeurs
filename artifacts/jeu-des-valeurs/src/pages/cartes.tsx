@@ -44,6 +44,10 @@ import { useSignalerErreur } from "@/hooks/use-erreur";
 /** En dessous, il n'y a pas assez de matière pour construire des duels. */
 const MINIMUM_CARTES = 3;
 const LIMITE_RESULTATS = 80;
+/** Combien de cartes par famille au premier tirage, et de combien on élargit. */
+const CARTES_PAR_FAMILLE = 18;
+const PAS_ELARGISSEMENT = 18;
+const CARTES_PAR_FAMILLE_MAX = 54;
 
 type FiltreFamille = CarteCatalogueFamille | "toutes";
 
@@ -107,15 +111,23 @@ export default function Cartes() {
   const rechercheDifferee = useDeferredValue(rechercheCatalogue);
   const [filtreFamille, setFiltreFamille] = useState<FiltreFamille>("toutes");
   const [masquerChoisies, setMasquerChoisies] = useState(false);
+  const [aideOuverte, setAideOuverte] = useState(false);
+  // « Je ne trouve pas ce qui me correspond » élargit la main. Le tirage étant
+  // déterministe, les cartes déjà lues restent en place : il s'en ajoute.
+  const [parFamille, setParFamille] = useState(CARTES_PAR_FAMILLE);
 
-  // La main tirée pour cette partie, pas les 885 cartes du catalogue.
+  // La main tirée pour cette partie, pas les 900 cartes du catalogue.
   const { data: catalogue, isLoading: chargeCatalogue } =
-    useListCartesProposees(sessionId, {
-      query: {
-        enabled: !!sessionId,
-        queryKey: getListCartesProposeesQueryKey(sessionId),
+    useListCartesProposees(
+      sessionId,
+      { parFamille },
+      {
+        query: {
+          enabled: !!sessionId,
+          queryKey: getListCartesProposeesQueryKey(sessionId, { parFamille }),
+        },
       },
-    });
+    );
 
   const { data: catalogueComplet, isLoading: chargeCatalogueComplet } =
     useListCartessCatalogue(undefined, {
@@ -245,6 +257,12 @@ export default function Cartes() {
     );
   };
 
+  const elargir = () => {
+    setParFamille((actuel) =>
+      Math.min(CARTES_PAR_FAMILLE_MAX, actuel + PAS_ELARGISSEMENT),
+    );
+  };
+
   const continuer = () => {
     majSession.mutate(
       { sessionId, data: { etapeCourante: "confirmation_valeurs" } },
@@ -273,7 +291,7 @@ export default function Cartes() {
     mesCartes?.filter(
       (carte) => carte.famille === "horizons" || carte.famille === "tresors",
     ).length ?? 0;
-  const pretPourCombattre =
+  const pretPourLesDuels =
     total >= MINIMUM_CARTES && nombreLimites > 0 && nombreEnjeux > 0;
 
   return (
@@ -286,26 +304,68 @@ export default function Cartes() {
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
             Choisis au moins une limite et quelque chose que tu veux obtenir ou
-            garder. Le jeu les mettra face à face pour voir ce qui tient.
+            garder. Le jeu les mettra face à face, deux par deux, pour voir ce
+            qui passe en premier.
           </p>
         </header>
-        <section className="catalogue-callout">
-          <span className="catalogue-callout-icon">
-            <LibraryBig className="size-5" />
-          </span>
-          <div className="flex-1">
-            <h2 className="font-serif text-lg font-semibold">
-              Tu ne trouves pas la bonne phrase ?
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Le tirage n'est qu'un point de départ. Recherche aussi dans toutes
-              les cartes du jeu.
-            </p>
+        <section className="catalogue-callout flex-col items-stretch gap-4">
+          <div className="flex items-start gap-3">
+            <span className="catalogue-callout-icon">
+              <LibraryBig className="size-5" />
+            </span>
+            <div className="flex-1">
+              <h2 className="font-serif text-lg font-semibold">
+                Je ne trouve pas ce qui me correspond
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Ce tirage n'est qu'un point de départ. Rien ne t'oblige à
+                choisir dans ce qui est proposé.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              aria-expanded={aideOuverte}
+              onClick={() => setAideOuverte((ouvert) => !ouvert)}
+            >
+              {aideOuverte ? "Fermer" : "Voir les options"}
+            </Button>
           </div>
-          <Button variant="outline" onClick={ouvrirBibliotheque}>
-            <Search className="size-4 mr-2" />
-            Explorer tout le catalogue
-          </Button>
+
+          {aideOuverte && (
+            <div className="grid gap-2 sm:grid-cols-3">
+              <Button
+                variant="secondary"
+                className="h-auto py-3 whitespace-normal text-left justify-start"
+                disabled={parFamille >= CARTES_PAR_FAMILLE_MAX}
+                onClick={elargir}
+              >
+                <Plus className="size-4 mr-2 shrink-0" />
+                {parFamille >= CARTES_PAR_FAMILLE_MAX
+                  ? "Tout le tirage est affiché"
+                  : "Afficher davantage de cartes"}
+              </Button>
+              <Button
+                variant="secondary"
+                className="h-auto py-3 whitespace-normal text-left justify-start"
+                onClick={ouvrirBibliotheque}
+              >
+                <Search className="size-4 mr-2 shrink-0" />
+                Chercher par thème dans tout le jeu
+              </Button>
+              <Button
+                variant="secondary"
+                className="h-auto py-3 whitespace-normal text-left justify-start"
+                onClick={() => {
+                  document
+                    .getElementById(`carte-libre-${ongletActif}`)
+                    ?.focus();
+                }}
+              >
+                <PenLine className="size-4 mr-2 shrink-0" />
+                Écrire ma propre carte
+              </Button>
+            </div>
+          )}
         </section>
 
         <Tabs
@@ -455,6 +515,7 @@ export default function Cartes() {
 
                   <div className="flex items-center gap-2">
                     <Input
+                      id={`carte-libre-${f.cle}`}
                       value={saisieLibre[f.cle] ?? ""}
                       onChange={(e) =>
                         setSaisieLibre((prev) => ({
@@ -661,11 +722,11 @@ export default function Cartes() {
                 ? " — choisis au moins une limite"
                 : nombreEnjeux === 0
                   ? " — choisis une aspiration ou un essentiel"
-                  : " — prêt pour les combats"}
+                  : " — prêt pour les duels"}
           </p>
           <Button
             size="lg"
-            disabled={!pretPourCombattre || majSession.isPending}
+            disabled={!pretPourLesDuels || majSession.isPending}
             onClick={continuer}
           >
             Continuer <MoveRight className="w-4 h-4 ml-2" />

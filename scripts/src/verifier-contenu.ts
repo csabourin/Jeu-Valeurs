@@ -21,12 +21,20 @@ import {
   reecritures,
   CARTES_PAR_FAMILLE,
   valeurs,
+  famillesValeurs,
   duels,
   series,
   familles,
   calculerParcours,
   planifierDuels,
   clePaire,
+  paireAdmissible,
+  pairesAdmissibles,
+  analyserFormulation,
+  personneCoherente,
+  duelsCartesPossibles,
+  ajusterModele,
+  type CarteDuel,
   type ReponseConnue,
 } from "@workspace/contenu";
 
@@ -185,6 +193,13 @@ for (const d of duels) {
 }
 
 // Une variante n'a de sens que s'il existe un duel principal sur la même paire.
+for (const d of duels) {
+  verifier(
+    personneCoherente([d.situation, d.optionA, d.optionB]),
+    `Duel ${d.id} mélange les personnes grammaticales : ${d.situation}`,
+  );
+}
+
 for (const d of duels.filter((x) => x.variante)) {
   const principal = duels.some(
     (x) => !x.variante && clePaire(x.valeurA, x.valeurB) === clePaire(d.valeurA, d.valeurB),
@@ -230,37 +245,156 @@ for (const famille of familles) {
   }
 }
 
-// Une valeur sans duel ne pourra jamais être mise à l'épreuve.
-for (const v of valeurs) {
-  const apparait = duels.some((d) => d.valeurA === v.label || d.valeurB === v.label);
-  verifier(apparait, `Valeur « ${v.label} » n'apparaît dans aucun duel.`);
+// Une valeur qui n'apparaît dans aucune situation écrite reste jouable : les
+// duels entre les cartes de la personne la porteront. C'est le prix d'un
+// lexique fin — et c'est voulu.
+const valeursSansSituation = valeurs.filter(
+  (v) => !duels.some((d) => d.valeurA === v.label || d.valeurB === v.label),
+);
+if (valeursSansSituation.length > 0) {
+  avertissements.push(
+    `${valeursSansSituation.length} valeurs sans situation écrite (jouables seulement par les cartes) : ` +
+      valeursSansSituation
+        .slice(0, 8)
+        .map((v) => v.label)
+        .join(", ") +
+      (valeursSansSituation.length > 8 ? "…" : ""),
+  );
+}
+
+// Une valeur que rien ne propose reste choisissable à l'étape « Tes mots »,
+// où le lexique complet est offert — mais elle ne sera jamais suggérée, donc
+// presque jamais confirmée. On le signale sans bloquer.
+const jamaisSuggerees = valeurs.filter(
+  (v) =>
+    !cartes.some((c) => c.valeursSuggerees.includes(v.label)) &&
+    !duels.some((d) => d.valeurA === v.label || d.valeurB === v.label),
+);
+if (jamaisSuggerees.length > 0) {
+  avertissements.push(
+    `${jamaisSuggerees.length} valeurs ne sont proposées par aucune carte ` +
+      `(choisissables seulement à la main) : ` +
+      jamaisSuggerees.map((v) => v.label).join(", "),
+  );
+}
+
+// ── Admissibilité des confrontations ────────────────────────────────────────
+
+for (const d of duels) {
+  const verdict = paireAdmissible(d.valeurA, d.valeurB);
+  verifier(
+    verdict.admissible,
+    `Duel ${d.id} oppose deux valeurs inadmissibles : ${verdict.explication}`,
+  );
+}
+
+for (const s of series) {
+  const verdict = paireAdmissible(s.valeurA, s.valeurB);
+  verifier(
+    verdict.admissible,
+    `Série ${s.id} oppose deux valeurs inadmissibles : ${verdict.explication}`,
+  );
+}
+
+// ── Registre d'écriture ─────────────────────────────────────────────────────
+
+for (const c of cartes) {
+  for (const defaut of analyserFormulation(c.label)) {
+    const message = `${c.id} · ${defaut.explication} : ${c.label}`;
+    if (defaut.gravite === "erreur") erreurs.push(message);
+    else avertissements.push(message);
+  }
+}
+
+// Les duels générés à partir des cartes doivent rester cohérents : un énoncé au
+// « tu » avec des options au « je » ne dit plus qui parle.
+const mainTest: CarteDuel[] = [
+  {
+    id: "t1",
+    famille: "lignes_rouges",
+    label: cartes.find((c) => c.famille === "lignes_rouges")!.label,
+    valeursConfirmees: ["Honnêteté"],
+  },
+  {
+    id: "t2",
+    famille: "horizons",
+    label: cartes.find((c) => c.famille === "horizons")!.label,
+    valeursConfirmees: ["Réussite"],
+  },
+  {
+    id: "t3",
+    famille: "tresors",
+    label: cartes.find((c) => c.famille === "tresors")!.label,
+    valeursConfirmees: ["Tranquillité"],
+  },
+  {
+    id: "t4",
+    famille: "lignes_rouges",
+    label: cartes.filter((c) => c.famille === "lignes_rouges")[1]!.label,
+    valeursConfirmees: ["Loyauté"],
+  },
+];
+for (const duel of duelsCartesPossibles(mainTest)) {
+  verifier(
+    personneCoherente([duel.situation, duel.optionA, duel.optionB]),
+    `Duel de cartes ${duel.id} mélange les personnes grammaticales : ${duel.situation}`,
+  );
 }
 
 // ── Une partie doit toujours se terminer ─────────────────────────────────────
 
-/** Rejoue une partie complète en répondant toujours de la même façon. */
+/**
+ * Rejoue une partie complète en répondant toujours de la même façon —
+ * première passe **et** mise à l'épreuve, puisque c'est là que le moteur
+ * d'exploration décide seul de ce qu'il propose.
+ */
 function jouerJusquAuBout(
   valeursConfirmees: string[],
+  cartesChoisies: CarteDuel[],
   choix: string,
   graine = 0,
+  phaseDemandee: "ordination" | "epreuve" = "ordination",
 ): number {
   const reponses: ReponseConnue[] = [];
-  for (let tour = 0; tour < 200; tour++) {
-    const parcours = calculerParcours({ valeursConfirmees, reponses, graine });
+  for (let tour = 0; tour < 300; tour++) {
+    const parcours = calculerParcours({
+      valeursConfirmees,
+      reponses,
+      cartes: cartesChoisies,
+      graine,
+      phaseDemandee,
+    });
     if (!parcours.prochaine) return tour;
     const q = parcours.prochaine;
+
+    // La première passe ne doit jamais réclamer de question de relance.
+    if (q.phase === "ordination" && q.approfondir) {
+      erreurs.push(
+        `La première passe demande un approfondissement (question ${q.dilemmeId}).`,
+      );
+    }
+    // Et aucune question ne doit opposer deux valeurs inadmissibles.
+    const verdict = paireAdmissible(q.valeurA, q.valeurB);
+    if (!verdict.admissible) {
+      erreurs.push(`Question ${q.dilemmeId} : ${verdict.explication}`);
+    }
+
     reponses.push({
       dilemmeId: q.dilemmeId,
       valeurA: q.valeurA,
       valeurB: q.valeurB,
+      carteA: q.carteA,
+      carteB: q.carteB,
       choix,
+      contexte: q.contexte,
+      phase: q.phase,
       facteurDepend: null,
       serieId: q.serieId,
       palier: q.palier,
     });
   }
   erreurs.push(
-    `Le parcours ne se termine pas pour [${valeursConfirmees.join(", ")}] en répondant « ${choix} ».`,
+    `Le parcours ne se termine pas pour [${valeursConfirmees.slice(0, 4).join(", ")}…] en répondant « ${choix} » (${phaseDemandee}).`,
   );
   return -1;
 }
@@ -272,7 +406,17 @@ const scenarios: { nom: string; cartesChoisies: string[] }[] = [
     nom: "mélange des trois familles",
     cartesChoisies: ["JV1002", "JV1004", "JV2003", "JV2006", "JV3002", "JV3004"],
   },
-  { nom: "toutes les cartes", cartesChoisies: cartes.map((c) => c.id) },
+  // Une main réaliste, mais large : personne ne retient 900 cartes, et les
+  // duels de cartes croissent en n². Vingt-quatre est déjà au-delà de ce qu'un
+  // écran de sélection produit en pratique.
+  {
+    nom: "main large",
+    cartesChoisies: [
+      ...cartes.filter((c) => c.famille === "lignes_rouges").slice(0, 8),
+      ...cartes.filter((c) => c.famille === "horizons").slice(0, 8),
+      ...cartes.filter((c) => c.famille === "tresors").slice(0, 8),
+    ].map((c) => c.id),
+  },
 ];
 
 // Un identifiant qui ne correspond à rien ferait passer un scénario à vide,
@@ -286,18 +430,46 @@ for (const scenario of scenarios) {
   }
 }
 
+/** La personne confirme les valeurs proposées : le cas le plus courant. */
+function mainDe(ids: string[]): CarteDuel[] {
+  return ids.flatMap((id, rang) => {
+    const carte = cartes.find((c) => c.id === id);
+    if (!carte) return [];
+    return [
+      {
+        id: String(rang + 1),
+        famille: carte.famille,
+        label: carte.label,
+        valeursConfirmees: carte.valeursSuggerees,
+      },
+    ];
+  });
+}
+
 for (const scenario of scenarios) {
+  const main = mainDe(scenario.cartesChoisies);
   const valeursConfirmees = Array.from(
-    new Set(
-      scenario.cartesChoisies.flatMap(
-        (id) => cartes.find((c) => c.id === id)?.valeursSuggerees ?? [],
-      ),
-    ),
+    new Set(main.flatMap((c) => c.valeursConfirmees ?? [])),
   );
-  for (const choix of ["A", "B", "ca_depend", "passer"]) {
-    const tours = jouerJusquAuBout(valeursConfirmees, choix);
-    if (tours === 0 && valeursConfirmees.length >= 2) {
-      erreurs.push(`Scénario « ${scenario.nom} » : aucune question posée.`);
+  for (const choix of ["A", "B", "ca_depend", "je_ne_sais_pas", "passer"]) {
+    for (const phase of ["ordination", "epreuve"] as const) {
+      const tours = jouerJusquAuBout(
+        valeursConfirmees,
+        main,
+        choix,
+        1,
+        phase,
+      );
+      if (
+        tours === 0 &&
+        phase === "ordination" &&
+        pairesAdmissibles(valeursConfirmees).length > 0 &&
+        main.length >= 2
+      ) {
+        erreurs.push(
+          `Scénario « ${scenario.nom} » : aucune question posée alors qu'il reste des paires à couvrir.`,
+        );
+      }
     }
   }
 }
@@ -305,6 +477,13 @@ for (const scenario of scenarios) {
 // Le parcours doit tenir sans aucune valeur, sans planter.
 const vide = calculerParcours({ valeursConfirmees: [], reponses: [] });
 verifier(vide.prochaine === null, "Sans valeur confirmée, le jeu devrait n'avoir aucune question.");
+
+// Et l'ordination doit tenir sur une partie vide.
+const ordinationVide = ajusterModele([], []);
+verifier(
+  ordinationVide.forces.length === 0 && ordinationVide.cycles.length === 0,
+  "L'ordination devrait être vide quand rien n'a été joué.",
+);
 
 // ── La main de cartes ───────────────────────────────────────────────────────
 
@@ -397,8 +576,10 @@ for (let graine = 1; graine <= 200; graine++) {
 }
 
 // Toute partie doit se terminer, quelle que soit la graine.
+const mainComplete = mainDe(scenarios[scenarios.length - 1].cartesChoisies);
 for (const graine of [0, 1, 7, 99, 123456]) {
-  jouerJusquAuBout(toutesLesValeurs, "A", graine);
+  jouerJusquAuBout(toutesLesValeurs, mainComplete, "A", graine);
+  jouerJusquAuBout(toutesLesValeurs, mainComplete, "A", graine, "epreuve");
 }
 
 // ── Rapport ──────────────────────────────────────────────────────────────────
@@ -423,6 +604,17 @@ console.log(
 );
 console.log(
   `Situations : ${plans.size} sélections distinctes sur 200 parties · ${vues.size}/${duels.length} duels atteignables`,
+);
+
+// La taxonomie, et ce qu'elle écarte : c'est le chiffre à surveiller quand on
+// ajoute des valeurs fines. Trop de paires refusées, et le jeu n'a plus rien à
+// poser ; trop peu, et les faux duels reviennent.
+const toutesPaires = (valeurs.length * (valeurs.length - 1)) / 2;
+const admissibles = pairesAdmissibles(toutesLesValeurs).length;
+console.log(
+  `Taxonomie : ${famillesValeurs.length} familles de valeurs · ` +
+    `${admissibles}/${toutesPaires} paires admissibles ` +
+    `(${toutesPaires - admissibles} écartées comme faux duels)`,
 );
 
 for (const a of avertissements) console.warn(`⚠ ${a}`);

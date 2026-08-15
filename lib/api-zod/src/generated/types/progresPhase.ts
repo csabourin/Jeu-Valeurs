@@ -13,8 +13,7 @@ export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 
 
 export const ProgresPhase = {
-  arbitrages: 'arbitrages',
-  duels: 'duels',
-  bascules: 'bascules',
+  ordination: 'ordination',
+  epreuve: 'epreuve',
   termine: 'termine',
 } as const;

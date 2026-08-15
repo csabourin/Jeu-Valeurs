@@ -6,38 +6,53 @@
  * Rafraîchir la page ne change donc rien à la partie en cours, alors que deux
  * parties tirent des sélections différentes dans le même contenu.
  *
- * Le parcours est piloté par le contenu, pas par les paires : on ne pose que
- * des situations écrites à la main. C'est ce qui garantit qu'aucune question
- * n'arrive sous la forme « Liberté ou Sécurité ? » posée à froid.
+ * Deux phases, et une frontière nette entre les deux :
  *
- * Trois phases :
- *   1. arbitrages — les cartes de la personne comparées entre elles, à froid,
- *                   avant que la moindre situation ait pu déplacer l'ordre ;
- *   2. duels      — situations concrètes entre deux valeurs de la personne ;
- *   3. bascules   — séries où un seul réglage bouge, servies pour les tensions
- *                   que la personne a tranchées franchement.
+ *   1. **ordination** — la première passe. Des duels courts, tirés pour
+ *      couvrir le plus de paires de valeurs possible. Aucune question de
+ *      relance : ni difficulté, ni certitude, ni « qu'est-ce que tu
+ *      protégeais ? ». C'est ce qui la garde jouable.
+ *   2. **epreuve** — après le premier portrait, et seulement si la personne le
+ *      demande. Le moteur d'exploration choisit les tensions qui apprendraient
+ *      quelque chose, rejoue les mêmes tensions sous d'autres cartes, et c'est
+ *      là — et là seulement — que le jeu pose ses questions d'approfondissement.
+ *
+ * Ce qui se compare, ce sont des **valeurs** ; les cartes ne sont que la forme
+ * concrète que prend la question. Une réponse enregistre donc toujours les
+ * deux étages (voir `comparaisons.ts`).
  */
 
-import { duels, clePaire, type DuelContenu } from "./duels";
+import { duels, type DuelContenu } from "./duels";
 import { series, type SerieBascule } from "./bascules";
 import { generateurAleatoire, melanger } from "./hasard";
+import { paireAdmissible } from "./eligibilite";
 import {
-  prochainArbitrage,
-  type BlocArbitrage,
-  type CarteArbitrable,
-  type ReponseArbitrage,
-} from "./arbitrages";
+  clePaire,
+  calculerCouverture,
+  estDecisif,
+  type Comparaison,
+  type PhaseExperience,
+} from "./comparaisons";
 import {
-  planifierCombatsCartes,
-  type CombatCarteContenu,
-} from "./combats-cartes";
+  duelsCartesPossibles,
+  type CarteDuel,
+  type DuelCarteContenu,
+} from "./duels-cartes";
+import {
+  pairesACouvrir,
+  tensionsAExplorer,
+  facteursLesPlusCites,
+  type MotifExploration,
+  type TensionAExplorer,
+} from "./exploration";
+import { ajusterModele } from "./preferences";
 
-/** Combien de duels au maximum dans une partie. */
-const MAX_DUELS = 12;
-/** En dessous de ce nombre, on complète avec des duels qui n'engagent qu'une valeur confirmée. */
-const MIN_DUELS = 8;
-/** Places réservées aux variantes (même conflit, autre forme) en fin de phase. */
-const MAX_VARIANTES = 3;
+/** Combien de duels au maximum dans la première passe. Au-delà, ça devient une corvée. */
+export const MAX_PREMIERE_VAGUE = 12;
+/** En dessous, l'ordination ne tient pas debout : on ne propose pas encore de portrait. */
+export const MIN_PREMIERE_VAGUE = 4;
+/** Combien de questions au maximum dans une mise à l'épreuve. */
+export const MAX_EPREUVE = 12;
 /** Combien de séries de bascule au maximum dans une partie. */
 const MAX_SERIES = 3;
 
@@ -48,12 +63,16 @@ export interface ReponseConnue {
   valeurA: string;
   valeurB: string;
   choix: string;
+  carteA?: string | null;
+  carteB?: string | null;
+  contexte?: string | null;
+  phase?: PhaseExperience | null;
   facteurDepend?: string | null;
   serieId?: string | null;
   palier?: number | null;
 }
 
-export type PhaseParcours = "arbitrages" | "duels" | "bascules" | "termine";
+export type PhaseParcours = "ordination" | "epreuve" | "termine";
 
 export interface Question {
   type: "duel" | "bascule";
@@ -63,10 +82,22 @@ export interface Question {
   situation: string;
   optionA: string;
   optionB: string;
-  /** Duel seulement. */
+  /** Duel écrit seulement. */
   contexte: string | null;
   /** Vrai si cette paire a déjà été vue sous une autre forme. */
   estVariante: boolean;
+  /** Cartes de session en jeu, quand la question vient des cartes de la personne. */
+  carteA: string | null;
+  carteB: string | null;
+  carteALabel: string | null;
+  carteBLabel: string | null;
+  /** Phase à enregistrer avec la réponse. */
+  phase: PhaseExperience;
+  /** Mise à l'épreuve : pourquoi cette tension maintenant. */
+  motif: MotifExploration | null;
+  motifTexte: string | null;
+  /** Vrai quand le jeu a le droit de poser ses questions de relance. */
+  approfondir: boolean;
   /** Bascule seulement. */
   serieId: string | null;
   palier: number | null;
@@ -78,70 +109,95 @@ export interface Question {
 export interface Parcours {
   phase: PhaseParcours;
   prochaine: Question | null;
-  /**
-   * Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une
-   * `Question` : il ne pose pas de situation et n'oppose pas deux valeurs, donc
-   * il voyage à part plutôt que d'ajouter huit champs nullables à `Question`.
-   */
-  prochainBloc: BlocArbitrage | null;
-  arbitragesPlanifies: number;
-  arbitragesRepondus: number;
-  duelsPlanifies: number;
-  duelsRepondus: number;
+  /** Duels prévus pour la première passe. */
+  comparaisonsPlanifiees: number;
+  comparaisonsRepondues: number;
+  /** n(n−1)/2 restreint aux paires admissibles. */
+  pairesPertinentes: number;
+  pairesCouvertes: number;
+  /** Tensions que la mise à l'épreuve pourrait encore poser. */
+  tensionsRestantes: number;
   seriesPlanifiees: number;
   seriesTerminees: number;
+  /** Vrai dès qu'il y a assez de matière pour afficher un premier portrait. */
+  premiereOrdinationPrete: boolean;
+  /** Vrai s'il reste des paires jamais confrontées à compléter. */
+  peutAffiner: boolean;
 }
 
 /** Ce que le parcours a besoin de savoir de la partie en cours. */
 export interface EtatPartie {
   valeursConfirmees: string[];
   reponses: ReponseConnue[];
-  /** Les cartes retenues par la personne. Vide ⇒ pas de phase d'arbitrage. */
-  cartes?: CarteArbitrable[];
-  arbitrages?: ReponseArbitrage[];
+  /** Les cartes retenues par la personne, avec leurs valeurs confirmées. */
+  cartes?: CarteDuel[];
   graine?: number;
+  /**
+   * Phase demandée par la personne. Le jeu ne bascule jamais tout seul dans la
+   * mise à l'épreuve : elle vient d'un bouton, après le premier portrait.
+   */
+  phaseDemandee?: PhaseExperience;
 }
 
-function estDecisif(choix: string): boolean {
-  return choix === "A" || choix === "B";
+// ─── Manifestations ──────────────────────────────────────────────────────────
+
+type SourceManifestation = "cartes" | "situation_ecrite";
+
+interface Manifestation {
+  id: number;
+  valeurA: string;
+  valeurB: string;
+  situation: string;
+  optionA: string;
+  optionB: string;
+  contexte: string | null;
+  carteA: string | null;
+  carteB: string | null;
+  carteALabel: string | null;
+  carteBLabel: string | null;
+  source: SourceManifestation;
+}
+
+function depuisDuelCarte(d: DuelCarteContenu): Manifestation {
+  return {
+    id: d.id,
+    valeurA: d.valeurA,
+    valeurB: d.valeurB,
+    situation: d.situation,
+    optionA: d.optionA,
+    optionB: d.optionB,
+    contexte: null,
+    carteA: d.carteAId,
+    carteB: d.carteBId,
+    carteALabel: d.carteALabel,
+    carteBLabel: d.carteBLabel,
+    source: "cartes",
+  };
+}
+
+function depuisDuelEcrit(d: DuelContenu): Manifestation {
+  return {
+    id: d.id,
+    valeurA: d.valeurA,
+    valeurB: d.valeurB,
+    situation: d.situation,
+    optionA: d.optionA,
+    optionB: d.optionB,
+    contexte: d.contexte,
+    carteA: null,
+    carteB: null,
+    carteALabel: null,
+    carteBLabel: null,
+    source: "situation_ecrite",
+  };
 }
 
 /**
- * Répartit les duels pour ne pas enchaîner deux situations sur la même paire :
- * on prend un duel par paire, puis un deuxième, et ainsi de suite.
+ * Les situations écrites à la main jouables avec les valeurs de la personne.
  *
- * L'ordre des paires et le choix à l'intérieur d'une paire viennent de la
- * graine de la partie : c'est ce qui fait que deux parties bâties sur les mêmes
- * cartes ne servent pas la même sélection.
- */
-function repartir(liste: DuelContenu[], suivant: () => number): DuelContenu[] {
-  const groupes = new Map<string, DuelContenu[]>();
-  for (const d of melanger(liste, suivant)) {
-    const cle = clePaire(d.valeurA, d.valeurB);
-    const groupe = groupes.get(cle);
-    if (groupe) groupe.push(d);
-    else groupes.set(cle, [d]);
-  }
-
-  const ordonnes = melanger(Array.from(groupes.values()), suivant);
-
-  const resultat: DuelContenu[] = [];
-  const profondeurMax = Math.max(0, ...ordonnes.map((g) => g.length));
-  for (let rang = 0; rang < profondeurMax; rang++) {
-    for (const groupe of ordonnes) {
-      const duel = groupe[rang];
-      if (duel) resultat.push(duel);
-    }
-  }
-  return resultat;
-}
-
-/**
- * L'ordre des duels d'une partie.
- *
- * D'abord les situations dont les deux valeurs ont été confirmées ; on complète
- * au besoin avec des situations qui n'en engagent qu'une (elles font découvrir
- * une valeur voisine) ; les variantes ferment la marche, loin de leur jumelle.
+ * Une paire que les règles d'admissibilité refusent n'est jamais servie, même
+ * si une situation existe pour elle : le contenu peut avoir vieilli, les règles
+ * font foi.
  */
 export function planifierDuels(
   valeursConfirmees: string[],
@@ -150,45 +206,35 @@ export function planifierDuels(
   const connues = new Set(valeursConfirmees);
   if (connues.size === 0) return [];
 
-  const suivant = generateurAleatoire(graine);
-
-  const deuxValeurs = duels.filter(
-    (d) => connues.has(d.valeurA) && connues.has(d.valeurB),
-  );
-  const uneValeur = duels.filter(
-    (d) => connues.has(d.valeurA) !== connues.has(d.valeurB),
+  const jouables = duels.filter(
+    (d) =>
+      connues.has(d.valeurA) &&
+      connues.has(d.valeurB) &&
+      paireAdmissible(d.valeurA, d.valeurB).admissible,
   );
 
-  const variantesPossibles = repartir(
-    deuxValeurs.filter((d) => d.variante),
-    suivant,
-  );
-  const principaux = repartir(
-    deuxValeurs.filter((d) => !d.variante),
-    suivant,
-  );
-  const complement = repartir(uneValeur, suivant);
-
-  const plafondPrincipaux =
-    MAX_DUELS - Math.min(variantesPossibles.length, MAX_VARIANTES);
-  let plan = principaux.slice(0, plafondPrincipaux);
-
-  if (plan.length < MIN_DUELS) {
-    plan = plan.concat(complement.slice(0, MIN_DUELS - plan.length));
-  }
-
-  // Une variante ne part que si sa jumelle est effectivement dans la partie :
-  // sinon l'écran annonce « déjà croisé, autrement » à propos d'une tension
-  // jamais vue, et le calcul de stabilité n'aurait rien à comparer.
-  const pairesRetenues = new Set(
-    plan.map((d) => clePaire(d.valeurA, d.valeurB)),
-  );
-  const variantes = variantesPossibles
-    .filter((d) => pairesRetenues.has(clePaire(d.valeurA, d.valeurB)))
-    .slice(0, MAX_VARIANTES);
-
-  return plan.slice(0, MAX_DUELS - variantes.length).concat(variantes);
+  return melanger(jouables, generateurAleatoire(graine));
 }
+
+/**
+ * Toutes les formes que peut prendre une comparaison dans cette partie :
+ * les duels entre les cartes de la personne, plus les situations écrites dont
+ * les deux valeurs lui appartiennent.
+ *
+ * Une même paire de valeurs a souvent plusieurs manifestations. C'est
+ * volontaire : rejouer la tension autrement mesure sa stabilité sans reposer la
+ * même question.
+ */
+function toutesLesManifestations(etat: EtatPartie): Manifestation[] {
+  const cartes = etat.cartes ?? [];
+  const desCartes = duelsCartesPossibles(cartes).map(depuisDuelCarte);
+  const ecrites = planifierDuels(etat.valeursConfirmees, etat.graine ?? 0).map(
+    depuisDuelEcrit,
+  );
+  return [...desCartes, ...ecrites];
+}
+
+// ─── Séries de bascule ───────────────────────────────────────────────────────
 
 /**
  * État d'une série : où elle en est et si elle doit continuer.
@@ -234,10 +280,10 @@ function etatSerie(
 /**
  * Les séries retenues pour une partie.
  *
- * On ne fait basculer que ce qui a été tranché : une série n'a de sens que si
- * la personne a déjà pris position franchement sur cette tension. Les séries
- * dont la dimension a été nommée dans un « ça dépend » passent devant — c'est
- * exactement le réglage que la personne a dit surveiller.
+ * Une série ne fait bouger qu'un seul réglage : elle mesure indirectement la
+ * répétabilité, sans jamais demander « referais-tu le même choix ? ». On ne
+ * fait basculer que ce qui a déjà été tranché franchement, et les séries dont
+ * la dimension a été nommée dans un « ça dépend » passent devant.
  */
 export function planifierSeries(
   valeursConfirmees: string[],
@@ -250,20 +296,15 @@ export function planifierSeries(
       .filter((r) => estDecisif(r.choix) && !r.serieId)
       .map((r) => clePaire(r.valeurA, r.valeurB)),
   );
-  const facteursCites = new Set(
-    reponses
-      .filter((r) => r.choix === "ca_depend" && r.facteurDepend)
-      .map((r) => r.facteurDepend as string),
-  );
+  const facteursCites = new Set(facteursLesPlusCites(reponses));
 
   const eligibles = series.filter((s) => {
+    if (!paireAdmissible(s.valeurA, s.valeurB).admissible) return false;
     const paireTranchee = tranchees.has(clePaire(s.valeurA, s.valeurB));
     const deuxValeursConnues = connues.has(s.valeurA) && connues.has(s.valeurB);
     return paireTranchee || deuxValeursConnues;
   });
 
-  // À priorité égale, c'est la graine qui départage — deux parties identiques
-  // sur le papier n'explorent pas les mêmes bascules.
   const suivant = generateurAleatoire(graine ^ 0x5eed);
   return melanger(eligibles, suivant)
     .map((serie, rang) => ({
@@ -278,43 +319,39 @@ export function planifierSeries(
     .map((e) => e.serie);
 }
 
-function versQuestionDuel(duel: DuelContenu): Question {
+// ─── Fabrication des questions ───────────────────────────────────────────────
+
+function versQuestion(
+  manifestation: Manifestation,
+  phase: PhaseExperience,
+  options: {
+    estVariante: boolean;
+    tension?: TensionAExplorer;
+  },
+): Question {
   return {
     type: "duel",
-    dilemmeId: duel.id,
-    valeurA: duel.valeurA,
-    valeurB: duel.valeurB,
-    situation: duel.situation,
-    optionA: duel.optionA,
-    optionB: duel.optionB,
-    contexte: duel.contexte,
-    estVariante: duel.variante === true,
+    dilemmeId: manifestation.id,
+    valeurA: manifestation.valeurA,
+    valeurB: manifestation.valeurB,
+    situation: manifestation.situation,
+    optionA: manifestation.optionA,
+    optionB: manifestation.optionB,
+    contexte: manifestation.contexte,
+    estVariante: options.estVariante,
+    carteA: manifestation.carteA,
+    carteB: manifestation.carteB,
+    carteALabel: manifestation.carteALabel,
+    carteBLabel: manifestation.carteBLabel,
+    phase,
+    motif: options.tension?.motif ?? null,
+    motifTexte: options.tension?.explication ?? null,
+    approfondir: phase === "epreuve",
     serieId: null,
     palier: null,
     dimension: null,
     reglage: null,
     amorce: null,
-  };
-}
-
-function versQuestionCombat(combat: CombatCarteContenu): Question {
-  return {
-    type: "duel",
-    dilemmeId: combat.id,
-    valeurA: combat.valeurA,
-    valeurB: combat.valeurB,
-    situation: combat.situation,
-    optionA: combat.optionA,
-    optionB: combat.optionB,
-    contexte: null,
-    estVariante: combat.variante,
-    serieId: null,
-    palier: null,
-    dimension: combat.variante ? "enjeu" : null,
-    reglage: combat.variante ? combat.enjeuLabel : null,
-    amorce: combat.variante
-      ? "La limite ne change pas. Seul ce que tu pourrais obtenir ou garder change."
-      : null,
   };
 }
 
@@ -334,6 +371,16 @@ function versQuestionBascule(
     optionB: serie.optionB,
     contexte: null,
     estVariante: false,
+    carteA: null,
+    carteB: null,
+    carteALabel: null,
+    carteBLabel: null,
+    phase: "epreuve",
+    motif: null,
+    motifTexte: null,
+    // Dans une série, c'est le jeu qui tient le réglage : on ne demande rien
+    // d'autre que le choix, sinon on casse la comparaison entre paliers.
+    approfondir: false,
     serieId: serie.id,
     palier: p.palier,
     dimension: serie.dimension,
@@ -342,78 +389,218 @@ function versQuestionBascule(
   };
 }
 
+/** Les réponses converties en comparaisons, pour les modules qui raisonnent en valeurs. */
+export function versComparaisons(reponses: ReponseConnue[]): Comparaison[] {
+  return reponses
+    .filter((r) => !r.serieId)
+    .map((r) => ({
+      valeurA: r.valeurA,
+      valeurB: r.valeurB,
+      carteA: r.carteA ?? null,
+      carteB: r.carteB ?? null,
+      choix: r.choix as Comparaison["choix"],
+      contexte: r.contexte ?? null,
+      phase: (r.phase ?? "ordination") as PhaseExperience,
+    }));
+}
+
+// ─── Entrée principale ───────────────────────────────────────────────────────
+
 /**
  * Où en est la partie, et quelle question vient maintenant.
- *
- * Les arbitrages passent avant les duels : une fois qu'on a joué douze
- * situations, on ne classe plus ses cartes à froid, on classe ce que les
- * situations viennent de remuer.
  */
-export function calculerParcours({
-  valeursConfirmees,
-  reponses,
-  cartes = [],
-  arbitrages = [],
-  graine = 0,
-}: EtatPartie): Parcours {
-  const arbitrage = prochainArbitrage(cartes, arbitrages, graine);
-  const combatsCartes = planifierCombatsCartes(cartes, graine);
-  const utiliseCombatsCartes = combatsCartes.length > 0;
-  const plan = utiliseCombatsCartes
-    ? combatsCartes
-    : planifierDuels(valeursConfirmees, graine);
+export function calculerParcours(etat: EtatPartie): Parcours {
+  const {
+    valeursConfirmees,
+    reponses,
+    graine = 0,
+    phaseDemandee = "ordination",
+  } = etat;
+
+  const manifestations = toutesLesManifestations(etat);
   const repondus = new Set(
     reponses
       .filter((r) => r.dilemmeId != null)
       .map((r) => r.dilemmeId as number),
   );
+  const comparaisons = versComparaisons(reponses);
 
-  const duelRestant = plan.find((d) => !repondus.has(d.id));
-  const duelsRepondus = plan.filter((d) => repondus.has(d.id)).length;
+  // Ce que le jeu peut effectivement poser : une paire sans manifestation
+  // n'est jamais proposée, même si les deux valeurs sont actives.
+  const pairesJouables = pairesDepuisManifestations(manifestations);
 
-  const seriesPlan = utiliseCombatsCartes
-    ? []
-    : planifierSeries(valeursConfirmees, reponses, graine);
-  const etats = seriesPlan.map((s) => ({
+  const couverture = calculerCouverture(valeursConfirmees, comparaisons);
+  const reponduesOrdination = comparaisons.filter(
+    (c) => c.phase === "ordination",
+  ).length;
+  const planifiees = Math.min(MAX_PREMIERE_VAGUE, pairesJouables.length);
+
+  const seriesPlan = planifierSeries(valeursConfirmees, reponses, graine);
+  const etatsSeries = seriesPlan.map((s) => ({
     serie: s,
     ...etatSerie(s, reponses),
   }));
-  const seriesTerminees = etats.filter((e) => e.terminee).length;
+  const seriesTerminees = etatsSeries.filter((e) => e.terminee).length;
+
+  const ordination = ajusterModele(comparaisons, valeursConfirmees);
+  const tensions = tensionsAExplorer({
+    valeursActives: valeursConfirmees,
+    comparaisons,
+    pairesJouables,
+    graine,
+    ordination,
+  });
 
   const base = {
-    prochainBloc: null,
-    arbitragesPlanifies: arbitrage.plan.length,
-    arbitragesRepondus: arbitrage.repondus,
-    duelsPlanifies: plan.length,
-    duelsRepondus,
+    comparaisonsPlanifiees: planifiees,
+    comparaisonsRepondues: reponduesOrdination,
+    pairesPertinentes: couverture.pairesPertinentes.length,
+    pairesCouvertes: couverture.pairesVues.length,
+    tensionsRestantes: tensions.length,
     seriesPlanifiees: seriesPlan.length,
     seriesTerminees,
+    premiereOrdinationPrete:
+      reponduesOrdination >= Math.min(MIN_PREMIERE_VAGUE, planifiees) &&
+      reponduesOrdination > 0,
+    peutAffiner: couverture.pairesManquantes.some(([a, b]) =>
+      pairesJouables.some(
+        ([x, y]) => clePaire(x, y) === clePaire(a, b),
+      ),
+    ),
   };
 
-  if (arbitrage.prochain) {
-    return {
-      ...base,
-      phase: "arbitrages",
-      prochaine: null,
-      prochainBloc: arbitrage.prochain,
-    };
+  // ── Première passe ────────────────────────────────────────────────────────
+  if (phaseDemandee === "ordination") {
+    if (reponduesOrdination < planifiees) {
+      for (const [a, b] of pairesACouvrir({
+        valeursActives: valeursConfirmees,
+        comparaisons,
+        pairesJouables,
+        graine,
+      })) {
+        const choisie = choisirManifestation(
+          manifestations,
+          a,
+          b,
+          repondus,
+          comparaisons,
+          graine,
+        );
+        if (choisie) {
+          return {
+            ...base,
+            phase: "ordination",
+            prochaine: versQuestion(choisie, "ordination", {
+              estVariante: false,
+            }),
+          };
+        }
+      }
+    }
+    // Plus rien à couvrir : la première passe est finie, le portrait peut
+    // s'afficher. La suite ne part que si la personne la demande.
+    return { ...base, phase: "termine", prochaine: null };
   }
 
-  if (duelRestant) {
-    return {
-      ...base,
-      phase: "duels",
-      prochaine: utiliseCombatsCartes
-        ? versQuestionCombat(duelRestant as CombatCarteContenu)
-        : versQuestionDuel(duelRestant as DuelContenu),
-    };
-  }
+  // ── Mise à l'épreuve ──────────────────────────────────────────────────────
+  const reponduesEpreuve =
+    comparaisons.filter((c) => c.phase === "epreuve").length +
+    reponses.filter((r) => r.serieId).length;
 
-  for (const etat of etats) {
-    if (etat.terminee || etat.prochainPalier == null) continue;
-    const question = versQuestionBascule(etat.serie, etat.prochainPalier);
-    if (question) return { ...base, phase: "bascules", prochaine: question };
+  if (reponduesEpreuve < MAX_EPREUVE) {
+    for (const tension of tensions) {
+      const choisie = choisirManifestation(
+        manifestations,
+        tension.valeurA,
+        tension.valeurB,
+        repondus,
+        comparaisons,
+        graine,
+      );
+      if (!choisie) continue;
+      const dejaVue = comparaisons.some(
+        (c) =>
+          clePaire(c.valeurA, c.valeurB) ===
+          clePaire(tension.valeurA, tension.valeurB),
+      );
+      return {
+        ...base,
+        phase: "epreuve",
+        prochaine: versQuestion(choisie, "epreuve", {
+          estVariante: dejaVue,
+          tension,
+        }),
+      };
+    }
+
+    // Les séries de bascule ferment la marche : elles ne mesurent plus l'ordre,
+    // mais l'endroit précis où il change.
+    for (const etatCourant of etatsSeries) {
+      if (etatCourant.terminee || etatCourant.prochainPalier == null) continue;
+      const question = versQuestionBascule(
+        etatCourant.serie,
+        etatCourant.prochainPalier,
+      );
+      if (question) return { ...base, phase: "epreuve", prochaine: question };
+    }
   }
 
   return { ...base, phase: "termine", prochaine: null };
+}
+
+function pairesDepuisManifestations(
+  manifestations: Manifestation[],
+): [string, string][] {
+  const vues = new Map<string, [string, string]>();
+  for (const m of manifestations) {
+    const cle = clePaire(m.valeurA, m.valeurB);
+    if (!vues.has(cle)) vues.set(cle, [m.valeurA, m.valeurB]);
+  }
+  return Array.from(vues.values());
+}
+
+/**
+ * Quelle forme donner à une tension.
+ *
+ * On écarte ce qui a déjà été joué, puis on préfère une manifestation d'une
+ * autre nature que celles déjà servies pour cette paire : revoir la même
+ * tension sous une autre forme est exactement ce qui permet de mesurer sa
+ * stabilité. À égalité, la graine décide.
+ */
+function choisirManifestation(
+  manifestations: Manifestation[],
+  valeurA: string,
+  valeurB: string,
+  repondus: Set<number>,
+  comparaisons: Comparaison[],
+  graine: number,
+): Manifestation | null {
+  const cible = clePaire(valeurA, valeurB);
+  const candidates = manifestations.filter(
+    (m) => clePaire(m.valeurA, m.valeurB) === cible && !repondus.has(m.id),
+  );
+  if (candidates.length === 0) return null;
+
+  const cartesDejaVues = new Set(
+    comparaisons
+      .filter((c) => clePaire(c.valeurA, c.valeurB) === cible)
+      .flatMap((c) => [c.carteA, c.carteB])
+      .filter((id): id is string => id !== null),
+  );
+  const sourcesVues = new Set(
+    comparaisons
+      .filter((c) => clePaire(c.valeurA, c.valeurB) === cible)
+      .map((c) => (c.carteA ? "cartes" : "situation_ecrite")),
+  );
+
+  const melangees = melanger(candidates, generateurAleatoire(graine ^ 0x4a17));
+  const note = (m: Manifestation): number => {
+    let points = 0;
+    if (!sourcesVues.has(m.source)) points -= 2;
+    if (m.carteA && !cartesDejaVues.has(m.carteA)) points -= 1;
+    if (m.carteB && !cartesDejaVues.has(m.carteB)) points -= 1;
+    return points;
+  };
+
+  return melangees.sort((a, b) => note(a) - note(b))[0] ?? null;
 }

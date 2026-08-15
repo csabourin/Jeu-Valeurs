@@ -13,8 +13,7 @@ export const SessionInputEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
-  arbitrages: 'arbitrages',
-  collisions: 'collisions',
-  bascules: 'bascules',
+  ordination: 'ordination',
   constellation: 'constellation',
+  epreuve: 'epreuve',
 } as const;

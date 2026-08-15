@@ -20,14 +20,13 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Arbitrage,
-  ArbitrageInput,
   CarteCatalogue,
   CarteSession,
   CarteSessionInput,
   CarteSessionUpdate,
   Constellation,
   HealthStatus,
+  ListCartesProposeesParams,
   ListCartessCatalogueParams,
   Progres,
   ReponseCollision,
@@ -595,21 +594,30 @@ export const useDeleteSession = <TError = ErrorType<void>,
       return useMutation(getDeleteSessionMutationOptions(options));
     }
 
-export const getListCartesProposeesUrl = (sessionId: string,) => {
+export const getListCartesProposeesUrl = (sessionId: string,
+    params?: ListCartesProposeesParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/sessions/${sessionId}/cartes-proposees`
+  return stringifiedParams.length > 0 ? `/api/sessions/${sessionId}/cartes-proposees?${stringifiedParams}` : `/api/sessions/${sessionId}/cartes-proposees`
 }
 
 /**
- * 825 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main tirée avec sa graine : stable pour une partie donnée, différente d'une partie à l'autre.
+ * 900 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main tirée avec sa graine : stable pour une partie donnée, différente d'une partie à l'autre. `parFamille` élargit la main sans la rebattre — les cartes déjà vues restent en place, d'autres s'ajoutent après elles.
  * @summary La main de cartes tirée pour cette partie
  */
-export const listCartesProposees = async (sessionId: string, options?: Parameters<typeof customFetch>[1]): Promise<CarteCatalogue[]> => {
+export const listCartesProposees = async (sessionId: string,
+    params?: ListCartesProposeesParams, options?: Parameters<typeof customFetch>[1]): Promise<CarteCatalogue[]> => {
 
-  return customFetch<CarteCatalogue[]>(getListCartesProposeesUrl(sessionId),
+  return customFetch<CarteCatalogue[]>(getListCartesProposeesUrl(sessionId,params),
   {
     ...options,
     method: 'GET'
@@ -622,23 +630,25 @@ export const listCartesProposees = async (sessionId: string, options?: Parameter
 
 
 
-export const getListCartesProposeesQueryKey = (sessionId: string,) => {
+export const getListCartesProposeesQueryKey = (sessionId: string,
+    params?: ListCartesProposeesParams,) => {
     return [
-    `/api/sessions/${sessionId}/cartes-proposees`
+    `/api/sessions/${sessionId}/cartes-proposees`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListCartesProposeesQueryOptions = <TData = Awaited<ReturnType<typeof listCartesProposees>>, TError = ErrorType<void>>(sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListCartesProposeesQueryOptions = <TData = Awaited<ReturnType<typeof listCartesProposees>>, TError = ErrorType<void>>(sessionId: string,
+    params?: ListCartesProposeesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListCartesProposeesQueryKey(sessionId);
+  const queryKey =  queryOptions?.queryKey ?? getListCartesProposeesQueryKey(sessionId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCartesProposees>>> = ({ signal }) => listCartesProposees(sessionId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCartesProposees>>> = ({ signal }) => listCartesProposees(sessionId,params, { signal, ...requestOptions });
 
 
 
@@ -656,11 +666,12 @@ export type ListCartesProposeesQueryError = ErrorType<void>
  */
 
 export function useListCartesProposees<TData = Awaited<ReturnType<typeof listCartesProposees>>, TError = ErrorType<void>>(
- sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ sessionId: string,
+    params?: ListCartesProposeesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCartesProposees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListCartesProposeesQueryOptions(sessionId,options)
+  const queryOptions = getListCartesProposeesQueryOptions(sessionId,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1190,155 +1201,6 @@ export const useUpdateReponse = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateReponseMutationOptions(options));
-    }
-
-export const getListArbitragesUrl = (sessionId: string,) => {
-
-
-
-
-  return `/api/sessions/${sessionId}/arbitrages`
-}
-
-/**
- * @summary Liste les blocs d'arbitrage joués dans une session
- */
-export const listArbitrages = async (sessionId: string, options?: Parameters<typeof customFetch>[1]): Promise<Arbitrage[]> => {
-
-  return customFetch<Arbitrage[]>(getListArbitragesUrl(sessionId),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListArbitragesQueryKey = (sessionId: string,) => {
-    return [
-    `/api/sessions/${sessionId}/arbitrages`
-    ] as const;
-    }
-
-
-export const getListArbitragesQueryOptions = <TData = Awaited<ReturnType<typeof listArbitrages>>, TError = ErrorType<unknown>>(sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listArbitrages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListArbitragesQueryKey(sessionId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listArbitrages>>> = ({ signal }) => listArbitrages(sessionId, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listArbitrages>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListArbitragesQueryResult = NonNullable<Awaited<ReturnType<typeof listArbitrages>>>
-export type ListArbitragesQueryError = ErrorType<unknown>
-
-
-/**
- * @summary Liste les blocs d'arbitrage joués dans une session
- */
-
-export function useListArbitrages<TData = Awaited<ReturnType<typeof listArbitrages>>, TError = ErrorType<unknown>>(
- sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listArbitrages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListArbitragesQueryOptions(sessionId,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-
-export const getCreateArbitrageUrl = (sessionId: string,) => {
-
-
-
-
-  return `/api/sessions/${sessionId}/arbitrages`
-}
-
-/**
- * @summary Enregistre le résultat d'un bloc d'arbitrage
- */
-export const createArbitrage = async (sessionId: string,
-    arbitrageInput: ArbitrageInput, options?: Parameters<typeof customFetch>[1]): Promise<Arbitrage> => {
-
-  return customFetch<Arbitrage>(getCreateArbitrageUrl(sessionId),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(arbitrageInput)
-  }
-);}
-
-
-
-
-
-export const getCreateArbitrageMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createArbitrage>>, TError,{sessionId: string;data: BodyType<ArbitrageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createArbitrage>>, TError,{sessionId: string;data: BodyType<ArbitrageInput>}, TContext> => {
-
-const mutationKey = ['createArbitrage'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createArbitrage>>, {sessionId: string;data: BodyType<ArbitrageInput>}> = (props) => {
-          const {sessionId,data} = props ?? {};
-
-          return  createArbitrage(sessionId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateArbitrageMutationResult = NonNullable<Awaited<ReturnType<typeof createArbitrage>>>
-    export type CreateArbitrageMutationBody = BodyType<ArbitrageInput>
-    export type CreateArbitrageMutationError = ErrorType<void>
-
-    /**
- * @summary Enregistre le résultat d'un bloc d'arbitrage
- */
-export const useCreateArbitrage = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createArbitrage>>, TError,{sessionId: string;data: BodyType<ArbitrageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createArbitrage>>,
-        TError,
-        {sessionId: string;data: BodyType<ArbitrageInput>},
-        TContext
-      > => {
-      return useMutation(getCreateArbitrageMutationOptions(options));
     }
 
 export const getGetConstellationUrl = (sessionId: string,) => {

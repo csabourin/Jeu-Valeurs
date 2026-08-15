@@ -45,6 +45,9 @@ export interface CarteCatalogue {
   estPersonnalisable?: boolean;
 }
 
+/**
+ * Grande famille théorique (cadre de haut niveau)
+ */
 export type ValeurCatalogueFamille = typeof ValeurCatalogueFamille[keyof typeof ValeurCatalogueFamille];
 
 
@@ -59,7 +62,12 @@ export interface ValeurCatalogue {
   /** Libellé canonique — sert d'identifiant partout */
   label: string;
   description: string;
+  /** Grande famille théorique (cadre de haut niveau) */
   famille: ValeurCatalogueFamille;
+  /** Famille de valeurs — l'étage qui décide de l'admissibilité d'un duel (autonomie, bienveillance, justice, securite…) */
+  familleValeur: string;
+  /** Valeurs trop proches pour être confrontées à celle-ci */
+  quasiSynonymes?: string[];
 }
 
 export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
@@ -71,7 +79,18 @@ export const QuestionType = {
 } as const;
 
 /**
- * Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
+ * Phase à enregistrer avec la réponse
+ */
+export type QuestionPhase = typeof QuestionPhase[keyof typeof QuestionPhase];
+
+
+export const QuestionPhase = {
+  ordination: 'ordination',
+  epreuve: 'epreuve',
+} as const;
+
+/**
+ * Une comparaison à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs — soit à travers deux cartes de la personne, soit à travers une situation écrite ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
  */
 export interface Question {
   type: QuestionType;
@@ -82,12 +101,37 @@ export interface Question {
   optionA: string;
   optionB: string;
   /**
-     * Duel : amis, ecole, maison, en_ligne, equipe, public
+     * Situation écrite : amis, ecole, maison, en_ligne, equipe, public
      * @nullable
      */
   contexte?: string | null;
   /** Vrai si cette tension a déjà été vue sous une autre forme */
   estVariante: boolean;
+  /**
+     * Carte de session qui manifeste `valeurA`, si la question vient des cartes
+     * @nullable
+     */
+  carteA?: string | null;
+  /** @nullable */
+  carteB?: string | null;
+  /** @nullable */
+  carteALabel?: string | null;
+  /** @nullable */
+  carteBLabel?: string | null;
+  /** Phase à enregistrer avec la réponse */
+  phase: QuestionPhase;
+  /**
+     * Mise à l'épreuve : pourquoi cette tension maintenant — reponses_variables, forces_proches, ca_depend_frequent, paire_jamais_vue, jamais_secondaire, domine_presque_tout
+     * @nullable
+     */
+  motif?: string | null;
+  /**
+     * Le motif, en une phrase affichable
+     * @nullable
+     */
+  motifTexte?: string | null;
+  /** Vrai quand le jeu a le droit de poser ses questions de relance (difficulté, valeur protégée, ce qui aurait pu changer la réponse). Toujours faux pendant la première passe. */
+  approfondir: boolean;
   /** @nullable */
   serieId?: string | null;
   /** @nullable */
@@ -116,10 +160,9 @@ export const SessionEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
-  arbitrages: 'arbitrages',
-  collisions: 'collisions',
-  bascules: 'bascules',
+  ordination: 'ordination',
   constellation: 'constellation',
+  epreuve: 'epreuve',
 } as const;
 
 export interface Session {
@@ -136,10 +179,9 @@ export const SessionInputEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
-  arbitrages: 'arbitrages',
-  collisions: 'collisions',
-  bascules: 'bascules',
+  ordination: 'ordination',
   constellation: 'constellation',
+  epreuve: 'epreuve',
 } as const;
 
 export interface SessionInput {
@@ -153,10 +195,9 @@ export const SessionUpdateEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
-  arbitrages: 'arbitrages',
-  collisions: 'collisions',
-  bascules: 'bascules',
+  ordination: 'ordination',
   constellation: 'constellation',
+  epreuve: 'epreuve',
 } as const;
 
 export interface SessionUpdate {
@@ -226,6 +267,14 @@ export const ReponseCollisionChoix = {
   passer: 'passer',
 } as const;
 
+export type ReponseCollisionPhase = typeof ReponseCollisionPhase[keyof typeof ReponseCollisionPhase];
+
+
+export const ReponseCollisionPhase = {
+  ordination: 'ordination',
+  epreuve: 'epreuve',
+} as const;
+
 export interface ReponseCollision {
   id: number;
   sessionId: string;
@@ -233,7 +282,20 @@ export interface ReponseCollision {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  /**
+     * Carte de session qui manifestait `valeurA`
+     * @nullable
+     */
+  carteA?: string | null;
+  /** @nullable */
+  carteB?: string | null;
   choix: ReponseCollisionChoix;
+  /**
+     * Où ça se passait, quand la situation le précisait
+     * @nullable
+     */
+  contexte?: string | null;
+  phase: ReponseCollisionPhase;
   /**
      * Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite
      * @nullable
@@ -245,12 +307,12 @@ export interface ReponseCollision {
      */
   facteurDependLibre?: string | null;
   /**
-     * 1 à 5, absent si choix=passer
+     * 1 à 5. Demandé seulement en phase de mise à l'épreuve.
      * @nullable
      */
   difficulte?: number | null;
   /**
-     * 1 à 5, absent si choix=passer
+     * 1 à 5. Demandé seulement en phase de mise à l'épreuve.
      * @nullable
      */
   certitude?: number | null;
@@ -268,6 +330,11 @@ export interface ReponseCollision {
      * @nullable
      */
   valeurProtegee?: string | null;
+  /**
+     * Ce qui aurait pu faire changer sa réponse, dans ses mots
+     * @nullable
+     */
+  ceQuiChangerait?: string | null;
   /** Numéro de version (incrémenter à chaque correction) */
   version: number;
   creeLe: string;
@@ -290,7 +357,18 @@ export interface ReponseCollisionInput {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  /** @nullable */
+  carteA?: string | null;
+  /** @nullable */
+  carteB?: string | null;
   choix: ReponseCollisionInputChoix;
+  /** @nullable */
+  contexte?: string | null;
+  /**
+     * ordination (défaut) ou epreuve
+     * @nullable
+     */
+  phase?: string | null;
   /** @nullable */
   facteurDepend?: string | null;
   /** @nullable */
@@ -307,6 +385,8 @@ export interface ReponseCollisionInput {
   dimension?: string | null;
   /** @nullable */
   valeurProtegee?: string | null;
+  /** @nullable */
+  ceQuiChangerait?: string | null;
 }
 
 export type ReponseCollisionUpdateChoix = typeof ReponseCollisionUpdateChoix[keyof typeof ReponseCollisionUpdateChoix];
@@ -332,95 +412,8 @@ export interface ReponseCollisionUpdate {
   certitude?: number | null;
   /** @nullable */
   valeurProtegee?: string | null;
-}
-
-export type CarteArbitrableFamille = typeof CarteArbitrableFamille[keyof typeof CarteArbitrableFamille];
-
-
-export const CarteArbitrableFamille = {
-  lignes_rouges: 'lignes_rouges',
-  horizons: 'horizons',
-  tresors: 'tresors',
-} as const;
-
-/**
- * Une carte de la personne, réduite à ce qu'un bloc affiche.
- */
-export interface CarteArbitrable {
-  /** Identifiant de la carte de session, en texte */
-  id: string;
-  famille: CarteArbitrableFamille;
-  label: string;
-}
-
-/**
- * Quatre cartes de la personne mises côte à côte, hors situation. On demande laquelle compte le plus et laquelle compte le moins.
- */
-export interface BlocArbitrage {
-  /** Rang du bloc dans la partie, à partir de 1 */
-  bloc: number;
-  cartes: CarteArbitrable[];
-}
-
-export interface Arbitrage {
-  id: number;
-  sessionId: string;
-  bloc: number;
-  /** Composition du bloc au moment où il a été joué. Figée : une carte retirée ensuite ne doit pas rendre la réponse illisible. */
-  carteIds: string[];
-  /**
-     * Null avec cartePire quand le bloc a été passé
-     * @nullable
-     */
-  carteMeilleure?: string | null;
   /** @nullable */
-  cartePire?: string | null;
-  version: number;
-  creeLe: string;
-  miseAJourLe?: string;
-}
-
-export interface ArbitrageInput {
-  bloc: number;
-  carteIds: string[];
-  /** @nullable */
-  carteMeilleure?: string | null;
-  /** @nullable */
-  cartePire?: string | null;
-}
-
-export type ScoreCarteFamille = typeof ScoreCarteFamille[keyof typeof ScoreCarteFamille];
-
-
-export const ScoreCarteFamille = {
-  lignes_rouges: 'lignes_rouges',
-  horizons: 'horizons',
-  tresors: 'tresors',
-} as const;
-
-/**
- * La place d'une carte dans le classement déclaré de la personne.
- */
-export interface ScoreCarte {
-  carteId: string;
-  label: string;
-  famille: ScoreCarteFamille;
-  /** Nombre de blocs où la carte a été proposée */
-  apparitions: number;
-  foisMeilleure: number;
-  foisPire: number;
-  /** (meilleure − pire) / apparitions, dans [-1, 1] */
-  score: number;
-}
-
-/**
- * Score moyen des cartes portant cette valeur. Hypothèse, pas mesure : la personne a classé des cartes, pas des valeurs. Ne sert qu'à repérer un écart franc avec ce qui s'est joué en situation.
- */
-export interface ValeurDeclaree {
-  valeur: string;
-  scoreDeclare: number;
-  /** Libellés des cartes qui portent cette valeur */
-  cartes: string[];
+  ceQuiChangerait?: string | null;
 }
 
 export interface TendanceValeur {
@@ -497,44 +490,178 @@ export type ObservationConstellationType = typeof ObservationConstellationType[k
 
 
 export const ObservationConstellationType = {
-  tendance: 'tendance',
-  tension: 'tension',
-  territoire_inexplore: 'territoire_inexplore',
-  stabilite: 'stabilite',
-  couverture: 'couverture',
-  point_de_bascule: 'point_de_bascule',
+  ordination: 'ordination',
+  valeur_forte: 'valeur_forte',
+  valeur_contextuelle: 'valeur_contextuelle',
   valeur_protegee: 'valeur_protegee',
-  contexte: 'contexte',
-  arbitrage: 'arbitrage',
-  ecart_declare: 'ecart_declare',
+  tension: 'tension',
+  stabilite: 'stabilite',
+  point_de_bascule: 'point_de_bascule',
+  cycle: 'cycle',
+  territoire_inexplore: 'territoire_inexplore',
+  couverture: 'couverture',
+  confiance: 'confiance',
 } as const;
 
 export interface ObservationConstellation {
   id: string;
-  /** Formulation prudente (ex. "Dans les situations explorées jusqu'ici…") */
+  /** Formulation prudente et bornée à ce qui a été joué. Emploie partout la terminologie symétrique « a été prioritaire sur » / « a été secondaire face à ». */
   texte: string;
   type: ObservationConstellationType;
   valeursConcernees: string[];
   /** IDs dans `reponses_collision` qui appuient cette observation */
   reponsesSources: number[];
-  /** IDs dans `arbitrages`. Séparés des précédents : les deux tables ont des identifiants qui se recouvrent, et « D'où ça sort ? » afficherait un bloc à la place d'une situation. */
-  arbitragesSources: number[];
 }
 
+export type LigneOrdinationNiveauConfiance = typeof LigneOrdinationNiveauConfiance[keyof typeof LigneOrdinationNiveauConfiance];
+
+
+export const LigneOrdinationNiveauConfiance = {
+  tendance_forte: 'tendance_forte',
+  tendance_probable: 'tendance_probable',
+  encore_incertain: 'encore_incertain',
+  territoire_peu_explore: 'territoire_peu_explore',
+} as const;
+
+/**
+ * La place estimée d'une valeur, selon un modèle de comparaison par paires (Bradley-Terry). Ce n'est pas un palmarès : c'est une estimation évolutive, avec son incertitude.
+ */
+export interface LigneOrdination {
+  valeur: string;
+  /** À partir de 1. Deux forces indiscernables partagent leur rang. */
+  rang: number;
+  /** Force relative en échelle logarithmique, centrée sur 0 */
+  force: number;
+  /** Erreur type sur la force. Grande ⇒ on ne sait pas encore. */
+  incertitude: number;
+  intervalleBas: number;
+  intervalleHaut: number;
+  niveauConfiance: LigneOrdinationNiveauConfiance;
+  comparaisons: number;
+  foisPrioritaire: number;
+  foisSecondaire: number;
+  /** ca_depend + je_ne_sais_pas */
+  indecis: number;
+  /** Vrai tant qu'aucune comparaison tranchée ne l'a fait passer derrière. Ce n'est pas un classement : c'est l'absence d'exception connue. */
+  jamaisSecondaire: boolean;
+  prioritaireSur: string[];
+  secondaireFaceA: string[];
+  /** Contextes où cette valeur a été prioritaire */
+  contextes: string[];
+}
+
+export interface RelationValeurs {
+  valeurA: string;
+  valeurB: string;
+  /**
+     * Valeur passée devant le plus souvent, null si rien ne se détache
+     * @nullable
+     */
+  prioritaire: string | null;
+  /** P(valeurA prioritaire sur valeurB) selon le modèle ajusté */
+  probabilite: number;
+  comparaisons: number;
+  /** Combien de formes différentes ont servi cette même tension */
+  manifestations: number;
+  indecis: number;
+  /** Vrai si la réponse a changé d'une manifestation à l'autre. Ce n'est jamais une contradiction : le contexte a compté. */
+  variable: boolean;
+}
+
+export interface ValeurContextuelle {
+  valeur: string;
+  contextes: string[];
+  texte: string;
+}
+
+export type TensionPrincipaleType = typeof TensionPrincipaleType[keyof typeof TensionPrincipaleType];
+
+
+export const TensionPrincipaleType = {
+  renversement: 'renversement',
+  indecise: 'indecise',
+  serree: 'serree',
+  tranchee: 'tranchee',
+} as const;
+
+export interface TensionPrincipale {
+  valeurA: string;
+  valeurB: string;
+  type: TensionPrincipaleType;
+  /** Ce que la tension a montré, en une phrase */
+  texte: string;
+}
+
+/**
+ * `ca_depend` : la personne a nommé ce facteur elle-même. `bascule` : sa réponse a changé quand le jeu a monté ce réglage.
+ */
+export type DimensionSensibleSource = typeof DimensionSensibleSource[keyof typeof DimensionSensibleSource];
+
+
+export const DimensionSensibleSource = {
+  ca_depend: 'ca_depend',
+  bascule: 'bascule',
+} as const;
+
+/**
+ * Un réglage qui semble déplacer les décisions : proximité, coût personnel, gravité, certitude, urgence, réversibilité, nombre de personnes touchées.
+ */
+export interface DimensionSensible {
+  dimension: string;
+  libelle: string;
+  occurrences: number;
+  /** `ca_depend` : la personne a nommé ce facteur elle-même. `bascule` : sa réponse a changé quand le jeu a monté ce réglage. */
+  source: DimensionSensibleSource;
+}
+
+export interface Couverture {
+  /** Part des paires pertinentes déjà confrontées (0 à 1) */
+  part: number;
+  /** n(n−1)/2 restreint aux paires que les règles autorisent */
+  pairesPertinentes: number;
+  pairesCouvertes: number;
+  comparaisonsRetenues: number;
+  /** Tensions revues sous une autre forme */
+  manifestationsRejouees: number;
+}
+
+export type ConstellationNiveauConfianceGlobal = typeof ConstellationNiveauConfianceGlobal[keyof typeof ConstellationNiveauConfianceGlobal];
+
+
+export const ConstellationNiveauConfianceGlobal = {
+  tendance_forte: 'tendance_forte',
+  tendance_probable: 'tendance_probable',
+  encore_incertain: 'encore_incertain',
+  territoire_peu_explore: 'territoire_peu_explore',
+} as const;
+
+/**
+ * Une carte des relations entre valeurs, à plusieurs niveaux de lecture — pas un palmarès. Tout est recalculable depuis les réponses brutes, et chaque observation transporte ses sources.
+ */
 export interface Constellation {
   sessionId: string;
   version: number;
+  /** Les valeurs classées par force estimée. Estimation évolutive. */
+  ordination: LigneOrdination[];
+  relations: RelationValeurs[];
+  /** Valeurs prioritaires de façon régulière, dans plusieurs contextes */
+  valeursFortes: string[];
+  valeursContextuelles: ValeurContextuelle[];
+  /** Valeurs pour lesquelles aucun compromis n'a encore été observé */
+  valeursProtegees: string[];
+  tensionsPrincipales: TensionPrincipale[];
+  dimensionsSensibles: DimensionSensible[];
+  /** Boucles A > B > C > A observées. Signalées, jamais corrigées. */
+  cycles: string[][];
+  /** Le détail chiffré, valeur par valeur */
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
   bascules: PointDeBascule[];
-  /** Classement déclaré des cartes. Vide si la phase n'a pas été jouée. */
-  cartesJugees: ScoreCarte[];
-  valeursDeclarees: ValeurDeclaree[];
   observations: ObservationConstellation[];
-  /** Proportion de collisions possibles explorées (0 à 1) */
-  couverture: number;
+  couverture: Couverture;
   /** Part des tensions revues sous une autre forme qui ont reçu la même réponse (0 à 1). Vaut 1 tant qu'aucune tension n'a été revue. */
   stabilite: number;
+  niveauConfianceGlobal: ConstellationNiveauConfianceGlobal;
   /** Version du moteur de calcul utilisé */
   versionCalcul: number;
 }
@@ -546,10 +673,9 @@ export const ProgresEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
-  arbitrages: 'arbitrages',
-  collisions: 'collisions',
-  bascules: 'bascules',
+  ordination: 'ordination',
   constellation: 'constellation',
+  epreuve: 'epreuve',
 } as const;
 
 /**
@@ -559,9 +685,8 @@ export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 
 
 export const ProgresPhase = {
-  arbitrages: 'arbitrages',
-  duels: 'duels',
-  bascules: 'bascules',
+  ordination: 'ordination',
+  epreuve: 'epreuve',
   termine: 'termine',
 } as const;
 
@@ -572,19 +697,23 @@ export interface Progres {
   phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
-  /** Nombre de blocs d'arbitrage prévus pour cette partie */
-  arbitragesPlanifies: number;
-  arbitragesRepondus: number;
-  /** Nombre de duels prévus pour cette partie */
-  duelsPlanifies: number;
-  duelsRepondus: number;
+  /** Duels prévus pour la première passe */
+  comparaisonsPlanifiees: number;
+  comparaisonsRepondues: number;
+  /** n(n−1)/2 restreint aux paires admissibles */
+  pairesPertinentes: number;
+  pairesCouvertes: number;
+  /** Tensions que la mise à l'épreuve pourrait encore poser */
+  tensionsRestantes: number;
   seriesPlanifiees: number;
   seriesTerminees: number;
-  /** Toutes réponses confondues, duels et bascules */
+  /** Toutes réponses confondues */
   nombreReponses: number;
+  /** Vrai dès qu'il y a assez de matière pour un premier portrait */
+  premiereOrdinationPrete: boolean;
+  /** Vrai s'il reste des paires jamais confrontées à compléter */
+  peutAffiner: boolean;
   prochaineQuestion: Question | null;
-  /** Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une Question : il ne pose pas de situation et n'oppose pas deux valeurs. */
-  prochainBloc: BlocArbitrage | null;
 }
 
 export type ListCartessCatalogueParams = {
@@ -599,4 +728,11 @@ export const ListCartessCatalogueFamille = {
   horizons: 'horizons',
   tresors: 'tresors',
 } as const;
+
+export type ListCartesProposeesParams = {
+/**
+ * Combien de cartes par famille (18 par défaut, 54 au plus)
+ */
+parFamille?: number;
+};
 

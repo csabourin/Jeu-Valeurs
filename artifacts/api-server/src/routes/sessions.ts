@@ -4,7 +4,7 @@ import {
   sessionsTable,
   cartesSessionTable,
   reponsesCollisionTable,
-  arbitragesTable,
+  normaliserEtape,
 } from "@workspace/db";
 import {
   CreateSessionBody,
@@ -40,7 +40,7 @@ router.post("/sessions", async (req, res): Promise<void> => {
 
   res.status(201).json({
     id: session.id,
-    etapeCourante: session.etapeCourante,
+    etapeCourante: normaliserEtape(session.etapeCourante),
     creeLe: session.creeLe.toISOString(),
     miseAJourLe: session.miseAJourLe.toISOString(),
   });
@@ -65,7 +65,7 @@ router.get("/sessions/:sessionId", async (req, res): Promise<void> => {
 
   res.json({
     id: session.id,
-    etapeCourante: session.etapeCourante,
+    etapeCourante: normaliserEtape(session.etapeCourante),
     creeLe: session.creeLe.toISOString(),
     miseAJourLe: session.miseAJourLe.toISOString(),
   });
@@ -102,7 +102,7 @@ router.patch("/sessions/:sessionId", async (req, res): Promise<void> => {
 
   res.json({
     id: session.id,
-    etapeCourante: session.etapeCourante,
+    etapeCourante: normaliserEtape(session.etapeCourante),
     creeLe: session.creeLe.toISOString(),
     miseAJourLe: session.miseAJourLe.toISOString(),
   });
@@ -129,9 +129,6 @@ router.delete("/sessions/:sessionId", async (req, res): Promise<void> => {
     await tx
       .delete(reponsesCollisionTable)
       .where(eq(reponsesCollisionTable.sessionId, sessionId));
-    await tx
-      .delete(arbitragesTable)
-      .where(eq(arbitragesTable.sessionId, sessionId));
     await tx
       .delete(cartesSessionTable)
       .where(eq(cartesSessionTable.sessionId, sessionId));

@@ -1,59 +1,84 @@
 /**
- * Moteur de constellation V2 — déterministe, sans LLM.
+ * ResultsModel — des réponses brutes à un portrait lisible.
  *
- * Tout ce qui est affiché à la fin est recalculable à partir des réponses
- * brutes, et chaque observation transporte les identifiants des réponses qui
- * l'appuient : rien n'est affirmé sans pouvoir montrer d'où ça vient.
+ * Le portrait a plusieurs niveaux de lecture, et c'est volontaire : un
+ * palmarès ne dirait presque rien.
+ *
+ *   1. **Ordination** — les valeurs à peu près classées, avec leur incertitude.
+ *   2. **Valeurs particulièrement fortes** — prioritaires dans plusieurs
+ *      contextes, pas seulement une fois.
+ *   3. **Valeurs contextuelles** — importantes seulement dans certaines
+ *      situations.
+ *   4. **Valeurs actuellement protégées** — aucun compromis observé à ce jour.
+ *   5. **Tensions principales** — ce que les relations entre valeurs montrent.
+ *   6. **Points de bascule** — les réglages qui semblent déplacer les décisions.
+ *   7. **Niveau de confiance** — tendance forte, probable, incertaine, ou
+ *      territoire peu exploré.
  *
  * Ce que le moteur refuse de faire, par construction :
- *   • sortir un classement unique des valeurs (on garde le contexte) ;
+ *   • présenter le classement comme une vérité (c'est une estimation, elle
+ *     bouge à chaque comparaison) ;
  *   • traiter une réponse différente comme une contradiction (c'est un
- *     changement de réglage, et c'est l'information intéressante) ;
+ *     changement de contexte, et c'est l'information intéressante) ;
  *   • déduire ce que la personne voulait protéger — cette information n'existe
  *     que si elle l'a écrite elle-même (`valeurProtegee`).
  *
- * Les formulations restent au conditionnel et bornées à ce qui a été joué.
+ * Terminologie : partout « a été prioritaire sur » / « a été secondaire face
+ * à ». Jamais « a passé devant » / « a cédé devant » — les deux ne pèsent pas
+ * pareil à la lecture.
  */
 
 import {
+  ajusterModele,
+  calculerCouverture,
+  clePaire,
+  cleManifestation,
+  estDecisif,
+  libellesConfiance,
+  libellesContexte,
+  libellesDimension,
   planifierDuels,
-  planifierCombatsCartes,
+  duelsCartesPossibles,
+  termes,
   trouverDuel,
   trouverSerie,
-  libellesDimension,
-  libellesContexte,
-  clePaire,
-  calculerScoresCartes,
+  type Comparaison,
   type Contexte,
   type Dimension,
   type Famille,
-  type ScoreCarte,
-  type ReponseArbitrage,
+  type ForceValeur,
+  type NiveauConfiance,
+  type PhaseExperience,
+  type RelationPaire,
 } from "@workspace/contenu";
 
 /**
- * 3 : les arbitrages entrent dans le calcul. Une constellation calculée en
- * version 2 n'avait ni classement déclaré ni écart entre le dit et le joué.
+ * 4 : l'ordination remplace le score net brut, et les arbitrages « le plus /
+ * le moins » ont disparu du calcul.
  */
-const VERSION_CALCUL = 3;
+const VERSION_CALCUL = 4;
 
 /** Nombre de mises à l'épreuve avant de dire d'une valeur qu'elle n'a pas encore cédé. */
 const SEUIL_VALEUR_PROTEGEE = 2;
 /** Part de réponses non tranchées à partir de laquelle une tension est dite forte. */
 const SEUIL_TENSION_FORTE = 0.5;
-/** Écarts nets en deçà desquels on ne parle pas de tendance. */
-const SEUIL_TENDANCE = 0.5;
-/** À partir d'où une valeur est dite « mise devant » dans les arbitrages. */
-const SEUIL_DECLARE = 0.25;
-/** Combien de fois une valeur doit avoir été mise à l'épreuve avant de parler d'écart. */
-const MIN_COLLISIONS_ECART = 2;
+/** Combien de contextes distincts avant de parler d'une valeur « forte ». */
+const SEUIL_CONTEXTES_FORTE = 2;
+/** Au-delà, deux valeurs sont trop proches pour qu'on les sépare. */
+const SEUIL_PROBABILITE_SERREE = 0.62;
+/** Combien de tensions le portrait met en avant. */
+const MAX_TENSIONS_PRINCIPALES = 5;
 
 export interface ReponseSource {
   id: number;
   dilemmeId: number | null;
   valeurA: string;
   valeurB: string;
+  carteA: string | null;
+  carteB: string | null;
   choix: string;
+  contexte: string | null;
+  phase: PhaseExperience;
   facteurDepend: string | null;
   facteurDependLibre: string | null;
   difficulte: number | null;
@@ -62,6 +87,7 @@ export interface ReponseSource {
   palier: number | null;
   dimension: string | null;
   valeurProtegee: string | null;
+  ceQuiChangerait: string | null;
   version: number;
 }
 
@@ -71,24 +97,6 @@ export interface CarteJugee {
   label: string;
   famille: Famille;
   valeursConfirmees: string[];
-}
-
-/** Un bloc d'arbitrage joué, tel qu'il sort de la base. */
-export interface ArbitrageSource extends ReponseArbitrage {
-  id: number;
-}
-
-/**
- * Ce que la personne a dit hors situation, valeur par valeur.
- *
- * Une valeur hérite du score moyen des cartes qui la portent : c'est une
- * hypothèse, pas une mesure — la personne a classé des cartes, pas des valeurs.
- */
-export interface ValeurDeclaree {
-  valeur: string;
-  scoreDeclare: number;
-  /** Libellés des cartes qui portent cette valeur. */
-  cartes: string[];
 }
 
 export interface TendanceValeur {
@@ -127,17 +135,56 @@ export interface PointDeBascule {
   reglageBascule: string | null;
 }
 
+export interface LigneOrdination extends Omit<ForceValeur, "intervalle"> {
+  intervalleBas: number;
+  intervalleHaut: number;
+  prioritaireSur: string[];
+  secondaireFaceA: string[];
+  contextes: string[];
+}
+
+export interface ValeurContextuelle {
+  valeur: string;
+  contextes: string[];
+  texte: string;
+}
+
+export type TypeTension = "renversement" | "indecise" | "serree" | "tranchee";
+
+export interface TensionPrincipale {
+  valeurA: string;
+  valeurB: string;
+  type: TypeTension;
+  texte: string;
+}
+
+export interface DimensionSensible {
+  dimension: string;
+  libelle: string;
+  occurrences: number;
+  source: "ca_depend" | "bascule";
+}
+
+export interface Couverture {
+  part: number;
+  pairesPertinentes: number;
+  pairesCouvertes: number;
+  comparaisonsRetenues: number;
+  manifestationsRejouees: number;
+}
+
 export type TypeObservation =
-  | "tendance"
-  | "tension"
-  | "territoire_inexplore"
-  | "stabilite"
-  | "couverture"
-  | "point_de_bascule"
+  | "ordination"
+  | "valeur_forte"
+  | "valeur_contextuelle"
   | "valeur_protegee"
-  | "contexte"
-  | "arbitrage"
-  | "ecart_declare";
+  | "tension"
+  | "stabilite"
+  | "point_de_bascule"
+  | "cycle"
+  | "territoire_inexplore"
+  | "couverture"
+  | "confiance";
 
 export interface ObservationConstellation {
   id: string;
@@ -146,31 +193,44 @@ export interface ObservationConstellation {
   valeursConcernees: string[];
   /** Identifiants dans `reponses_collision`. */
   reponsesSources: number[];
-  /**
-   * Identifiants dans `arbitrages`. Séparés des précédents : les deux tables
-   * ont des identifiants qui se recouvrent, et l'écran « D'où ça sort ? »
-   * afficherait un bloc à la place d'une situation.
-   */
-  arbitragesSources: number[];
 }
 
 export interface ResultatConstellation {
+  ordination: LigneOrdination[];
+  relations: RelationPaire[];
+  valeursFortes: string[];
+  valeursContextuelles: ValeurContextuelle[];
+  valeursProtegees: string[];
+  tensionsPrincipales: TensionPrincipale[];
+  dimensionsSensibles: DimensionSensible[];
+  cycles: string[][];
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
   bascules: PointDeBascule[];
-  cartesJugees: ScoreCarte[];
-  valeursDeclarees: ValeurDeclaree[];
   observations: ObservationConstellation[];
-  couverture: number;
+  couverture: Couverture;
   stabilite: number;
+  niveauConfianceGlobal: NiveauConfiance;
   versionCalcul: number;
 }
 
-function estDecisif(choix: string): boolean {
-  return choix === "A" || choix === "B";
+// ─── Petits outils de langue ─────────────────────────────────────────────────
+
+function citer(valeur: string): string {
+  return `« ${valeur} »`;
 }
 
-/** Qui l'a emporté dans cette réponse, en tenant compte du sens du duel. */
+function enumerer(valeurs: string[]): string {
+  const cites = valeurs.map(citer);
+  if (cites.length <= 1) return cites.join("");
+  return `${cites.slice(0, -1).join(", ")} et ${cites[cites.length - 1]}`;
+}
+
+function moyenne(valeurs: number[]): number | null {
+  if (valeurs.length === 0) return null;
+  return valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
+}
+
 function gagnant(r: ReponseSource): string | null {
   if (r.choix === "A") return r.valeurA;
   if (r.choix === "B") return r.valeurB;
@@ -183,24 +243,15 @@ function perdant(r: ReponseSource): string | null {
   return null;
 }
 
+/**
+ * Le contexte d'une réponse : celui enregistré avec elle, sinon celui de la
+ * situation écrite. Un duel entre deux cartes n'en a pas — il ne se passe nulle
+ * part en particulier, et c'est très bien.
+ */
 function contexteDe(r: ReponseSource): Contexte | null {
+  if (r.contexte) return r.contexte as Contexte;
   if (r.dilemmeId == null) return null;
   return trouverDuel(r.dilemmeId)?.contexte ?? null;
-}
-
-function moyenne(valeurs: number[]): number | null {
-  if (valeurs.length === 0) return null;
-  return valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
-}
-
-function citer(valeur: string): string {
-  return `« ${valeur} »`;
-}
-
-function enumerer(valeurs: string[]): string {
-  const cites = valeurs.map(citer);
-  if (cites.length <= 1) return cites.join("");
-  return `${cites.slice(0, -1).join(", ")} et ${cites[cites.length - 1]}`;
 }
 
 function labelFacteur(facteur: string | null, libre: string | null): string {
@@ -214,7 +265,19 @@ function labelFacteur(facteur: string | null, libre: string | null): string {
   return autres[facteur] ?? facteur;
 }
 
-// ─── Tendances par valeur ────────────────────────────────────────────────────
+function versComparaison(r: ReponseSource): Comparaison {
+  return {
+    valeurA: r.valeurA,
+    valeurB: r.valeurB,
+    carteA: r.carteA,
+    carteB: r.carteB,
+    choix: r.choix as Comparaison["choix"],
+    contexte: contexteDe(r),
+    phase: r.phase,
+  };
+}
+
+// ─── Tendances : le détail chiffré ───────────────────────────────────────────
 
 function calculerTendances(
   reponses: ReponseSource[],
@@ -277,9 +340,7 @@ function calculerTendances(
         contextesFavorables,
       };
     })
-    .sort(
-      (a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur),
-    );
+    .sort((a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur));
 }
 
 // ─── Tensions ────────────────────────────────────────────────────────────────
@@ -370,52 +431,251 @@ function calculerBascules(reponses: ReponseSource[]): PointDeBascule[] {
   return bascules.sort((a, b) => a.serieId.localeCompare(b.serieId));
 }
 
-// ─── Ce qui a été dit hors situation ─────────────────────────────────────────
+// ─── Les niveaux de lecture du portrait ──────────────────────────────────────
+
+function construireOrdination(
+  forces: ForceValeur[],
+  tendances: TendanceValeur[],
+): LigneOrdination[] {
+  const parValeur = new Map(tendances.map((t) => [t.valeur, t]));
+  return forces.map((f) => {
+    const tendance = parValeur.get(f.valeur);
+    const { intervalle, ...reste } = f;
+    return {
+      ...reste,
+      intervalleBas: intervalle[0],
+      intervalleHaut: intervalle[1],
+      prioritaireSur: tendance?.domine ?? [],
+      secondaireFaceA: tendance?.cedeDevant ?? [],
+      contextes: tendance?.contextesFavorables ?? [],
+    };
+  });
+}
 
 /**
- * Des scores de cartes vers des scores de valeurs.
+ * Les valeurs qui dominent régulièrement, **dans plusieurs contextes**.
  *
- * Une carte porte les valeurs que la personne a confirmées dessus ; sa place
- * dans le classement déteint donc sur chacune d'elles, à parts égales. C'est
- * grossier, et assumé : on ne s'en sert que pour repérer un écart franc avec
- * ce qui s'est joué en situation, jamais pour annoncer un classement de valeurs.
+ * Une valeur qui gagne trois fois dans la même situation n'est pas forte : elle
+ * est contextuelle. La distinction est tout l'intérêt de la section.
  */
-function calculerValeursDeclarees(
-  scores: ScoreCarte[],
-  cartes: CarteJugee[],
-): ValeurDeclaree[] {
-  const parCarte = new Map(cartes.map((c) => [c.carteId, c]));
-  const cumul = new Map<
-    string,
-    { total: number; n: number; cartes: string[] }
-  >();
+function reperer(
+  ordination: LigneOrdination[],
+  relations: RelationPaire[],
+): { fortes: string[]; contextuelles: ValeurContextuelle[] } {
+  const fortes: string[] = [];
+  const contextuelles: ValeurContextuelle[] = [];
 
-  for (const score of scores) {
-    // Une carte jamais proposée n'a pas de place : elle ne dit rien.
-    if (score.apparitions === 0) continue;
-    const carte = parCarte.get(score.carteId);
-    if (!carte) continue;
+  for (const ligne of ordination) {
+    if (ligne.foisPrioritaire === 0) continue;
 
-    for (const valeur of carte.valeursConfirmees) {
-      const entree = cumul.get(valeur);
-      if (entree) {
-        entree.total += score.score;
-        entree.n++;
-        entree.cartes.push(carte.label);
-      } else {
-        cumul.set(valeur, { total: score.score, n: 1, cartes: [carte.label] });
-      }
+    const adversaires = relations.filter(
+      (r) => r.valeurA === ligne.valeur || r.valeurB === ligne.valeur,
+    );
+    const gagnees = adversaires.filter((r) => r.prioritaire === ligne.valeur);
+    const variables = adversaires.filter((r) => r.variable);
+
+    const largeur =
+      ligne.contextes.length >= SEUIL_CONTEXTES_FORTE ||
+      ligne.prioritaireSur.length >= SEUIL_CONTEXTES_FORTE;
+
+    if (
+      largeur &&
+      variables.length === 0 &&
+      gagnees.length >= 2 &&
+      ligne.foisPrioritaire > ligne.foisSecondaire &&
+      // Une valeur qu'on n'arrive pas encore à situer n'est pas « forte » :
+      // elle est seulement en avance dans un classement encore flou.
+      (ligne.niveauConfiance === "tendance_forte" ||
+        ligne.niveauConfiance === "tendance_probable")
+    ) {
+      fortes.push(ligne.valeur);
+      continue;
+    }
+
+    // Contextuelle : elle passe devant, mais toujours au même endroit, ou
+    // seulement une fois sur deux selon la situation.
+    if (ligne.contextes.length === 1 && ligne.foisPrioritaire >= 2) {
+      const libelle = libellesContexte[ligne.contextes[0] as Contexte];
+      contextuelles.push({
+        valeur: ligne.valeur,
+        contextes: ligne.contextes,
+        texte: `${citer(ligne.valeur)} a été prioritaire seulement dans un type de situation : ${(libelle ?? ligne.contextes[0]).toLowerCase()}. Ailleurs, le jeu ne l'a pas encore mise à l'épreuve.`,
+      });
+      continue;
+    }
+
+    if (variables.length > 0) {
+      contextuelles.push({
+        valeur: ligne.valeur,
+        contextes: ligne.contextes,
+        texte: `${citer(ligne.valeur)} a été prioritaire dans certaines situations et secondaire dans d'autres. Ce qui la fait bouger tient à la situation, pas à une hésitation.`,
+      });
     }
   }
 
-  return Array.from(cumul, ([valeur, { total, n, cartes: labels }]) => ({
-    valeur,
-    scoreDeclare: total / n,
-    cartes: labels.sort(),
-  })).sort(
-    (a, b) =>
-      b.scoreDeclare - a.scoreDeclare || a.valeur.localeCompare(b.valeur),
+  return { fortes, contextuelles };
+}
+
+function construireTensionsPrincipales(
+  relations: RelationPaire[],
+  reponses: ReponseSource[],
+  bascules: PointDeBascule[],
+): TensionPrincipale[] {
+  const parPaire = new Map(
+    bascules.map((b) => [clePaire(b.valeurA, b.valeurB), b]),
   );
+
+  const classees = relations.map((relation) => {
+    const cle = clePaire(relation.valeurA, relation.valeurB);
+    const facteurs = reponses
+      .filter(
+        (r) =>
+          clePaire(r.valeurA, r.valeurB) === cle &&
+          r.choix === "ca_depend" &&
+          r.facteurDepend,
+      )
+      .map((r) => labelFacteur(r.facteurDepend, r.facteurDependLibre));
+    const bascule = parPaire.get(cle);
+
+    let type: TypeTension = "tranchee";
+    if (relation.variable) type = "renversement";
+    else if (relation.indecis >= Math.max(1, relation.comparaisons / 2))
+      type = "indecise";
+    else if (
+      relation.comparaisons >= 2 &&
+      Math.abs(relation.probabilite - 0.5) <
+        SEUIL_PROBABILITE_SERREE - 0.5
+    )
+      type = "serree";
+
+    const texte = formulerTension(relation, type, facteurs[0], bascule);
+    return { relation, type, texte };
+  });
+
+  const rang: Record<TypeTension, number> = {
+    renversement: 0,
+    indecise: 1,
+    serree: 2,
+    tranchee: 3,
+  };
+
+  // Une paire tranchée une seule fois ne « montre » rien que l'ordination ne
+  // dise déjà. On ne la remonte que si elle a tenu sur plusieurs situations.
+  return classees
+    .filter(
+      (c) => c.type !== "tranchee" || c.relation.comparaisons >= 2,
+    )
+    .sort(
+      (a, b) =>
+        rang[a.type] - rang[b.type] ||
+        b.relation.comparaisons - a.relation.comparaisons,
+    )
+    .slice(0, MAX_TENSIONS_PRINCIPALES)
+    .map(({ relation, type, texte }) => ({
+      valeurA: relation.valeurA,
+      valeurB: relation.valeurB,
+      type,
+      texte,
+    }));
+}
+
+function formulerTension(
+  relation: RelationPaire,
+  type: TypeTension,
+  facteur: string | undefined,
+  bascule: PointDeBascule | undefined,
+): string {
+  const { valeurA, valeurB, prioritaire } = relation;
+  // Sans majorité, on prend valeurA comme point de vue — mais l'autre valeur se
+  // déduit du point de vue retenu, jamais du gagnant : sinon la phrase oppose
+  // une valeur à elle-même.
+  const devant = prioritaire ?? valeurA;
+  const derriere = devant === valeurA ? valeurB : valeurA;
+
+  if (type === "renversement") {
+    const declencheur = bascule?.reglageBascule ?? facteur ?? null;
+    if (prioritaire) {
+      return declencheur
+        ? `${citer(devant)} ${termes.prioritaire} ${citer(derriere)} la plupart du temps, mais elle devient secondaire quand ${declencheur} entre en jeu.`
+        : `${citer(devant)} ${termes.prioritaire} ${citer(derriere)} la plupart du temps, mais pas toujours : une situation a suffi à inverser l'ordre.`;
+    }
+    return declencheur
+      ? `${citer(devant)} et ${citer(derriere)} se sont départagées dans les deux sens. Ce qui les fait basculer : ${declencheur}.`
+      : `${citer(devant)} et ${citer(derriere)} se sont départagées dans les deux sens selon la situation. Ce qui fait pencher d'un côté ou de l'autre reste à trouver.`;
+  }
+
+  if (type === "indecise") {
+    return `Entre ${citer(valeurA)} et ${citer(valeurB)}, tu as surtout répondu que ça dépend${facteur ? ` — souvent de ${facteur}` : ""}. Les deux comptent pour vrai.`;
+  }
+
+  if (type === "serree") {
+    return `${citer(valeurA)} et ${citer(valeurB)} se tiennent de très près : rien dans ce qui a été joué ne les sépare nettement.`;
+  }
+
+  return `${citer(devant)} ${termes.prioritaire} ${citer(derriere)} dans ${relation.comparaisons > 1 ? `les ${relation.comparaisons} situations jouées` : "la situation jouée"}.`;
+}
+
+/**
+ * Les réglages qui semblent déplacer les décisions.
+ *
+ * Deux sources, et elles ne disent pas la même chose : ce que la personne a
+ * nommé elle-même dans un « ça dépend », et ce que le jeu a observé en montant
+ * un réglage d'un cran.
+ */
+function calculerDimensionsSensibles(
+  reponses: ReponseSource[],
+  bascules: PointDeBascule[],
+): DimensionSensible[] {
+  const comptes = new Map<string, DimensionSensible>();
+
+  const ajouter = (
+    dimension: string,
+    source: "ca_depend" | "bascule",
+  ): void => {
+    const cle = `${dimension}|${source}`;
+    const deja = comptes.get(cle);
+    if (deja) {
+      deja.occurrences++;
+      return;
+    }
+    comptes.set(cle, {
+      dimension,
+      libelle:
+        libellesDimension[dimension as Dimension] ??
+        labelFacteur(dimension, null),
+      occurrences: 1,
+      source,
+    });
+  };
+
+  for (const r of reponses) {
+    if (r.choix === "ca_depend" && r.facteurDepend && r.facteurDepend !== "autre") {
+      ajouter(r.facteurDepend, "ca_depend");
+    }
+  }
+  for (const b of bascules) {
+    if (b.reglageBascule) ajouter(b.dimension, "bascule");
+  }
+
+  return Array.from(comptes.values()).sort(
+    (a, b) => b.occurrences - a.occurrences || a.libelle.localeCompare(b.libelle),
+  );
+}
+
+function confianceGlobale(
+  ordination: LigneOrdination[],
+  couverture: Couverture,
+): NiveauConfiance {
+  if (couverture.comparaisonsRetenues === 0) return "territoire_peu_explore";
+  const fortes = ordination.filter(
+    (l) => l.niveauConfiance === "tendance_forte",
+  ).length;
+  const probables = ordination.filter(
+    (l) => l.niveauConfiance === "tendance_probable",
+  ).length;
+  if (fortes >= 2 && couverture.part >= 0.6) return "tendance_forte";
+  if (fortes >= 1 || probables >= 2) return "tendance_probable";
+  return "encore_incertain";
 }
 
 // ─── Observations ────────────────────────────────────────────────────────────
@@ -429,7 +689,6 @@ class Observations {
     texte: string,
     valeursConcernees: string[],
     reponsesSources: number[],
-    arbitragesSources: number[] = [],
   ): void {
     this.liste.push({
       id: `obs_${type}_${this.index++}`,
@@ -437,7 +696,6 @@ class Observations {
       type,
       valeursConcernees,
       reponsesSources,
-      arbitragesSources,
     });
   }
 
@@ -455,108 +713,95 @@ function idsImpliquant(reponses: ReponseSource[], valeur: string): number[] {
     .map((r) => r.id);
 }
 
+function idsDePaire(
+  reponses: ReponseSource[],
+  valeurA: string,
+  valeurB: string,
+): number[] {
+  const cle = clePaire(valeurA, valeurB);
+  return reponses
+    .filter((r) => clePaire(r.valeurA, r.valeurB) === cle)
+    .map((r) => r.id);
+}
+
 function redigerObservations(
   reponses: ReponseSource[],
+  ordination: LigneOrdination[],
   tendances: TendanceValeur[],
   tensions: TensionObservee[],
+  tensionsPrincipales: TensionPrincipale[],
+  fortes: string[],
+  contextuelles: ValeurContextuelle[],
   bascules: PointDeBascule[],
-  scoresCartes: ScoreCarte[],
-  valeursDeclarees: ValeurDeclaree[],
-  arbitrages: ArbitrageSource[],
-  couverture: number,
-  duelsPlanifies: number,
+  cycles: string[][],
+  couverture: Couverture,
+  confiance: NiveauConfiance,
 ): ObservationConstellation[] {
   const obs = new Observations();
-  const idsArbitrages = arbitrages
-    .filter((a) => a.carteMeilleure || a.cartePire)
-    .map((a) => a.id);
+
+  // Où en est l'ordination — dit avant tout le reste, parce que tout le reste
+  // en dépend.
+  if (ordination.some((l) => l.comparaisons > 0)) {
+    const tete = ordination.filter((l) => l.comparaisons > 0).slice(0, 3);
+    obs.ajouter(
+      "ordination",
+      `Dans ce qui a été joué jusqu'ici, ${enumerer(tete.map((l) => l.valeur))} ${tete.length > 1 ? "arrivent" : "arrive"} en tête. C'est une estimation : elle bouge à chaque comparaison, et elle ne dit rien de ce que le jeu n'a pas posé.`,
+      tete.map((l) => l.valeur),
+      [],
+    );
+  }
 
   // Valeurs qui n'ont pas encore cédé.
   for (const t of tendances.filter((x) => x.estProtegee)) {
     obs.ajouter(
       "valeur_protegee",
-      `${citer(t.valeur)} n'a pas encore cédé : chaque fois qu'elle a été mise à l'épreuve, tu l'as choisie. Ça ne veut pas dire qu'elle ne cédera jamais — seulement qu'aucune situation jouée jusqu'ici ne l'a fait plier.`,
+      `${citer(t.valeur)} ${termes.jamaisSecondaire} : chaque fois qu'elle a été mise à l'épreuve, tu l'as choisie. Ça ne veut pas dire qu'elle ne cédera jamais — seulement qu'aucune situation jouée jusqu'ici ne l'a fait plier.`,
       [t.valeur],
       idsImpliquant(reponses, t.valeur),
     );
   }
 
-  // Tendances nettes, dans un sens comme dans l'autre.
-  for (const t of tendances) {
-    const total = t.foisPrivilegiee + t.foisCedee;
-    if (total < 2 || Math.abs(t.scoreNet) <= SEUIL_TENDANCE) continue;
-    if (t.estProtegee) continue; // déjà dit, en mieux
-
-    const texte =
-      t.scoreNet > 0
-        ? `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} est passée devant ${enumerer(t.domine)}.`
-        : `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} a plutôt cédé la place à ${enumerer(t.cedeDevant)}.`;
-
+  // Valeurs fortes : régulières, et dans plus d'un contexte.
+  for (const valeur of fortes) {
+    const ligne = ordination.find((l) => l.valeur === valeur);
+    if (!ligne) continue;
     obs.ajouter(
-      "tendance",
-      texte,
-      [t.valeur],
-      idsImpliquant(reponses, t.valeur),
+      "valeur_forte",
+      `${citer(valeur)} ${termes.prioritaire} ${enumerer(ligne.prioritaireSur)}, dans des situations différentes.`,
+      [valeur],
+      idsImpliquant(reponses, valeur),
     );
   }
 
-  // La carte mise devant les autres, hors situation.
-  const jugees = scoresCartes.filter((s) => s.apparitions > 0);
-  const devant = jugees.filter((s) => s.score === jugees[0]?.score);
-  if (jugees.length >= 2 && devant.length === 1 && devant[0].score > 0) {
+  // Valeurs qui ne comptent que dans certaines situations.
+  for (const contextuelle of contextuelles) {
     obs.ajouter(
-      "arbitrage",
-      `Quand tes cartes étaient côte à côte, sans situation autour, c'est ${citer(devant[0].label)} que tu as mise devant le plus souvent.`,
-      [],
-      [],
-      idsArbitrages,
+      "valeur_contextuelle",
+      contextuelle.texte,
+      [contextuelle.valeur],
+      idsImpliquant(reponses, contextuelle.valeur),
     );
   }
 
-  // L'écart entre ce qui a été dit à froid et ce qui s'est joué en situation.
-  //
-  // C'est l'observation que la phase d'arbitrage existe pour rendre possible.
-  // Elle ne dit jamais que la personne s'est trompée quelque part : les deux
-  // réponses sont vraies, elles répondent simplement à deux questions
-  // différentes — ce qui compte, et ce qui l'emporte quand ça coûte.
-  for (const declaree of valeursDeclarees) {
-    if (declaree.scoreDeclare < SEUIL_DECLARE) continue;
-    const tendance = tendances.find((t) => t.valeur === declaree.valeur);
-    if (!tendance) continue;
-    if (tendance.foisPrivilegiee + tendance.foisCedee < MIN_COLLISIONS_ECART)
-      continue;
-    if (tendance.scoreNet > -SEUIL_TENDANCE) continue;
-
+  // Les tensions les plus parlantes.
+  for (const tension of tensionsPrincipales) {
     obs.ajouter(
-      "ecart_declare",
-      `Cartes en main, ${citer(declaree.valeur)} passait devant. Dans les situations, c'est ${enumerer(tendance.cedeDevant)} qui l'a emporté. Les deux sont vraies : mises côte à côte, tes cartes ne pèsent pas le même poids qu'au moment de choisir.`,
-      [declaree.valeur],
-      idsImpliquant(reponses, declaree.valeur),
-      idsArbitrages,
+      "tension",
+      tension.texte,
+      [tension.valeurA, tension.valeurB],
+      idsDePaire(reponses, tension.valeurA, tension.valeurB),
     );
   }
 
-  // Une valeur qui ne gagne que dans un seul contexte.
-  //
-  // On ne compte que les victoires en duel : les paliers de bascule ne portent
-  // pas de contexte, et les inclure ferait dire « seulement avec tes amis » à
-  // une valeur qui a aussi gagné ailleurs, sans étiquette.
-  for (const t of tendances) {
-    if (t.contextesFavorables.length !== 1) continue;
-    const victoiresSituees = reponses.filter(
-      (r) =>
-        estDecisif(r.choix) &&
-        gagnant(r) === t.valeur &&
-        contexteDe(r) !== null,
-    );
-    if (victoiresSituees.length < 2) continue;
-    const contexte = libellesContexte[t.contextesFavorables[0] as Contexte];
-    if (!contexte) continue;
+  // Même tension, autre forme, autre réponse.
+  for (const t of tensions.filter((x) => x.estStable === false)) {
     obs.ajouter(
-      "contexte",
-      `Chaque fois que ${citer(t.valeur)} est passée devant dans une situation située, c'était la même : ${contexte.toLowerCase()}. Ailleurs, le jeu ne l'a pas encore mise à l'épreuve.`,
-      [t.valeur],
-      victoiresSituees.map((r) => r.id),
+      "stabilite",
+      `Tu as rencontré ${citer(t.valeurA)} et ${citer(t.valeurB)} plus d'une fois, sous des formes différentes, et tu n'as pas répondu pareil. Ce n'est pas une contradiction : quelque chose dans la situation a compté.`,
+      [t.valeurA, t.valeurB],
+      idsDePaire(reponses, t.valeurA, t.valeurB).filter((id) =>
+        reponses.some((r) => r.id === id && !r.serieId && estDecisif(r.choix)),
+      ),
     );
   }
 
@@ -578,91 +823,39 @@ function redigerObservations(
     obs.ajouter("point_de_bascule", texte, [b.valeurA, b.valeurB], sources);
   }
 
-  // Tensions difficiles à trancher.
-  for (const t of tensions.filter((x) => x.estForte)) {
-    const sources = reponses
-      .filter(
-        (r) =>
-          clePaire(r.valeurA, r.valeurB) === clePaire(t.valeurA, t.valeurB) &&
-          (r.choix === "ca_depend" || r.choix === "je_ne_sais_pas"),
-      )
-      .map((r) => r.id);
+  // Boucles : dites telles quelles, jamais corrigées en douce.
+  for (const cycle of cycles) {
     obs.ajouter(
-      "tension",
-      `${citer(t.valeurA)} contre ${citer(t.valeurB)} fait partie des tensions que tu as le moins tranchées. Ce n'est pas une hésitation : les deux ont l'air de compter pour vrai.`,
-      [t.valeurA, t.valeurB],
-      sources,
-    );
-  }
-
-  // Même conflit, autre forme.
-  for (const t of tensions.filter((x) => x.estStable === false)) {
-    const sources = reponses
-      .filter(
-        (r) =>
-          !r.serieId &&
-          clePaire(r.valeurA, r.valeurB) === clePaire(t.valeurA, t.valeurB) &&
-          estDecisif(r.choix),
-      )
-      .map((r) => r.id);
-    obs.ajouter(
-      "stabilite",
-      `Tu as rencontré ${citer(t.valeurA)} contre ${citer(t.valeurB)} deux fois, dans deux situations différentes, et tu n'as pas répondu pareil. Ce n'est pas une contradiction : quelque chose dans la situation a compté.`,
-      [t.valeurA, t.valeurB],
-      sources,
-    );
-  }
-
-  // Facteurs invoqués de façon répétée dans les « ça dépend ».
-  const parFacteur = new Map<string, { ids: number[]; libre: string | null }>();
-  for (const r of reponses) {
-    if (r.choix !== "ca_depend" || !r.facteurDepend) continue;
-    const entree = parFacteur.get(r.facteurDepend);
-    if (entree) {
-      entree.ids.push(r.id);
-      entree.libre = entree.libre ?? r.facteurDependLibre;
-    } else {
-      parFacteur.set(r.facteurDepend, {
-        ids: [r.id],
-        libre: r.facteurDependLibre,
-      });
-    }
-  }
-  for (const [facteur, { ids, libre }] of parFacteur) {
-    if (ids.length < 2) continue;
-    obs.ajouter(
-      "tension",
-      `Quand tu réponds « ça dépend », c'est souvent ${labelFacteur(facteur, libre)} qui décide.`,
+      "cycle",
+      `${enumerer(cycle)} tournent en rond : chacune ${termes.precede} la suivante, et la dernière ${termes.precede} la première. Ce n'est pas une erreur — ça veut dire que la situation décide, pas un ordre fixe.`,
+      cycle,
       [],
-      ids,
     );
   }
 
   // Ce que la personne a elle-même nommé.
   const nommees = reponses.filter((r) => r.valeurProtegee);
-  if (nommees.length >= 2) {
-    const comptes = new Map<string, number[]>();
-    for (const r of nommees) {
-      const cle = r.valeurProtegee as string;
-      const ids = comptes.get(cle);
-      if (ids) ids.push(r.id);
-      else comptes.set(cle, [r.id]);
-    }
-    for (const [valeur, ids] of comptes) {
-      if (ids.length < 2) continue;
-      obs.ajouter(
-        "tendance",
-        `Quand on t'a demandé ce que tu essayais de protéger, tu as répondu ${citer(valeur)} plus d'une fois. C'est toi qui l'as nommée — le jeu ne l'a pas déduite.`,
-        [valeur],
-        ids,
-      );
-    }
+  const comptes = new Map<string, number[]>();
+  for (const r of nommees) {
+    const cle = r.valeurProtegee as string;
+    const ids = comptes.get(cle);
+    if (ids) ids.push(r.id);
+    else comptes.set(cle, [r.id]);
+  }
+  for (const [valeur, ids] of comptes) {
+    if (ids.length < 2) continue;
+    obs.ajouter(
+      "valeur_forte",
+      `Quand on t'a demandé ce que tu essayais de protéger, tu as répondu ${citer(valeur)} plus d'une fois. C'est toi qui l'as nommée — le jeu ne l'a pas déduite.`,
+      [valeur],
+      ids,
+    );
   }
 
   // Territoires inexplorés.
-  const inexplorees = tendances
-    .filter((t) => t.territoireInexplore)
-    .map((t) => t.valeur);
+  const inexplorees = ordination
+    .filter((l) => l.comparaisons === 0)
+    .map((l) => l.valeur);
   if (inexplorees.length > 0) {
     obs.ajouter(
       "territoire_inexplore",
@@ -673,14 +866,25 @@ function redigerObservations(
   }
 
   // Étendue de ce qui a été joué.
-  if (duelsPlanifies > 0 && couverture < 1) {
+  if (couverture.pairesPertinentes > 0 && couverture.part < 1) {
     obs.ajouter(
       "couverture",
-      `Tu as joué ${Math.round(couverture * 100)} % des situations prévues pour tes cartes. Tout ce qui est écrit ici ne parle que de celles-là.`,
+      `${couverture.pairesCouvertes} des ${couverture.pairesPertinentes} paires de valeurs possibles ont été confrontées. Tout ce qui est écrit ici ne parle que de celles-là.`,
       [],
       [],
     );
   }
+
+  obs.ajouter(
+    "confiance",
+    `Niveau de confiance de cette lecture : ${libellesConfiance[confiance].toLowerCase()}. ${
+      confiance === "tendance_forte"
+        ? "Les mêmes réponses sont revenues assez souvent pour dessiner quelque chose."
+        : "Il y a encore peu de comparaisons derrière ce portrait — mettre la constellation à l'épreuve le précisera."
+    }`,
+    [],
+    [],
+  );
 
   return obs.tout();
 }
@@ -690,9 +894,8 @@ function redigerObservations(
 export interface EntreeConstellation {
   reponses: ReponseSource[];
   valeursConnues: string[];
-  /** Les cartes retenues par la personne. Vide ⇒ pas de classement déclaré. */
+  /** Les cartes retenues par la personne. Sert à savoir ce qui reste jouable. */
   cartes?: CarteJugee[];
-  arbitrages?: ArbitrageSource[];
   graine?: number;
 }
 
@@ -700,64 +903,107 @@ export function calculerConstellation({
   reponses,
   valeursConnues,
   cartes = [],
-  arbitrages = [],
   graine = 0,
 }: EntreeConstellation): ResultatConstellation {
+  const duelsSeuls = reponses.filter((r) => !r.serieId);
+  const comparaisons = duelsSeuls.map(versComparaison);
+
+  const modele = ajusterModele(comparaisons, valeursConnues);
   const tendances = calculerTendances(reponses, valeursConnues);
   const tensions = calculerTensions(reponses);
   const bascules = calculerBascules(reponses);
 
-  const cartesJugees = calculerScoresCartes(
-    cartes.map((c) => ({ id: c.carteId, famille: c.famille, label: c.label })),
-    arbitrages,
+  const ordination = construireOrdination(modele.forces, tendances);
+  const { fortes, contextuelles } = reperer(ordination, modele.relations);
+  const tensionsPrincipales = construireTensionsPrincipales(
+    modele.relations,
+    reponses,
+    bascules,
   );
-  const valeursDeclarees = calculerValeursDeclarees(cartesJugees, cartes);
+  const dimensionsSensibles = calculerDimensionsSensibles(reponses, bascules);
 
-  const combatsPlanifies = planifierCombatsCartes(
-    cartes.map((carte) => ({
-      id: carte.carteId,
-      famille: carte.famille,
-      label: carte.label,
-      valeursConfirmees: carte.valeursConfirmees,
+  // Ce que le jeu pourrait encore poser : les paires que les cartes ou les
+  // situations écrites savent servir.
+  const pairesDesCartes = duelsCartesPossibles(
+    cartes.map((c) => ({
+      id: c.carteId,
+      famille: c.famille,
+      label: c.label,
+      valeursConfirmees: c.valeursConfirmees,
     })),
-    graine,
+  ).map((d) => [d.valeurA, d.valeurB] as [string, string]);
+  const pairesEcrites = planifierDuels(valeursConnues, graine).map(
+    (d) => [d.valeurA, d.valeurB] as [string, string],
   );
-  const duelsPlanifies =
-    combatsPlanifies.length || planifierDuels(valeursConnues, graine).length;
-  const duelsRepondus = reponses.filter(
-    (r) => !r.serieId && r.choix !== "passer",
-  ).length;
-  const couverture =
-    duelsPlanifies > 0 ? Math.min(1, duelsRepondus / duelsPlanifies) : 0;
+  const valeursJouables = Array.from(
+    new Set([...pairesDesCartes, ...pairesEcrites].flat()),
+  );
+
+  const couvertureBrute = calculerCouverture(
+    valeursConnues.length > 0 ? valeursConnues : valeursJouables,
+    comparaisons,
+  );
+
+  const manifestations = new Set(
+    comparaisons.map((c) =>
+      cleManifestation(c.valeurA, c.valeurB, c.carteA, c.carteB),
+    ),
+  );
+  const couverture: Couverture = {
+    part: couvertureBrute.part,
+    pairesPertinentes: couvertureBrute.pairesPertinentes.length,
+    pairesCouvertes: couvertureBrute.pairesVues.length,
+    comparaisonsRetenues: comparaisons.filter((c) => c.choix !== "passer")
+      .length,
+    manifestationsRejouees: Math.max(
+      0,
+      manifestations.size - couvertureBrute.pairesVues.length,
+    ),
+  };
 
   // Stabilité : parmi les tensions revues sous une autre forme, combien ont
-  // reçu la même réponse. Sans reprise, il n'y a rien à mesurer — on ne
-  // pénalise pas, on affiche 1 et l'observation de couverture dit le reste.
+  // reçu la même réponse. Sans reprise, il n'y a rien à mesurer — on affiche 1
+  // et l'observation de couverture dit le reste.
   const revues = tensions.filter((t) => t.estStable !== null);
   const stabilite =
     revues.length > 0
       ? revues.filter((t) => t.estStable === true).length / revues.length
       : 1;
 
+  const niveauConfianceGlobal = confianceGlobale(ordination, couverture);
+
   return {
+    ordination,
+    relations: modele.relations,
+    valeursFortes: fortes,
+    valeursContextuelles: contextuelles,
+    valeursProtegees: ordination
+      .filter(
+        (l) => l.jamaisSecondaire && l.foisPrioritaire >= SEUIL_VALEUR_PROTEGEE,
+      )
+      .map((l) => l.valeur),
+    tensionsPrincipales,
+    dimensionsSensibles,
+    cycles: modele.cycles,
     tendances,
     tensions,
     bascules,
-    cartesJugees,
-    valeursDeclarees,
     observations: redigerObservations(
       reponses,
+      ordination,
       tendances,
       tensions,
+      tensionsPrincipales,
+      fortes,
+      contextuelles,
       bascules,
-      cartesJugees,
-      valeursDeclarees,
-      arbitrages,
+      modele.cycles,
       couverture,
-      duelsPlanifies,
+      niveauConfianceGlobal,
     ),
     couverture,
     stabilite,
+    niveauConfianceGlobal,
     versionCalcul: VERSION_CALCUL,
   };
 }

@@ -51,6 +51,8 @@ router.get("/catalogue/valeurs", (_req, res): void => {
       label: v.label,
       description: v.description,
       famille: v.famille,
+      familleValeur: v.familleValeur,
+      quasiSynonymes: v.quasiSynonymes ?? [],
     })),
   );
 });

@@ -632,7 +632,7 @@ const horizons: CarteContenu[] = [
     description: "Ne plus avoir à calculer avant chaque décision.",
     origine: "maison" as const,
     categorie: null,
-    valeursSuggerees: [V.securite, V.autonomie],
+    valeursSuggerees: [V.securite, V.autonomieFinanciere],
   },
   {
     id: "JV2006",
@@ -641,7 +641,7 @@ const horizons: CarteContenu[] = [
     description: "Refuser, et que ça reste correct.",
     origine: "maison" as const,
     categorie: null,
-    valeursSuggerees: [V.autonomie, V.courage],
+    valeursSuggerees: [V.nonDependance, V.courage],
   },
   {
     id: "JV2007",
@@ -860,7 +860,7 @@ const tresors: CarteContenu[] = [
     description: "Pouvoir être en désaccord tout haut.",
     origine: "maison" as const,
     categorie: null,
-    valeursSuggerees: [V.liberte, V.courage],
+    valeursSuggerees: [V.liberteExpression, V.courage],
   },
   {
     id: "JV3009",
