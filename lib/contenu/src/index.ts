@@ -13,5 +13,6 @@ export * from "./reecritures";
 export * from "./catalogue";
 export * from "./duels";
 export * from "./bascules";
+export * from "./arbitrages";
 export * from "./hasard";
 export * from "./parcours";

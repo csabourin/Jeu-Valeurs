@@ -18,6 +18,8 @@ tags:
     description: Cartes sélectionnées dans une session
   - name: reponses
     description: Réponses aux collisions
+  - name: arbitrages
+    description: Comparaisons entre les cartes de la personne
   - name: constellation
     description: Constellation personnelle
 
@@ -307,6 +309,46 @@ paths:
         "404":
           description: Réponse introuvable
 
+  # ─── Arbitrages ───────────────────────────────────────────────────────────────
+
+  /sessions/{sessionId}/arbitrages:
+    get:
+      operationId: listArbitrages
+      tags: [arbitrages]
+      summary: Liste les blocs d'arbitrage joués dans une session
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Blocs joués
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Arbitrage"
+    post:
+      operationId: createArbitrage
+      tags: [arbitrages]
+      summary: Enregistre le résultat d'un bloc d'arbitrage
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArbitrageInput"
+      responses:
+        "201":
+          description: Bloc enregistré
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Arbitrage"
+        "400":
+          description: Données invalides
+
   # ─── Constellation ────────────────────────────────────────────────────────────
 
   /sessions/{sessionId}/constellation:
@@ -472,7 +514,16 @@ components:
           type: string
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
+          enum:
+            [
+              accueil,
+              selection_cartes,
+              confirmation_valeurs,
+              arbitrages,
+              collisions,
+              bascules,
+              constellation,
+            ]
         creeLe:
           type: string
           format: date-time
@@ -485,7 +536,16 @@ components:
       properties:
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
+          enum:
+            [
+              accueil,
+              selection_cartes,
+              confirmation_valeurs,
+              arbitrages,
+              collisions,
+              bascules,
+              constellation,
+            ]
           default: accueil
 
     SessionUpdate:
@@ -493,7 +553,16 @@ components:
       properties:
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
+          enum:
+            [
+              accueil,
+              selection_cartes,
+              confirmation_valeurs,
+              arbitrages,
+              collisions,
+              bascules,
+              constellation,
+            ]
 
     # ─── Cartes session ────────────────────────────────────────────────────────
 
@@ -665,6 +734,125 @@ components:
         valeurProtegee:
           type: ["string", "null"]
 
+    # ─── Arbitrages ────────────────────────────────────────────────────────────
+
+    CarteArbitrable:
+      type: object
+      description: Une carte de la personne, réduite à ce qu'un bloc affiche.
+      required: [id, famille, label]
+      properties:
+        id:
+          type: string
+          description: Identifiant de la carte de session, en texte
+        famille:
+          type: string
+          enum: [lignes_rouges, horizons, tresors]
+        label:
+          type: string
+
+    BlocArbitrage:
+      type: object
+      description: >
+        Quatre cartes de la personne mises côte à côte, hors situation. On
+        demande laquelle compte le plus et laquelle compte le moins.
+      required: [bloc, cartes]
+      properties:
+        bloc:
+          type: number
+          description: Rang du bloc dans la partie, à partir de 1
+        cartes:
+          type: array
+          items:
+            $ref: "#/components/schemas/CarteArbitrable"
+
+    Arbitrage:
+      type: object
+      required: [id, sessionId, bloc, carteIds, version, creeLe]
+      properties:
+        id:
+          type: number
+        sessionId:
+          type: string
+        bloc:
+          type: number
+        carteIds:
+          type: array
+          items:
+            type: string
+          description: >
+            Composition du bloc au moment où il a été joué. Figée : une carte
+            retirée ensuite ne doit pas rendre la réponse illisible.
+        carteMeilleure:
+          type: ["string", "null"]
+          description: Null avec cartePire quand le bloc a été passé
+        cartePire:
+          type: ["string", "null"]
+        version:
+          type: number
+        creeLe:
+          type: string
+          format: date-time
+        miseAJourLe:
+          type: string
+          format: date-time
+
+    ArbitrageInput:
+      type: object
+      required: [bloc, carteIds]
+      properties:
+        bloc:
+          type: number
+        carteIds:
+          type: array
+          items:
+            type: string
+        carteMeilleure:
+          type: ["string", "null"]
+        cartePire:
+          type: ["string", "null"]
+
+    ScoreCarte:
+      type: object
+      description: La place d'une carte dans le classement déclaré de la personne.
+      required:
+        [carteId, label, famille, apparitions, foisMeilleure, foisPire, score]
+      properties:
+        carteId:
+          type: string
+        label:
+          type: string
+        famille:
+          type: string
+          enum: [lignes_rouges, horizons, tresors]
+        apparitions:
+          type: number
+          description: Nombre de blocs où la carte a été proposée
+        foisMeilleure:
+          type: number
+        foisPire:
+          type: number
+        score:
+          type: number
+          description: (meilleure − pire) / apparitions, dans [-1, 1]
+
+    ValeurDeclaree:
+      type: object
+      description: >
+        Score moyen des cartes portant cette valeur. Hypothèse, pas mesure : la
+        personne a classé des cartes, pas des valeurs. Ne sert qu'à repérer un
+        écart franc avec ce qui s'est joué en situation.
+      required: [valeur, scoreDeclare, cartes]
+      properties:
+        valeur:
+          type: string
+        scoreDeclare:
+          type: number
+        cartes:
+          type: array
+          items:
+            type: string
+          description: Libellés des cartes qui portent cette valeur
+
     # ─── Constellation ─────────────────────────────────────────────────────────
 
     TendanceValeur:
@@ -783,7 +971,8 @@ components:
 
     ObservationConstellation:
       type: object
-      required: [id, texte, type, valeursConcernees, reponsesSources]
+      required:
+        [id, texte, type, valeursConcernees, reponsesSources, arbitragesSources]
       properties:
         id:
           type: string
@@ -802,6 +991,8 @@ components:
               point_de_bascule,
               valeur_protegee,
               contexte,
+              arbitrage,
+              ecart_declare,
             ]
         valeursConcernees:
           type: array
@@ -811,7 +1002,15 @@ components:
           type: array
           items:
             type: number
-          description: IDs des réponses qui appuient cette observation
+          description: IDs dans `reponses_collision` qui appuient cette observation
+        arbitragesSources:
+          type: array
+          items:
+            type: number
+          description: >
+            IDs dans `arbitrages`. Séparés des précédents : les deux tables ont
+            des identifiants qui se recouvrent, et « D'où ça sort ? »
+            afficherait un bloc à la place d'une situation.
 
     Constellation:
       type: object
@@ -822,6 +1021,8 @@ components:
           tendances,
           tensions,
           bascules,
+          cartesJugees,
+          valeursDeclarees,
           observations,
           couverture,
           stabilite,
@@ -844,6 +1045,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PointDeBascule"
+        cartesJugees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoreCarte"
+          description: Classement déclaré des cartes. Vide si la phase n'a pas été jouée.
+        valeursDeclarees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValeurDeclaree"
         observations:
           type: array
           items:
@@ -871,26 +1081,43 @@ components:
           phase,
           nombreCartes,
           nombreValeurs,
+          arbitragesPlanifies,
+          arbitragesRepondus,
           duelsPlanifies,
           duelsRepondus,
           seriesPlanifiees,
           seriesTerminees,
           nombreReponses,
           prochaineQuestion,
+          prochainBloc,
         ]
       properties:
         sessionId:
           type: string
         etapeCourante:
           type: string
-          enum: [accueil, selection_cartes, confirmation_valeurs, collisions, bascules, constellation]
+          enum:
+            [
+              accueil,
+              selection_cartes,
+              confirmation_valeurs,
+              arbitrages,
+              collisions,
+              bascules,
+              constellation,
+            ]
         phase:
           type: string
-          enum: [duels, bascules, termine]
+          enum: [arbitrages, duels, bascules, termine]
           description: Où en est la partie, calculé depuis les réponses
         nombreCartes:
           type: number
         nombreValeurs:
+          type: number
+        arbitragesPlanifies:
+          type: number
+          description: Nombre de blocs d'arbitrage prévus pour cette partie
+        arbitragesRepondus:
           type: number
         duelsPlanifies:
           type: number
@@ -907,4 +1134,11 @@ components:
         prochaineQuestion:
           oneOf:
             - $ref: "#/components/schemas/Question"
+            - type: "null"
+        prochainBloc:
+          description: >
+            Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une
+            Question : il ne pose pas de situation et n'oppose pas deux valeurs.
+          oneOf:
+            - $ref: "#/components/schemas/BlocArbitrage"
             - type: "null"

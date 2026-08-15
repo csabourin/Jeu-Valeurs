@@ -17,6 +17,7 @@ const chemins: Record<SessionEtapeCourante, string> = {
   accueil: "cartes",
   selection_cartes: "cartes",
   confirmation_valeurs: "valeurs",
+  arbitrages: "partie",
   collisions: "partie",
   bascules: "partie",
   constellation: "constellation",

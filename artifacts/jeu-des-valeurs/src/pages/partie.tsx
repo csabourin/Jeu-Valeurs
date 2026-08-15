@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "wouter";
 import { Shell } from "@/components/shell";
+import { BlocArbitrage } from "@/components/bloc-arbitrage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +11,7 @@ import {
   useUpdateSession,
   type Question,
   type ReponseCollisionInputChoix,
+  type SessionUpdateEtapeCourante,
 } from "@workspace/api-client-react";
 import { libellesContexte, libellesDimension } from "@workspace/contenu";
 import type { Contexte, Dimension } from "@workspace/contenu";
@@ -20,6 +22,17 @@ import { useToast } from "@/hooks/use-toast";
 
 /** Toutes les N réponses tranchées, on demande ce que la personne protégeait. */
 const CADENCE_QUESTION_PROTEGEE = 4;
+
+/**
+ * L'étape à enregistrer pour chaque phase calculée. `termine` n'y est pas :
+ * c'est le bouton « Voir ma carte » qui fait passer à la constellation, pas le
+ * simple fait d'avoir répondu à tout.
+ */
+const etapeParPhase: Record<string, SessionUpdateEtapeCourante | undefined> = {
+  arbitrages: "arbitrages",
+  duels: "collisions",
+  bascules: "bascules",
+};
 
 const facteurs: { id: string; label: string }[] = [
   { id: "ampleur_impact", label: "La gravité" },
@@ -78,15 +91,19 @@ export default function Partie() {
   }, [question?.dilemmeId]);
 
   // L'étape enregistrée sert à reprendre la partie au bon endroit après une
-  // fermeture d'onglet. On la fait avancer une seule fois, à l'entrée dans les
-  // bascules ; le `ref` évite de repatcher à chaque rafraîchissement.
-  const etapeAnnoncee = useRef(false);
+  // fermeture d'onglet. La phase, elle, se recalcule depuis les réponses : on
+  // aligne l'une sur l'autre à chaque changement de phase. Le `ref` retient ce
+  // qui a déjà été annoncé pour ne pas repatcher à chaque rafraîchissement.
+  const etapeAnnoncee = useRef<string | null>(null);
   useEffect(() => {
-    if (etapeAnnoncee.current) return;
-    if (progres?.phase !== "bascules" || progres.etapeCourante !== "collisions") return;
-    etapeAnnoncee.current = true;
-    majSession.mutate({ sessionId, data: { etapeCourante: "bascules" } });
-  }, [progres?.phase, progres?.etapeCourante, sessionId, majSession]);
+    if (!progres) return;
+    const attendue = etapeParPhase[progres.phase];
+    if (!attendue) return;
+    if (progres.etapeCourante === attendue) return;
+    if (etapeAnnoncee.current === attendue) return;
+    etapeAnnoncee.current = attendue;
+    majSession.mutate({ sessionId, data: { etapeCourante: attendue } });
+  }, [progres, sessionId, majSession]);
 
   // La question « qu'est-ce que tu protégeais ? » revient de temps en temps.
   // Posée à chaque fois, elle transformerait la partie en interrogatoire.
@@ -163,6 +180,21 @@ export default function Partie() {
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
+      </Shell>
+    );
+  }
+
+  // Les arbitrages passent avant les duels : on classe ses cartes à froid,
+  // avant que la moindre situation ait pu déplacer l'ordre.
+  if (progres?.phase === "arbitrages" && progres.prochainBloc) {
+    return (
+      <Shell sessionId={sessionId} etape="partie">
+        <BlocArbitrage
+          sessionId={sessionId}
+          bloc={progres.prochainBloc}
+          repondus={progres.arbitragesRepondus}
+          planifies={progres.arbitragesPlanifies}
+        />
       </Shell>
     );
   }

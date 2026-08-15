@@ -95,37 +95,34 @@ for (const famille of familles) {
 // ── Registre des libellés ───────────────────────────────────────────────────
 
 /**
- * Mots qui trahissent le registre adulte ou administratif du jeu importé.
- * Ce n'est pas une liste de mots interdits en soi : c'est un filet pour
- * repérer les libellés qui n'ont pas été relus, ou dont la réécriture a laissé
- * passer le vocabulaire d'origine.
+ * Mots abstraits ou administratifs qui trahissent un libellé non relu.
+ *
+ * Le jeu s'adresse à des adultes, quel que soit leur niveau de scolarité :
+ * ce filet cherche du **jargon**, pas des sujets d'adultes. « Mon travail »,
+ * « mon conjoint », « mes économies » sont à leur place ; « instrumentaliser »
+ * et « réciprocité » ne le sont pas — non parce qu'ils sont graves, mais parce
+ * qu'ils forcent à décoder au lieu de réagir.
+ *
+ * Les mots retirés de cette liste l'ont été parce qu'ils décrivaient une vie
+ * adulte ordinaire (`professionnel`, `partenaire`, `patrimoine`, `dignité`,
+ * `légitime`, `vulnérabilité`, `descendants`) : les signaler poussait à
+ * réécrire des cartes justes en cartes vagues.
  */
-const motsTropAdultes = [
+const motsJargon = [
   "délibérément",
-  "volontairement",
   "systématiquement",
   "automatiquement",
   "déshumanis",
   "réciprocité",
   "instrumentalis",
-  "patrimoine",
   "institutionnel",
-  "professionnel",
-  "partenaire",
-  "prospère",
   "conventionnel",
   "conformiste",
   "transcendance",
-  "descendants",
-  "légitime",
   "environnement social",
   "structures sociales",
   "perspectives",
   "mesurable",
-  "arbitraire",
-  "irréversible",
-  "vulnérabilité",
-  "dignité",
 ];
 
 /** Un libellé qui ne se lit pas d'un coup d'œil rate sa cible. */
@@ -133,7 +130,7 @@ const LONGUEUR_MAX = 100;
 
 for (const c of cartesImportees) {
   const minuscule = c.label.toLowerCase();
-  for (const mot of motsTropAdultes) {
+  for (const mot of motsJargon) {
     if (minuscule.includes(mot)) {
       avertissements.push(`${c.id} garde « ${mot} » : ${c.label}`);
       break;
@@ -249,7 +246,7 @@ function jouerJusquAuBout(
 ): number {
   const reponses: ReponseConnue[] = [];
   for (let tour = 0; tour < 200; tour++) {
-    const parcours = calculerParcours(valeursConfirmees, reponses, graine);
+    const parcours = calculerParcours({ valeursConfirmees, reponses, graine });
     if (!parcours.prochaine) return tour;
     const q = parcours.prochaine;
     reponses.push({
@@ -306,7 +303,7 @@ for (const scenario of scenarios) {
 }
 
 // Le parcours doit tenir sans aucune valeur, sans planter.
-const vide = calculerParcours([], []);
+const vide = calculerParcours({ valeursConfirmees: [], reponses: [] });
 verifier(vide.prochaine === null, "Sans valeur confirmée, le jeu devrait n'avoir aucune question.");
 
 // ── La main de cartes ───────────────────────────────────────────────────────

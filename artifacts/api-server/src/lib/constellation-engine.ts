@@ -22,11 +22,19 @@ import {
   libellesDimension,
   libellesContexte,
   clePaire,
+  calculerScoresCartes,
   type Contexte,
   type Dimension,
+  type Famille,
+  type ScoreCarte,
+  type ReponseArbitrage,
 } from "@workspace/contenu";
 
-const VERSION_CALCUL = 2;
+/**
+ * 3 : les arbitrages entrent dans le calcul. Une constellation calculée en
+ * version 2 n'avait ni classement déclaré ni écart entre le dit et le joué.
+ */
+const VERSION_CALCUL = 3;
 
 /** Nombre de mises à l'épreuve avant de dire d'une valeur qu'elle n'a pas encore cédé. */
 const SEUIL_VALEUR_PROTEGEE = 2;
@@ -34,6 +42,10 @@ const SEUIL_VALEUR_PROTEGEE = 2;
 const SEUIL_TENSION_FORTE = 0.5;
 /** Écarts nets en deçà desquels on ne parle pas de tendance. */
 const SEUIL_TENDANCE = 0.5;
+/** À partir d'où une valeur est dite « mise devant » dans les arbitrages. */
+const SEUIL_DECLARE = 0.25;
+/** Combien de fois une valeur doit avoir été mise à l'épreuve avant de parler d'écart. */
+const MIN_COLLISIONS_ECART = 2;
 
 export interface ReponseSource {
   id: number;
@@ -50,6 +62,32 @@ export interface ReponseSource {
   dimension: string | null;
   valeurProtegee: string | null;
   version: number;
+}
+
+/** Une carte de la personne, avec les valeurs qu'elle a confirmées dessus. */
+export interface CarteJugee {
+  carteId: string;
+  label: string;
+  famille: Famille;
+  valeursConfirmees: string[];
+}
+
+/** Un bloc d'arbitrage joué, tel qu'il sort de la base. */
+export interface ArbitrageSource extends ReponseArbitrage {
+  id: number;
+}
+
+/**
+ * Ce que la personne a dit hors situation, valeur par valeur.
+ *
+ * Une valeur hérite du score moyen des cartes qui la portent : c'est une
+ * hypothèse, pas une mesure — la personne a classé des cartes, pas des valeurs.
+ */
+export interface ValeurDeclaree {
+  valeur: string;
+  scoreDeclare: number;
+  /** Libellés des cartes qui portent cette valeur. */
+  cartes: string[];
 }
 
 export interface TendanceValeur {
@@ -96,20 +134,31 @@ export type TypeObservation =
   | "couverture"
   | "point_de_bascule"
   | "valeur_protegee"
-  | "contexte";
+  | "contexte"
+  | "arbitrage"
+  | "ecart_declare";
 
 export interface ObservationConstellation {
   id: string;
   texte: string;
   type: TypeObservation;
   valeursConcernees: string[];
+  /** Identifiants dans `reponses_collision`. */
   reponsesSources: number[];
+  /**
+   * Identifiants dans `arbitrages`. Séparés des précédents : les deux tables
+   * ont des identifiants qui se recouvrent, et l'écran « D'où ça sort ? »
+   * afficherait un bloc à la place d'une situation.
+   */
+  arbitragesSources: number[];
 }
 
 export interface ResultatConstellation {
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
   bascules: PointDeBascule[];
+  cartesJugees: ScoreCarte[];
+  valeursDeclarees: ValeurDeclaree[];
   observations: ObservationConstellation[];
   couverture: number;
   stabilite: number;
@@ -316,6 +365,50 @@ function calculerBascules(reponses: ReponseSource[]): PointDeBascule[] {
   return bascules.sort((a, b) => a.serieId.localeCompare(b.serieId));
 }
 
+// ─── Ce qui a été dit hors situation ─────────────────────────────────────────
+
+/**
+ * Des scores de cartes vers des scores de valeurs.
+ *
+ * Une carte porte les valeurs que la personne a confirmées dessus ; sa place
+ * dans le classement déteint donc sur chacune d'elles, à parts égales. C'est
+ * grossier, et assumé : on ne s'en sert que pour repérer un écart franc avec
+ * ce qui s'est joué en situation, jamais pour annoncer un classement de valeurs.
+ */
+function calculerValeursDeclarees(
+  scores: ScoreCarte[],
+  cartes: CarteJugee[],
+): ValeurDeclaree[] {
+  const parCarte = new Map(cartes.map((c) => [c.carteId, c]));
+  const cumul = new Map<string, { total: number; n: number; cartes: string[] }>();
+
+  for (const score of scores) {
+    // Une carte jamais proposée n'a pas de place : elle ne dit rien.
+    if (score.apparitions === 0) continue;
+    const carte = parCarte.get(score.carteId);
+    if (!carte) continue;
+
+    for (const valeur of carte.valeursConfirmees) {
+      const entree = cumul.get(valeur);
+      if (entree) {
+        entree.total += score.score;
+        entree.n++;
+        entree.cartes.push(carte.label);
+      } else {
+        cumul.set(valeur, { total: score.score, n: 1, cartes: [carte.label] });
+      }
+    }
+  }
+
+  return Array.from(cumul, ([valeur, { total, n, cartes: labels }]) => ({
+    valeur,
+    scoreDeclare: total / n,
+    cartes: labels.sort(),
+  })).sort(
+    (a, b) => b.scoreDeclare - a.scoreDeclare || a.valeur.localeCompare(b.valeur),
+  );
+}
+
 // ─── Observations ────────────────────────────────────────────────────────────
 
 class Observations {
@@ -327,6 +420,7 @@ class Observations {
     texte: string,
     valeursConcernees: string[],
     reponsesSources: number[],
+    arbitragesSources: number[] = [],
   ): void {
     this.liste.push({
       id: `obs_${type}_${this.index++}`,
@@ -334,6 +428,7 @@ class Observations {
       type,
       valeursConcernees,
       reponsesSources,
+      arbitragesSources,
     });
   }
 
@@ -356,10 +451,16 @@ function redigerObservations(
   tendances: TendanceValeur[],
   tensions: TensionObservee[],
   bascules: PointDeBascule[],
+  scoresCartes: ScoreCarte[],
+  valeursDeclarees: ValeurDeclaree[],
+  arbitrages: ArbitrageSource[],
   couverture: number,
   duelsPlanifies: number,
 ): ObservationConstellation[] {
   const obs = new Observations();
+  const idsArbitrages = arbitrages
+    .filter((a) => a.carteMeilleure || a.cartePire)
+    .map((a) => a.id);
 
   // Valeurs qui n'ont pas encore cédé.
   for (const t of tendances.filter((x) => x.estProtegee)) {
@@ -383,6 +484,41 @@ function redigerObservations(
         : `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} a plutôt cédé la place à ${enumerer(t.cedeDevant)}.`;
 
     obs.ajouter("tendance", texte, [t.valeur], idsImpliquant(reponses, t.valeur));
+  }
+
+  // La carte mise devant les autres, hors situation.
+  const jugees = scoresCartes.filter((s) => s.apparitions > 0);
+  const devant = jugees.filter((s) => s.score === jugees[0]?.score);
+  if (jugees.length >= 2 && devant.length === 1 && devant[0].score > 0) {
+    obs.ajouter(
+      "arbitrage",
+      `Quand tes cartes étaient côte à côte, sans situation autour, c'est ${citer(devant[0].label)} que tu as mise devant le plus souvent.`,
+      [],
+      [],
+      idsArbitrages,
+    );
+  }
+
+  // L'écart entre ce qui a été dit à froid et ce qui s'est joué en situation.
+  //
+  // C'est l'observation que la phase d'arbitrage existe pour rendre possible.
+  // Elle ne dit jamais que la personne s'est trompée quelque part : les deux
+  // réponses sont vraies, elles répondent simplement à deux questions
+  // différentes — ce qui compte, et ce qui l'emporte quand ça coûte.
+  for (const declaree of valeursDeclarees) {
+    if (declaree.scoreDeclare < SEUIL_DECLARE) continue;
+    const tendance = tendances.find((t) => t.valeur === declaree.valeur);
+    if (!tendance) continue;
+    if (tendance.foisPrivilegiee + tendance.foisCedee < MIN_COLLISIONS_ECART) continue;
+    if (tendance.scoreNet > -SEUIL_TENDANCE) continue;
+
+    obs.ajouter(
+      "ecart_declare",
+      `Cartes en main, ${citer(declaree.valeur)} passait devant. Dans les situations, c'est ${enumerer(tendance.cedeDevant)} qui l'a emporté. Les deux sont vraies : mises côte à côte, tes cartes ne pèsent pas le même poids qu'au moment de choisir.`,
+      [declaree.valeur],
+      idsImpliquant(reponses, declaree.valeur),
+      idsArbitrages,
+    );
   }
 
   // Une valeur qui ne gagne que dans un seul contexte.
@@ -530,14 +666,31 @@ function redigerObservations(
 
 // ─── Entrée principale ───────────────────────────────────────────────────────
 
-export function calculerConstellation(
-  reponses: ReponseSource[],
-  valeursConnues: string[],
+export interface EntreeConstellation {
+  reponses: ReponseSource[];
+  valeursConnues: string[];
+  /** Les cartes retenues par la personne. Vide ⇒ pas de classement déclaré. */
+  cartes?: CarteJugee[];
+  arbitrages?: ArbitrageSource[];
+  graine?: number;
+}
+
+export function calculerConstellation({
+  reponses,
+  valeursConnues,
+  cartes = [],
+  arbitrages = [],
   graine = 0,
-): ResultatConstellation {
+}: EntreeConstellation): ResultatConstellation {
   const tendances = calculerTendances(reponses, valeursConnues);
   const tensions = calculerTensions(reponses);
   const bascules = calculerBascules(reponses);
+
+  const cartesJugees = calculerScoresCartes(
+    cartes.map((c) => ({ id: c.carteId, famille: c.famille, label: c.label })),
+    arbitrages,
+  );
+  const valeursDeclarees = calculerValeursDeclarees(cartesJugees, cartes);
 
   const duelsPlanifies = planifierDuels(valeursConnues, graine).length;
   const duelsRepondus = reponses.filter(
@@ -559,11 +712,16 @@ export function calculerConstellation(
     tendances,
     tensions,
     bascules,
+    cartesJugees,
+    valeursDeclarees,
     observations: redigerObservations(
       reponses,
       tendances,
       tensions,
       bascules,
+      cartesJugees,
+      valeursDeclarees,
+      arbitrages,
       couverture,
       duelsPlanifies,
     ),
