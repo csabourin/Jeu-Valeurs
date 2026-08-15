@@ -27,6 +27,10 @@ import {
   type CarteArbitrable,
   type ReponseArbitrage,
 } from "./arbitrages";
+import {
+  planifierCombatsCartes,
+  type CombatCarteContenu,
+} from "./combats-cartes";
 
 /** Combien de duels au maximum dans une partie. */
 const MAX_DUELS = 12;
@@ -165,7 +169,8 @@ export function planifierDuels(
   );
   const complement = repartir(uneValeur, suivant);
 
-  const plafondPrincipaux = MAX_DUELS - Math.min(variantesPossibles.length, MAX_VARIANTES);
+  const plafondPrincipaux =
+    MAX_DUELS - Math.min(variantesPossibles.length, MAX_VARIANTES);
   let plan = principaux.slice(0, plafondPrincipaux);
 
   if (plan.length < MIN_DUELS) {
@@ -175,7 +180,9 @@ export function planifierDuels(
   // Une variante ne part que si sa jumelle est effectivement dans la partie :
   // sinon l'écran annonce « déjà croisé, autrement » à propos d'une tension
   // jamais vue, et le calcul de stabilité n'aurait rien à comparer.
-  const pairesRetenues = new Set(plan.map((d) => clePaire(d.valeurA, d.valeurB)));
+  const pairesRetenues = new Set(
+    plan.map((d) => clePaire(d.valeurA, d.valeurB)),
+  );
   const variantes = variantesPossibles
     .filter((d) => pairesRetenues.has(clePaire(d.valeurA, d.valeurB)))
     .slice(0, MAX_VARIANTES);
@@ -201,18 +208,25 @@ function etatSerie(
 
   if (donnees.length === 0) return { terminee: false, prochainPalier: 1 };
 
-  if (donnees.some((r) => r.choix === "passer" || r.choix === "je_ne_sais_pas")) {
+  if (
+    donnees.some((r) => r.choix === "passer" || r.choix === "je_ne_sais_pas")
+  ) {
     return { terminee: true, prochainPalier: null };
   }
 
   const premier = donnees[0].choix;
   const dernier = donnees[donnees.length - 1];
-  if (estDecisif(premier) && estDecisif(dernier.choix) && dernier.choix !== premier) {
+  if (
+    estDecisif(premier) &&
+    estDecisif(dernier.choix) &&
+    dernier.choix !== premier
+  ) {
     return { terminee: true, prochainPalier: null };
   }
 
   const suivant = (dernier.palier as number) + 1;
-  if (suivant > serie.paliers.length) return { terminee: true, prochainPalier: null };
+  if (suivant > serie.paliers.length)
+    return { terminee: true, prochainPalier: null };
 
   return { terminee: false, prochainPalier: suivant };
 }
@@ -283,7 +297,31 @@ function versQuestionDuel(duel: DuelContenu): Question {
   };
 }
 
-function versQuestionBascule(serie: SerieBascule, palier: number): Question | null {
+function versQuestionCombat(combat: CombatCarteContenu): Question {
+  return {
+    type: "duel",
+    dilemmeId: combat.id,
+    valeurA: combat.valeurA,
+    valeurB: combat.valeurB,
+    situation: combat.situation,
+    optionA: combat.optionA,
+    optionB: combat.optionB,
+    contexte: null,
+    estVariante: combat.variante,
+    serieId: null,
+    palier: null,
+    dimension: combat.variante ? "enjeu" : null,
+    reglage: combat.variante ? combat.enjeuLabel : null,
+    amorce: combat.variante
+      ? "La limite ne change pas. Seul ce que tu pourrais obtenir ou garder change."
+      : null,
+  };
+}
+
+function versQuestionBascule(
+  serie: SerieBascule,
+  palier: number,
+): Question | null {
   const p = serie.paliers.find((x) => x.palier === palier);
   if (!p) return null;
   return {
@@ -319,16 +357,27 @@ export function calculerParcours({
   graine = 0,
 }: EtatPartie): Parcours {
   const arbitrage = prochainArbitrage(cartes, arbitrages, graine);
-  const plan = planifierDuels(valeursConfirmees, graine);
+  const combatsCartes = planifierCombatsCartes(cartes, graine);
+  const utiliseCombatsCartes = combatsCartes.length > 0;
+  const plan = utiliseCombatsCartes
+    ? combatsCartes
+    : planifierDuels(valeursConfirmees, graine);
   const repondus = new Set(
-    reponses.filter((r) => r.dilemmeId != null).map((r) => r.dilemmeId as number),
+    reponses
+      .filter((r) => r.dilemmeId != null)
+      .map((r) => r.dilemmeId as number),
   );
 
   const duelRestant = plan.find((d) => !repondus.has(d.id));
   const duelsRepondus = plan.filter((d) => repondus.has(d.id)).length;
 
-  const seriesPlan = planifierSeries(valeursConfirmees, reponses, graine);
-  const etats = seriesPlan.map((s) => ({ serie: s, ...etatSerie(s, reponses) }));
+  const seriesPlan = utiliseCombatsCartes
+    ? []
+    : planifierSeries(valeursConfirmees, reponses, graine);
+  const etats = seriesPlan.map((s) => ({
+    serie: s,
+    ...etatSerie(s, reponses),
+  }));
   const seriesTerminees = etats.filter((e) => e.terminee).length;
 
   const base = {
@@ -354,7 +403,9 @@ export function calculerParcours({
     return {
       ...base,
       phase: "duels",
-      prochaine: versQuestionDuel(duelRestant),
+      prochaine: utiliseCombatsCartes
+        ? versQuestionCombat(duelRestant as CombatCarteContenu)
+        : versQuestionDuel(duelRestant as DuelContenu),
     };
   }
 

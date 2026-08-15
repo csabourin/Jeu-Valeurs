@@ -17,6 +17,7 @@
 
 import {
   planifierDuels,
+  planifierCombatsCartes,
   trouverDuel,
   trouverSerie,
   libellesDimension,
@@ -269,13 +270,16 @@ function calculerTendances(
           notees.map((r) => r.certitude).filter((c): c is number => c != null),
         ),
         territoireInexplore: total === 0,
-        estProtegee: gagnees.length >= SEUIL_VALEUR_PROTEGEE && perdues.length === 0,
+        estProtegee:
+          gagnees.length >= SEUIL_VALEUR_PROTEGEE && perdues.length === 0,
         domine,
         cedeDevant,
         contextesFavorables,
       };
     })
-    .sort((a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur));
+    .sort(
+      (a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur),
+    );
 }
 
 // ─── Tensions ────────────────────────────────────────────────────────────────
@@ -357,7 +361,8 @@ function calculerBascules(reponses: ReponseSource[]): PointDeBascule[] {
       choixInitial: initial,
       paliers: ordonnees.length,
       reglageBascule: bascule
-        ? (serie.paliers.find((p) => p.palier === bascule.palier)?.reglage ?? null)
+        ? (serie.paliers.find((p) => p.palier === bascule.palier)?.reglage ??
+          null)
         : null,
     });
   }
@@ -380,7 +385,10 @@ function calculerValeursDeclarees(
   cartes: CarteJugee[],
 ): ValeurDeclaree[] {
   const parCarte = new Map(cartes.map((c) => [c.carteId, c]));
-  const cumul = new Map<string, { total: number; n: number; cartes: string[] }>();
+  const cumul = new Map<
+    string,
+    { total: number; n: number; cartes: string[] }
+  >();
 
   for (const score of scores) {
     // Une carte jamais proposée n'a pas de place : elle ne dit rien.
@@ -405,7 +413,8 @@ function calculerValeursDeclarees(
     scoreDeclare: total / n,
     cartes: labels.sort(),
   })).sort(
-    (a, b) => b.scoreDeclare - a.scoreDeclare || a.valeur.localeCompare(b.valeur),
+    (a, b) =>
+      b.scoreDeclare - a.scoreDeclare || a.valeur.localeCompare(b.valeur),
   );
 }
 
@@ -483,7 +492,12 @@ function redigerObservations(
         ? `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} est passée devant ${enumerer(t.domine)}.`
         : `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} a plutôt cédé la place à ${enumerer(t.cedeDevant)}.`;
 
-    obs.ajouter("tendance", texte, [t.valeur], idsImpliquant(reponses, t.valeur));
+    obs.ajouter(
+      "tendance",
+      texte,
+      [t.valeur],
+      idsImpliquant(reponses, t.valeur),
+    );
   }
 
   // La carte mise devant les autres, hors situation.
@@ -509,7 +523,8 @@ function redigerObservations(
     if (declaree.scoreDeclare < SEUIL_DECLARE) continue;
     const tendance = tendances.find((t) => t.valeur === declaree.valeur);
     if (!tendance) continue;
-    if (tendance.foisPrivilegiee + tendance.foisCedee < MIN_COLLISIONS_ECART) continue;
+    if (tendance.foisPrivilegiee + tendance.foisCedee < MIN_COLLISIONS_ECART)
+      continue;
     if (tendance.scoreNet > -SEUIL_TENDANCE) continue;
 
     obs.ajouter(
@@ -529,7 +544,10 @@ function redigerObservations(
   for (const t of tendances) {
     if (t.contextesFavorables.length !== 1) continue;
     const victoiresSituees = reponses.filter(
-      (r) => estDecisif(r.choix) && gagnant(r) === t.valeur && contexteDe(r) !== null,
+      (r) =>
+        estDecisif(r.choix) &&
+        gagnant(r) === t.valeur &&
+        contexteDe(r) !== null,
     );
     if (victoiresSituees.length < 2) continue;
     const contexte = libellesContexte[t.contextesFavorables[0] as Contexte];
@@ -546,9 +564,12 @@ function redigerObservations(
   for (const b of bascules) {
     const serie = trouverSerie(b.serieId);
     if (!serie) continue;
-    const dimension = libellesDimension[b.dimension as Dimension] ?? b.dimension;
+    const dimension =
+      libellesDimension[b.dimension as Dimension] ?? b.dimension;
     const choixDepart = b.choixInitial === "A" ? serie.optionA : serie.optionB;
-    const sources = reponses.filter((r) => r.serieId === b.serieId).map((r) => r.id);
+    const sources = reponses
+      .filter((r) => r.serieId === b.serieId)
+      .map((r) => r.id);
 
     const texte = b.reglageBascule
       ? `Entre ${citer(b.valeurA)} et ${citer(b.valeurB)}, tu répondais « ${choixDepart} ». On montait ${dimension} — ton choix a changé à ce cran-ci : ${b.reglageBascule}.`
@@ -692,7 +713,17 @@ export function calculerConstellation({
   );
   const valeursDeclarees = calculerValeursDeclarees(cartesJugees, cartes);
 
-  const duelsPlanifies = planifierDuels(valeursConnues, graine).length;
+  const combatsPlanifies = planifierCombatsCartes(
+    cartes.map((carte) => ({
+      id: carte.carteId,
+      famille: carte.famille,
+      label: carte.label,
+      valeursConfirmees: carte.valeursConfirmees,
+    })),
+    graine,
+  );
+  const duelsPlanifies =
+    combatsPlanifies.length || planifierDuels(valeursConnues, graine).length;
   const duelsRepondus = reponses.filter(
     (r) => !r.serieId && r.choix !== "passer",
   ).length;

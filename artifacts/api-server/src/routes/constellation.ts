@@ -64,7 +64,12 @@ async function chargerSession(sessionId: string) {
  * que la personne n'a jamais prise. On ne sort donc jamais de `cartes_session`.
  */
 function versCarteArbitrable(c: LigneCarte): CarteArbitrable {
-  return { id: String(c.id), famille: c.famille, label: c.label };
+  return {
+    id: String(c.id),
+    famille: c.famille,
+    label: c.label,
+    valeursConfirmees: c.valeursConfirmees,
+  };
 }
 
 function versCarteJugee(c: LigneCarte): CarteJugee {

@@ -204,11 +204,11 @@ export default function Partie() {
       <Shell sessionId={sessionId} etape="partie">
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto">
           <h1 className="text-2xl font-serif font-bold">
-            Pas encore de duel possible
+            Pas encore de combat possible
           </h1>
           <p className="text-muted-foreground">
-            Le jeu n'a pas trouvé de situation qui oppose deux de tes raisons.
-            Reprends quelques cartes, ou coche d'autres raisons.
+            Choisis au moins une limite et une aspiration ou un essentiel pour
+            que le jeu puisse les mettre face à face.
           </p>
           <Button onClick={() => setLocation(`/session/${sessionId}/cartes`)}>
             Retourner aux cartes
@@ -224,7 +224,7 @@ export default function Partie() {
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 max-w-lg mx-auto animate-in fade-in zoom-in duration-500">
           <h1 className="text-3xl font-serif font-bold">Manche terminée</h1>
           <p className="text-lg text-muted-foreground">
-            Tu as joué {progres?.duelsRepondus ?? 0} duel
+            Tu as joué {progres?.duelsRepondus ?? 0} combat
             {(progres?.duelsRepondus ?? 0) > 1 && "s"}
             {(progres?.seriesTerminees ?? 0) > 0 &&
               ` et ${progres?.seriesTerminees} série${(progres?.seriesTerminees ?? 0) > 1 ? "s" : ""} de bascule`}
@@ -238,8 +238,11 @@ export default function Partie() {
     );
   }
 
-  const estBascule = question.type === "bascule";
-  const totalPrevu = (progres?.duelsPlanifies ?? 0) + (progres?.seriesPlanifiees ?? 0);
+  const estCombatCartes = question.dilemmeId >= 1_000_000_000;
+  const estBascule =
+    question.type === "bascule" || (estCombatCartes && question.estVariante);
+  const totalPrevu =
+    (progres?.duelsPlanifies ?? 0) + (progres?.seriesPlanifiees ?? 0);
   const faits = (progres?.duelsRepondus ?? 0) + (progres?.seriesTerminees ?? 0);
   const avancement = totalPrevu > 0 ? (faits / totalPrevu) * 100 : 0;
   const enCours = creerReponse.isPending || envoiEnCours;
@@ -252,19 +255,23 @@ export default function Partie() {
             <span className="inline-flex items-center gap-2">
               {estBascule ? (
                 <>
-                  <SlidersHorizontal className="w-4 h-4" aria-hidden="true" /> Bascule
+                  <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />{" "}
+                  Bascule
                 </>
               ) : (
                 <>
-                  <Swords className="w-4 h-4" aria-hidden="true" /> Duel
+                  <Swords className="w-4 h-4" aria-hidden="true" /> Combat
                 </>
               )}
             </span>
             <span>
-              {progres?.duelsRepondus} / {progres?.duelsPlanifies} duels
+              {progres?.duelsRepondus} / {progres?.duelsPlanifies} combats
             </span>
           </div>
-          <Progress value={Math.min(100, Math.max(0, avancement))} className="h-2" />
+          <Progress
+            value={Math.min(100, Math.max(0, avancement))}
+            className="h-2"
+          />
         </div>
 
         {etape === "choix" && (
@@ -330,8 +337,8 @@ export default function Partie() {
                 Ça dépend de quoi ?
               </h2>
               <p className="text-muted-foreground">
-                C'est une vraie réponse. Le jeu s'en sert pour te renvoyer la même
-                situation avec ce réglage-là qui change.
+                C'est une vraie réponse. Le jeu s'en sert pour te renvoyer la
+                même situation avec ce réglage-là qui change.
               </p>
             </div>
 
@@ -365,7 +372,9 @@ export default function Partie() {
               </Button>
               <Button
                 size="lg"
-                disabled={!facteur || (facteur === "autre" && !facteurLibre.trim())}
+                disabled={
+                  !facteur || (facteur === "autre" && !facteurLibre.trim())
+                }
                 onClick={() => setEtape("reglages")}
               >
                 Continuer <MoveRight className="w-4 h-4 ml-2" />
@@ -380,7 +389,9 @@ export default function Partie() {
               <h2 className="text-2xl md:text-3xl font-serif font-bold">
                 Deux petites questions
               </h2>
-              <p className="text-muted-foreground">Puis on passe à la suivante.</p>
+              <p className="text-muted-foreground">
+                Puis on passe à la suivante.
+              </p>
             </div>
 
             <div className="space-y-8 bg-card border border-border/50 rounded-2xl p-5 md:p-6">
@@ -436,7 +447,9 @@ export default function Partie() {
               <Button
                 variant="ghost"
                 disabled={enCours}
-                onClick={() => setEtape(choix === "ca_depend" ? "depend" : "choix")}
+                onClick={() =>
+                  setEtape(choix === "ca_depend" ? "depend" : "choix")
+                }
               >
                 Retour
               </Button>
@@ -473,6 +486,25 @@ export default function Partie() {
 }
 
 function EnTeteQuestion({ question }: { question: Question }) {
+  if (question.estVariante && question.dimension === "enjeu") {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-2">
+          <p className="text-xs uppercase tracking-wider text-accent font-medium">
+            Même limite — nouvel enjeu
+          </p>
+          <p className="text-muted-foreground">
+            L'acte reste le même. Regarde si cette nouvelle raison déplace ta
+            réponse.
+          </p>
+        </div>
+        <p className="text-xl md:text-2xl font-serif leading-snug">
+          {question.situation}
+        </p>
+      </div>
+    );
+  }
+
   if (question.type === "bascule") {
     const dimension =
       libellesDimension[question.dimension as Dimension] ?? "le réglage";
@@ -485,7 +517,8 @@ function EnTeteQuestion({ question }: { question: Question }) {
           <p className="text-muted-foreground">{question.amorce}</p>
           {question.reglage && (
             <p className="font-medium">
-              Cette fois : <span className="text-foreground">{question.reglage}</span>
+              Cette fois :{" "}
+              <span className="text-foreground">{question.reglage}</span>
             </p>
           )}
         </div>
@@ -537,7 +570,9 @@ function OptionCarte({
       disabled={disabled}
       className="text-left rounded-xl border border-border/60 bg-card p-6 min-h-[140px] flex flex-col justify-between gap-4 transition-all hover:border-primary/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
     >
-      <span className="text-lg md:text-xl font-medium leading-snug">{texte}</span>
+      <span className="text-lg md:text-xl font-medium leading-snug">
+        {texte}
+      </span>
       <span className="text-xs uppercase tracking-wider text-muted-foreground">
         Tu protèges : {valeur}
       </span>
@@ -562,7 +597,9 @@ function Echelle({
     <fieldset className="space-y-3">
       <legend className="font-medium">{label}</legend>
       <div className="flex items-center gap-3">
-        <span className="text-xs text-muted-foreground w-16 shrink-0">{bas}</span>
+        <span className="text-xs text-muted-foreground w-16 shrink-0">
+          {bas}
+        </span>
         <div className="flex-1 flex justify-between gap-1">
           {[1, 2, 3, 4, 5].map((v) => (
             <button

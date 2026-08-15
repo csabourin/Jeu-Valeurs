@@ -14,9 +14,15 @@
  * de formulations non relues.
  */
 
-import { cartesMaison, familles, type CarteContenu, type Famille } from "./cartes";
+import {
+  cartesMaison,
+  familles,
+  type CarteContenu,
+  type Famille,
+} from "./cartes";
 import { valeursParCategorie } from "./categories";
 import { reecritures } from "./reecritures";
+import { limitesSimples } from "./limites-simples";
 import { generateurAleatoire, melanger } from "./hasard";
 import lignesRougesImportees from "./data/red_lines.json";
 import horizonsImportes from "./data/horizons.json";
@@ -55,7 +61,11 @@ function importer(brutes: CarteImportee[], famille: Famille): CarteContenu[] {
     // Le libellé d'origine ne sert que de repli : toutes les cartes ont été
     // relues, et celles qui ne sont pas dans `reecritures` sont celles qui
     // passaient déjà telles quelles.
-    label: normaliser(reecritures[c.id] ?? c.label),
+    label: normaliser(
+      famille === "lignes_rouges"
+        ? (limitesSimples[c.id] ?? reecritures[c.id] ?? c.label)
+        : (reecritures[c.id] ?? c.label),
+    ),
     description: null,
     // Une catégorie inconnue ne fait pas disparaître la carte : elle arrive
     // sans hypothèse, et la personne nomme elle-même ce qu'elle y voit.

@@ -20,9 +20,9 @@ import { useSignalerErreur } from "@/hooks/use-erreur";
 const MINIMUM_VALEURS = 2;
 
 const etiquettes: Record<CarteSessionFamille, string> = {
-  lignes_rouges: "🛑 Ligne rouge",
-  horizons: "🌅 Horizon",
-  tresors: "💎 Trésor",
+  lignes_rouges: "Mes limites · Ce que je refuse",
+  horizons: "Mes aspirations · Ce que je veux vivre",
+  tresors: "Mes essentiels · Ce que je veux préserver",
 };
 
 export default function Valeurs() {
@@ -55,7 +55,8 @@ export default function Valeurs() {
     setConfirmees((prev) => {
       const suivant = { ...prev };
       for (const c of mesCartes) {
-        if (suivant[c.id] === undefined) suivant[c.id] = c.valeursConfirmées ?? [];
+        if (suivant[c.id] === undefined)
+          suivant[c.id] = c.valeursConfirmées ?? [];
       }
       return suivant;
     });
@@ -64,7 +65,11 @@ export default function Valeurs() {
   const enregistrer = (carteId: number, valeurs: string[]) => {
     setConfirmees((prev) => ({ ...prev, [carteId]: valeurs }));
     majCarte.mutate(
-      { sessionId, carteSessionId: carteId, data: { valeursConfirmées: valeurs } },
+      {
+        sessionId,
+        carteSessionId: carteId,
+        data: { valeursConfirmées: valeurs },
+      },
       {
         onSuccess: () =>
           queryClient.invalidateQueries({
@@ -132,24 +137,24 @@ export default function Valeurs() {
 
   return (
     <Shell sessionId={sessionId} etape="valeurs">
-      <div className="space-y-8 animate-in fade-in duration-500">
-        <header className="space-y-3">
+      <div className="max-w-4xl mx-auto w-full space-y-8 animate-in fade-in duration-500">
+        <header className="space-y-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setLocation(`/session/${sessionId}/cartes`)}
             className="-ml-4 text-muted-foreground"
           >
-            <MoveLeft className="w-4 h-4 mr-2" /> Mes cartes
+            <MoveLeft className="w-4 h-4 mr-2" /> Ce qui compte pour moi
           </Button>
-          <h1 className="text-3xl md:text-4xl font-serif font-bold">
-            Pourquoi cette carte ?
+          <p className="eyebrow">Étape 2 · Préciser</p>
+          <h1 className="text-4xl md:text-5xl font-serif font-semibold">
+            Qu'est-ce que ça protège ?
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            Pour chaque carte, le jeu propose des raisons possibles. Garde
-            seulement celles qui sont vraies pour toi — et ajoute les tiennes si
-            aucune ne l'est. Rien n'est coché d'avance : ce n'est pas au jeu de
-            décider ce que tu voulais dire.
+          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+            Une même envie peut cacher des raisons très différentes. Pour chaque
+            choix, garde seulement les mots qui expliquent vraiment pourquoi il
+            compte pour toi — ou écris les tiens.
           </p>
         </header>
 
@@ -185,7 +190,8 @@ export default function Valeurs() {
                     </p>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      C'est ta carte, alors c'est toi qui dis pourquoi elle compte.
+                      C'est ta carte, alors c'est toi qui dis pourquoi elle
+                      compte.
                     </p>
                   )}
 
@@ -276,7 +282,9 @@ export default function Valeurs() {
           </p>
           <Button
             size="lg"
-            disabled={toutesLesValeurs.length < MINIMUM_VALEURS || majSession.isPending}
+            disabled={
+              toutesLesValeurs.length < MINIMUM_VALEURS || majSession.isPending
+            }
             onClick={continuer}
           >
             Aux duels <MoveRight className="w-4 h-4 ml-2" />
