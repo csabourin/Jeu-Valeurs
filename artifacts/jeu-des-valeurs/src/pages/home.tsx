@@ -26,10 +26,9 @@ const chemins: Record<SessionEtapeCourante, string> = {
   accueil: "cartes",
   selection_cartes: "cartes",
   confirmation_valeurs: "valeurs",
-  arbitrages: "partie",
-  collisions: "partie",
-  bascules: "partie",
+  ordination: "partie",
   constellation: "constellation",
+  epreuve: "partie",
 };
 
 const reperes = [
@@ -210,7 +209,7 @@ export default function Home() {
             </div>
             <div className="portrait-card portrait-card-left">
               <Scale className="size-4 text-primary" />
-              <span>Tu arbitres</span>
+              <span>Tu tranches</span>
             </div>
             <div className="portrait-card portrait-card-right">
               <Sparkles className="size-4" />
@@ -268,37 +267,45 @@ export default function Home() {
               Tes réponses dessinent une boussole, pas une étiquette.
             </h2>
             <p className="text-white/65 text-lg leading-relaxed">
-              Tu sélectionnes ce qui compte, tu précises pourquoi, puis tu
-              tranches des situations où deux valeurs entrent en tension.
+              Tu choisis ce qui compte, tu dis pourquoi, puis tu tranches des
+              duels courts. Le portrait arrive vite — et c'est seulement après
+              que le jeu creuse, si tu en as envie.
             </p>
           </div>
           <ol className="experience-steps">
             <li>
               <span>1</span>
               <div>
-                <strong>Choisis</strong>
-                <p>Des situations qui te ressemblent.</p>
+                <strong>Découvre</strong>
+                <p>Des cartes qui te ressemblent.</p>
               </div>
             </li>
             <li>
               <span>2</span>
               <div>
-                <strong>Précise</strong>
-                <p>Ce que chacune protège vraiment.</p>
+                <strong>Nomme</strong>
+                <p>Ce que chaque carte protège vraiment.</p>
               </div>
             </li>
             <li>
               <span>3</span>
               <div>
-                <strong>Arbitre</strong>
-                <p>Des dilemmes concrets, sans réponse idéale.</p>
+                <strong>Ordonne</strong>
+                <p>Des duels courts, deux cartes à la fois.</p>
               </div>
             </li>
             <li>
               <span>4</span>
               <div>
-                <strong>Découvre</strong>
-                <p>Tes constantes et tes points de bascule.</p>
+                <strong>Observe</strong>
+                <p>Une première constellation, avec son incertitude.</p>
+              </div>
+            </li>
+            <li>
+              <span>5</span>
+              <div>
+                <strong>Mets à l'épreuve</strong>
+                <p>Le jeu revient sur ce qui reste flou.</p>
               </div>
             </li>
           </ol>

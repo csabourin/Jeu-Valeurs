@@ -952,8 +952,3 @@ const duelsParId = new Map(duels.map((d) => [d.id, d]));
 export function trouverDuel(id: number): DuelContenu | undefined {
   return duelsParId.get(id);
 }
-
-/** Clé d'une paire de valeurs, indépendante de l'ordre. */
-export function clePaire(a: string, b: string): string {
-  return [a, b].sort().join(" | ");
-}

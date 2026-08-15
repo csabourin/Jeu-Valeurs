@@ -3,7 +3,9 @@ import { db } from "@workspace/db";
 import {
   reponsesCollisionTable,
   facteursPossibles,
+  phasesPossibles,
   type FacteurDepend,
+  type PhaseExperience,
 } from "@workspace/db";
 import {
   ListReponsesParams,
@@ -28,6 +30,17 @@ function versFacteur(valeur: string | null | undefined): FacteurDepend | null {
     : "autre";
 }
 
+/**
+ * La phase n'est jamais devinée : elle vient du parcours, avec la question.
+ * Une valeur inconnue retombe sur la première passe, qui est le régime le
+ * moins bavard — jamais l'inverse.
+ */
+function versPhase(valeur: string | null | undefined): PhaseExperience {
+  return (phasesPossibles as readonly string[]).includes(valeur ?? "")
+    ? (valeur as PhaseExperience)
+    : "ordination";
+}
+
 function mapReponse(r: typeof reponsesCollisionTable.$inferSelect) {
   return {
     id: r.id,
@@ -35,7 +48,11 @@ function mapReponse(r: typeof reponsesCollisionTable.$inferSelect) {
     dilemmeId: r.dilemmeId ?? null,
     valeurA: r.valeurA,
     valeurB: r.valeurB,
+    carteA: r.carteA ?? null,
+    carteB: r.carteB ?? null,
     choix: r.choix,
+    contexte: r.contexte ?? null,
+    phase: r.phase ?? "ordination",
     facteurDepend: r.facteurDepend ?? null,
     facteurDependLibre: r.facteurDependLibre ?? null,
     difficulte: r.difficulte ?? null,
@@ -44,6 +61,7 @@ function mapReponse(r: typeof reponsesCollisionTable.$inferSelect) {
     palier: r.palier ?? null,
     dimension: r.dimension ?? null,
     valeurProtegee: r.valeurProtegee ?? null,
+    ceQuiChangerait: r.ceQuiChangerait ?? null,
     version: r.version,
     creeLe: r.creeLe.toISOString(),
     miseAJourLe: r.miseAJourLe.toISOString(),
@@ -82,6 +100,11 @@ router.post(
 
     // Si choix=passer, difficulté et certitude ignorées
     const isPasser = parsed.data.choix === "passer";
+    const phase = versPhase(parsed.data.phase);
+    // Les questions de relance n'existent que pendant la mise à l'épreuve. Un
+    // client d'une version antérieure qui les enverrait quand même ne doit pas
+    // pouvoir alourdir la première passe après coup.
+    const approfondie = phase === "epreuve";
 
     const [reponse] = await db
       .insert(reponsesCollisionTable)
@@ -90,7 +113,11 @@ router.post(
         dilemmeId: parsed.data.dilemmeId ?? null,
         valeurA: parsed.data.valeurA,
         valeurB: parsed.data.valeurB,
+        carteA: parsed.data.carteA ?? null,
+        carteB: parsed.data.carteB ?? null,
         choix: parsed.data.choix,
+        contexte: parsed.data.contexte ?? null,
+        phase,
         facteurDepend:
           parsed.data.choix === "ca_depend"
             ? versFacteur(parsed.data.facteurDepend)
@@ -99,13 +126,20 @@ router.post(
           parsed.data.choix === "ca_depend"
             ? (parsed.data.facteurDependLibre ?? null)
             : null,
-        difficulte: isPasser ? null : (parsed.data.difficulte ?? null),
-        certitude: isPasser ? null : (parsed.data.certitude ?? null),
+        difficulte:
+          isPasser || !approfondie ? null : (parsed.data.difficulte ?? null),
+        certitude:
+          isPasser || !approfondie ? null : (parsed.data.certitude ?? null),
         serieId: parsed.data.serieId ?? null,
         palier: parsed.data.palier ?? null,
         dimension: parsed.data.dimension ?? null,
         // Jamais déduite : seulement ce que la personne a nommé elle-même.
-        valeurProtegee: isPasser ? null : (parsed.data.valeurProtegee ?? null),
+        valeurProtegee:
+          isPasser || !approfondie ? null : (parsed.data.valeurProtegee ?? null),
+        ceQuiChangerait:
+          isPasser || !approfondie
+            ? null
+            : (parsed.data.ceQuiChangerait ?? null),
         version: 1,
       })
       .returning();
@@ -170,10 +204,13 @@ router.patch(
         updates.certitude = parsed.data.certitude;
       if (parsed.data.valeurProtegee !== undefined)
         updates.valeurProtegee = parsed.data.valeurProtegee;
+      if (parsed.data.ceQuiChangerait !== undefined)
+        updates.ceQuiChangerait = parsed.data.ceQuiChangerait;
     } else {
       updates.difficulte = null;
       updates.certitude = null;
       updates.valeurProtegee = null;
+      updates.ceQuiChangerait = null;
     }
 
     const [reponse] = await db

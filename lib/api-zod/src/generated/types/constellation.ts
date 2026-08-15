@@ -5,27 +5,45 @@
  * Jeu des valeurs — API
  * OpenAPI spec version: 0.1.0
  */
+import type { ConstellationNiveauConfianceGlobal } from './constellationNiveauConfianceGlobal';
+import type { Couverture } from './couverture';
+import type { DimensionSensible } from './dimensionSensible';
+import type { LigneOrdination } from './ligneOrdination';
 import type { ObservationConstellation } from './observationConstellation';
 import type { PointDeBascule } from './pointDeBascule';
-import type { ScoreCarte } from './scoreCarte';
+import type { RelationValeurs } from './relationValeurs';
 import type { TendanceValeur } from './tendanceValeur';
 import type { TensionObservee } from './tensionObservee';
-import type { ValeurDeclaree } from './valeurDeclaree';
+import type { TensionPrincipale } from './tensionPrincipale';
+import type { ValeurContextuelle } from './valeurContextuelle';
 
+/**
+ * Une carte des relations entre valeurs, à plusieurs niveaux de lecture — pas un palmarès. Tout est recalculable depuis les réponses brutes, et chaque observation transporte ses sources.
+ */
 export interface Constellation {
   sessionId: string;
   version: number;
+  /** Les valeurs classées par force estimée. Estimation évolutive. */
+  ordination: LigneOrdination[];
+  relations: RelationValeurs[];
+  /** Valeurs prioritaires de façon régulière, dans plusieurs contextes */
+  valeursFortes: string[];
+  valeursContextuelles: ValeurContextuelle[];
+  /** Valeurs pour lesquelles aucun compromis n'a encore été observé */
+  valeursProtegees: string[];
+  tensionsPrincipales: TensionPrincipale[];
+  dimensionsSensibles: DimensionSensible[];
+  /** Boucles A > B > C > A observées. Signalées, jamais corrigées. */
+  cycles: string[][];
+  /** Le détail chiffré, valeur par valeur */
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
   bascules: PointDeBascule[];
-  /** Classement déclaré des cartes. Vide si la phase n'a pas été jouée. */
-  cartesJugees: ScoreCarte[];
-  valeursDeclarees: ValeurDeclaree[];
   observations: ObservationConstellation[];
-  /** Proportion de collisions possibles explorées (0 à 1) */
-  couverture: number;
+  couverture: Couverture;
   /** Part des tensions revues sous une autre forme qui ont reçu la même réponse (0 à 1). Vaut 1 tant qu'aucune tension n'a été revue. */
   stabilite: number;
+  niveauConfianceGlobal: ConstellationNiveauConfianceGlobal;
   /** Version du moteur de calcul utilisé */
   versionCalcul: number;
 }

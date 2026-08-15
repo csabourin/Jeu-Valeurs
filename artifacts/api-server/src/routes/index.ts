@@ -4,7 +4,6 @@ import catalogueRouter from "./catalogue";
 import sessionsRouter from "./sessions";
 import cartesSessionRouter from "./cartes-session";
 import reponsesRouter from "./reponses";
-import arbitragesRouter from "./arbitrages";
 import constellationRouter from "./constellation";
 
 const router: IRouter = Router();
@@ -14,7 +13,6 @@ router.use(catalogueRouter);
 router.use(sessionsRouter);
 router.use(cartesSessionRouter);
 router.use(reponsesRouter);
-router.use(arbitragesRouter);
 router.use(constellationRouter);
 
 export default router;

@@ -11,5 +11,10 @@ export interface ValeurCatalogue {
   /** Libellé canonique — sert d'identifiant partout */
   label: string;
   description: string;
+  /** Grande famille théorique (cadre de haut niveau) */
   famille: ValeurCatalogueFamille;
+  /** Famille de valeurs — l'étage qui décide de l'admissibilité d'un duel (autonomie, bienveillance, justice, securite…) */
+  familleValeur: string;
+  /** Valeurs trop proches pour être confrontées à celle-ci */
+  quasiSynonymes?: string[];
 }

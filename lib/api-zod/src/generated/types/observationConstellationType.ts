@@ -10,14 +10,15 @@ export type ObservationConstellationType = typeof ObservationConstellationType[k
 
 
 export const ObservationConstellationType = {
-  tendance: 'tendance',
-  tension: 'tension',
-  territoire_inexplore: 'territoire_inexplore',
-  stabilite: 'stabilite',
-  couverture: 'couverture',
-  point_de_bascule: 'point_de_bascule',
+  ordination: 'ordination',
+  valeur_forte: 'valeur_forte',
+  valeur_contextuelle: 'valeur_contextuelle',
   valeur_protegee: 'valeur_protegee',
-  contexte: 'contexte',
-  arbitrage: 'arbitrage',
-  ecart_declare: 'ecart_declare',
+  tension: 'tension',
+  stabilite: 'stabilite',
+  point_de_bascule: 'point_de_bascule',
+  cycle: 'cycle',
+  territoire_inexplore: 'territoire_inexplore',
+  couverture: 'couverture',
+  confiance: 'confiance',
 } as const;

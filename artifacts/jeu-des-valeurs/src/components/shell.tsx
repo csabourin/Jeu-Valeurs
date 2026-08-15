@@ -6,11 +6,19 @@ import { useToast } from "@/hooks/use-toast";
 
 export type EtapeVisuelle = "cartes" | "valeurs" | "partie" | "constellation";
 
+/**
+ * Le parcours : découvrir → nommer → ordonner → observer, puis mettre à
+ * l'épreuve et comprendre.
+ *
+ * Les deux dernières étapes se jouent sur les deux mêmes écrans — on revient
+ * aux duels depuis le portrait, et le portrait se précise. Les afficher comme
+ * deux jalons de plus laisserait croire à une ligne droite qui se termine.
+ */
 const etapes: { cle: EtapeVisuelle; nom: string; court: string }[] = [
-  { cle: "cartes", nom: "Ce qui compte", court: "Choisir" },
-  { cle: "valeurs", nom: "Ce que ça protège", court: "Préciser" },
-  { cle: "partie", nom: "Tes choix", court: "Arbitrer" },
-  { cle: "constellation", nom: "Ton portrait", court: "Découvrir" },
+  { cle: "cartes", nom: "Ce qui compte", court: "Découvrir" },
+  { cle: "valeurs", nom: "Ce que ça protège", court: "Nommer" },
+  { cle: "partie", nom: "Tes duels", court: "Ordonner" },
+  { cle: "constellation", nom: "Ta constellation", court: "Observer" },
 ];
 
 export function Shell({

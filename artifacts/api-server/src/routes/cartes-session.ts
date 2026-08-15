@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { cartesSessionTable, sessionsTable } from "@workspace/db";
-import { distribuerCartes } from "@workspace/contenu";
+import { CARTES_PAR_FAMILLE, distribuerCartes } from "@workspace/contenu";
 import { mapCarteCatalogue } from "./catalogue";
 import {
   ListCartesProposeesParams,
+  ListCartesProposeesQueryParams,
   ListCartesSessionParams,
   AddCarteSessionParams,
   AddCarteSessionBody,
@@ -31,11 +32,19 @@ function mapCarte(c: typeof cartesSessionTable.$inferSelect) {
   };
 }
 
+/** Au-delà, l'écran de sélection redevient une liste interminable. */
+const CARTES_PAR_FAMILLE_MAX = 54;
+
 /**
  * La main de cette partie.
  *
  * Le tirage suit la graine de la session : revenir sur l'écran de sélection ne
  * rebat pas les cartes, et une carte déjà prise reste sous les yeux.
+ *
+ * « Je ne trouve pas ce qui me correspond » demande une main plus large. Le
+ * tirage étant déterministe, une main plus grande **contient** la précédente :
+ * les cartes déjà lues ne bougent pas de place, il s'en ajoute simplement à la
+ * suite.
  */
 router.get(
   "/sessions/:sessionId/cartes-proposees",
@@ -56,7 +65,20 @@ router.get(
       return;
     }
 
-    res.json(distribuerCartes(session.graine).map(mapCarteCatalogue));
+    const requete = ListCartesProposeesQueryParams.safeParse(req.query);
+    if (!requete.success) {
+      res.status(400).json({ error: requete.error.message });
+      return;
+    }
+
+    const parFamille = Math.min(
+      CARTES_PAR_FAMILLE_MAX,
+      Math.max(1, Math.round(requete.data.parFamille ?? CARTES_PAR_FAMILLE)),
+    );
+
+    res.json(
+      distribuerCartes(session.graine, parFamille).map(mapCarteCatalogue),
+    );
   },
 );
 

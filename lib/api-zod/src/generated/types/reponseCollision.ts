@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ReponseCollisionChoix } from './reponseCollisionChoix';
+import type { ReponseCollisionPhase } from './reponseCollisionPhase';
 
 export interface ReponseCollision {
   id: number;
@@ -14,7 +15,20 @@ export interface ReponseCollision {
   dilemmeId?: number | null;
   valeurA: string;
   valeurB: string;
+  /**
+     * Carte de session qui manifestait `valeurA`
+     * @nullable
+     */
+  carteA?: string | null;
+  /** @nullable */
+  carteB?: string | null;
   choix: ReponseCollisionChoix;
+  /**
+     * Où ça se passait, quand la situation le précisait
+     * @nullable
+     */
+  contexte?: string | null;
+  phase: ReponseCollisionPhase;
   /**
      * Facteur prédéfini si choix=ca_depend : cout_personnel, ampleur_impact, proximite_sociale, nombre_personnes, certitude, reversibilite, urgence, responsabilite
      * @nullable
@@ -26,12 +40,12 @@ export interface ReponseCollision {
      */
   facteurDependLibre?: string | null;
   /**
-     * 1 à 5, absent si choix=passer
+     * 1 à 5. Demandé seulement en phase de mise à l'épreuve.
      * @nullable
      */
   difficulte?: number | null;
   /**
-     * 1 à 5, absent si choix=passer
+     * 1 à 5. Demandé seulement en phase de mise à l'épreuve.
      * @nullable
      */
   certitude?: number | null;
@@ -49,6 +63,11 @@ export interface ReponseCollision {
      * @nullable
      */
   valeurProtegee?: string | null;
+  /**
+     * Ce qui aurait pu faire changer sa réponse, dans ses mots
+     * @nullable
+     */
+  ceQuiChangerait?: string | null;
   /** Numéro de version (incrémenter à chaque correction) */
   version: number;
   creeLe: Date;

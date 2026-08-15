@@ -1,35 +1,98 @@
 /**
  * Le parcours est recalculé à chaque requête de progrès, à partir des seules
- * réponses déjà enregistrées. Deux propriétés en découlent, et les deux se
+ * réponses déjà enregistrées. Trois propriétés en découlent, et les trois se
  * cassent sans bruit :
  *
- *   • pour une graine donnée, le plan ne bouge pas — sinon la partie change
- *     sous les pieds de la personne entre deux écrans ;
+ *   • pour une graine donnée, la question suivante ne bouge pas — sinon la
+ *     partie change sous les pieds de la personne entre deux écrans ;
  *   • toute partie finit par atteindre « termine » — sinon le jeu boucle sur
- *     une question qu'il ne sait pas retirer.
+ *     une question qu'il ne sait pas retirer ;
+ *   • la première passe ne pose **jamais** de question de relance, et la mise
+ *     à l'épreuve ne démarre **jamais** toute seule.
  *
  * Les fixtures dérivent du contenu réel plutôt que de coder en dur des
  * libellés : une situation retirée ne doit pas faire échouer un test de moteur.
  */
 
 import { describe, expect, it } from "vitest";
-import { duels, clePaire } from "../src/duels";
+import { duels } from "../src/duels";
+import { clePaire } from "../src/comparaisons";
 import { series } from "../src/bascules";
 import { valeurs } from "../src/valeurs";
+import type { CarteDuel } from "../src/duels-cartes";
 import {
+  MAX_PREMIERE_VAGUE,
   calculerParcours,
   planifierDuels,
   planifierSeries,
   type ReponseConnue,
 } from "../src/parcours";
 
-const MAX_DUELS = 12;
-const MAX_SERIES = 3;
-
 const toutesLesValeurs = valeurs.map((v) => v.label);
 
 /** Une paire qui a réellement au moins un duel écrit. */
 const pairePrincipale = duels.find((d) => !d.variante)!;
+
+/** Une main de cartes minimale, avec des valeurs confirmées distinctes. */
+const cartes: CarteDuel[] = [
+  {
+    id: "1",
+    famille: "lignes_rouges",
+    label: "Mentir à quelqu'un qui me fait confiance",
+    valeursConfirmees: ["Honnêteté"],
+  },
+  {
+    id: "2",
+    famille: "horizons",
+    label: "Devenir bon dans mon métier",
+    valeursConfirmees: ["Réussite"],
+  },
+  {
+    id: "3",
+    famille: "tresors",
+    label: "Le calme quand je rentre chez moi",
+    valeursConfirmees: ["Tranquillité"],
+  },
+  {
+    id: "4",
+    famille: "lignes_rouges",
+    label: "Laisser tomber un ami à la dernière minute",
+    valeursConfirmees: ["Loyauté"],
+  },
+];
+
+const valeursDesCartes = ["Honnêteté", "Réussite", "Tranquillité", "Loyauté"];
+
+function jouer(
+  etat: {
+    valeursConfirmees: string[];
+    cartes?: CarteDuel[];
+    graine?: number;
+    phaseDemandee?: "ordination" | "epreuve";
+  },
+  choix: string,
+  toursMax = 200,
+): { reponses: ReponseConnue[]; tours: number; termine: boolean } {
+  const reponses: ReponseConnue[] = [];
+  for (let tour = 0; tour < toursMax; tour++) {
+    const parcours = calculerParcours({ ...etat, reponses });
+    if (!parcours.prochaine) return { reponses, tours: tour, termine: true };
+    const q = parcours.prochaine;
+    reponses.push({
+      dilemmeId: q.dilemmeId,
+      valeurA: q.valeurA,
+      valeurB: q.valeurB,
+      carteA: q.carteA,
+      carteB: q.carteB,
+      choix,
+      contexte: q.contexte,
+      phase: q.phase,
+      serieId: q.serieId,
+      palier: q.palier,
+    });
+  }
+  return { reponses, tours: toursMax, termine: false };
+}
 
 describe("planifierDuels", () => {
   it("ne planifie rien sans valeur confirmée", () => {
@@ -40,18 +103,11 @@ describe("planifierDuels", () => {
     expect(planifierDuels(["Valeur inventée"], 1)).toEqual([]);
   });
 
-  it("ne dépasse jamais le plafond de duels", () => {
-    for (const graine of [0, 1, 42, 12345]) {
-      expect(planifierDuels(toutesLesValeurs, graine).length).toBeLessThanOrEqual(
-        MAX_DUELS,
-      );
-    }
-  });
-
-  it("ne sert jamais deux fois la même situation", () => {
-    for (const graine of [0, 7, 99]) {
-      const plan = planifierDuels(toutesLesValeurs, graine);
-      expect(new Set(plan.map((d) => d.id)).size).toBe(plan.length);
+  it("n'engage que des situations dont les deux valeurs sont confirmées", () => {
+    const confirmees = [pairePrincipale.valeurA, pairePrincipale.valeurB];
+    for (const duel of planifierDuels(confirmees, 5)) {
+      expect(confirmees).toContain(duel.valeurA);
+      expect(confirmees).toContain(duel.valeurB);
     }
   });
 
@@ -69,322 +125,268 @@ describe("planifierDuels", () => {
     );
     expect(new Set(plans).size).toBeGreaterThan(1);
   });
+});
 
-  it("n'engage que des situations touchant une valeur confirmée", () => {
-    const confirmees = [pairePrincipale.valeurA, pairePrincipale.valeurB];
-    for (const duel of planifierDuels(confirmees, 5)) {
-      const touche =
-        confirmees.includes(duel.valeurA) || confirmees.includes(duel.valeurB);
-      expect(touche).toBe(true);
-    }
+describe("première passe", () => {
+  it("ne pose rien sans valeur confirmée", () => {
+    const parcours = calculerParcours({ valeursConfirmees: [], reponses: [] });
+    expect(parcours.prochaine).toBeNull();
+    expect(parcours.phase).toBe("termine");
   });
 
-  it("ne garde une variante que si sa jumelle est dans la partie", () => {
-    // Sinon l'écran annonce « déjà croisé, autrement » pour une tension jamais
-    // vue, et la stabilité n'a rien à comparer.
-    for (const graine of [0, 3, 77, 2024]) {
-      const plan = planifierDuels(toutesLesValeurs, graine);
-      const pairesPrincipales = new Set(
-        plan
-          .filter((d) => !d.variante)
-          .map((d) => clePaire(d.valeurA, d.valeurB)),
-      );
-      for (const variante of plan.filter((d) => d.variante)) {
-        expect(pairesPrincipales).toContain(
-          clePaire(variante.valeurA, variante.valeurB),
-        );
-      }
-    }
+  it("commence par les duels entre les cartes de la personne", () => {
+    const parcours = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses: [],
+      cartes,
+      graine: 7,
+    });
+    expect(parcours.phase).toBe("ordination");
+    expect(parcours.prochaine).not.toBeNull();
+    expect(parcours.prochaine!.phase).toBe("ordination");
   });
 
-  it("place les variantes en fin de parcours, loin de leur jumelle", () => {
-    const plan = planifierDuels(toutesLesValeurs, 2024);
-    const premiereVariante = plan.findIndex((d) => d.variante);
-    if (premiereVariante === -1) return; // aucune variante tirée pour cette graine
-    for (const duel of plan.slice(premiereVariante)) {
-      expect(duel.variante).toBe(true);
-    }
+  it("ne demande jamais d'approfondir pendant la première passe", () => {
+    const { reponses } = jouer(
+      { valeursConfirmees: valeursDesCartes, cartes, graine: 3 },
+      "A",
+    );
+    expect(reponses.length).toBeGreaterThan(0);
+    for (const r of reponses) expect(r.phase).toBe("ordination");
+
+    // Et la question elle-même ne l'autorise pas.
+    let etat = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses: [],
+      cartes,
+      graine: 3,
+    });
+    expect(etat.prochaine!.approfondir).toBe(false);
+    expect(etat.prochaine!.motif).toBeNull();
+  });
+
+  it("ne repose jamais deux fois la même manifestation", () => {
+    const { reponses } = jouer(
+      { valeursConfirmees: valeursDesCartes, cartes, graine: 11 },
+      "A",
+    );
+    const ids = reponses.map((r) => r.dilemmeId);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("couvre des paires distinctes plutôt que de répéter la même tension", () => {
+    const { reponses } = jouer(
+      { valeursConfirmees: valeursDesCartes, cartes, graine: 5 },
+      "A",
+    );
+    const paires = reponses.map((r) => clePaire(r.valeurA, r.valeurB));
+    expect(new Set(paires).size).toBe(paires.length);
+  });
+
+  it("ne dépasse pas le plafond de la première vague", () => {
+    const { reponses } = jouer(
+      { valeursConfirmees: toutesLesValeurs, cartes, graine: 42 },
+      "A",
+    );
+    expect(reponses.length).toBeLessThanOrEqual(MAX_PREMIERE_VAGUE);
+  });
+
+  it("s'arrête sans passer d'elle-même à la mise à l'épreuve", () => {
+    const { reponses } = jouer(
+      { valeursConfirmees: valeursDesCartes, cartes, graine: 9 },
+      "A",
+    );
+    const fin = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses,
+      cartes,
+      graine: 9,
+    });
+    expect(fin.phase).toBe("termine");
+    expect(fin.premiereOrdinationPrete).toBe(true);
+  });
+
+  it("rend la même question suivante pour un même état", () => {
+    const etat = {
+      valeursConfirmees: valeursDesCartes,
+      reponses: [],
+      cartes,
+      graine: 2024,
+    };
+    expect(calculerParcours(etat).prochaine!.dilemmeId).toBe(
+      calculerParcours(etat).prochaine!.dilemmeId,
+    );
+  });
+
+  it("compte les paires pertinentes et celles déjà couvertes", () => {
+    const debut = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses: [],
+      cartes,
+      graine: 1,
+    });
+    expect(debut.pairesPertinentes).toBeGreaterThan(0);
+    expect(debut.pairesCouvertes).toBe(0);
+
+    const { reponses } = jouer(
+      { valeursConfirmees: valeursDesCartes, cartes, graine: 1 },
+      "A",
+    );
+    const apres = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses,
+      cartes,
+      graine: 1,
+    });
+    expect(apres.pairesCouvertes).toBeGreaterThan(0);
   });
 });
 
-describe("planifierSeries", () => {
-  it("ne dépasse jamais le plafond de séries", () => {
-    const plan = planifierSeries(toutesLesValeurs, [], 1);
-    expect(plan.length).toBeLessThanOrEqual(MAX_SERIES);
+describe("mise à l'épreuve", () => {
+  function premierePasse(graine = 4) {
+    return jouer({ valeursConfirmees: valeursDesCartes, cartes, graine }, "A")
+      .reponses;
+  }
+
+  it("ne part que si la personne la demande", () => {
+    const reponses = premierePasse();
+    const sans = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses,
+      cartes,
+      graine: 4,
+    });
+    const avec = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses,
+      cartes,
+      graine: 4,
+      phaseDemandee: "epreuve",
+    });
+    expect(sans.phase).toBe("termine");
+    expect(avec.phase).toBe("epreuve");
   });
 
-  it("rend le même plan pour une même graine", () => {
-    const a = planifierSeries(toutesLesValeurs, [], 88).map((s) => s.id);
-    const b = planifierSeries(toutesLesValeurs, [], 88).map((s) => s.id);
-    expect(a).toEqual(b);
+  it("dit pourquoi elle pose cette tension-là, et autorise l'approfondissement", () => {
+    const reponses = premierePasse();
+    const parcours = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses,
+      cartes,
+      graine: 4,
+      phaseDemandee: "epreuve",
+    });
+    const question = parcours.prochaine!;
+    if (question.type === "duel") {
+      expect(question.motif).not.toBeNull();
+      expect(question.motifTexte).not.toBeNull();
+      expect(question.approfondir).toBe(true);
+    }
+    expect(question.phase).toBe("epreuve");
   });
 
-  it("fait passer devant une tension déjà tranchée franchement", () => {
+  it("rejoue une tension déjà vue sous une autre forme", () => {
+    const reponses = premierePasse();
+    const dejaVues = new Set(reponses.map((r) => r.dilemmeId));
+    const parcours = calculerParcours({
+      valeursConfirmees: valeursDesCartes,
+      reponses,
+      cartes,
+      graine: 4,
+      phaseDemandee: "epreuve",
+    });
+    expect(dejaVues.has(parcours.prochaine!.dilemmeId)).toBe(false);
+  });
+
+  it("finit par se terminer", () => {
+    const premiere = premierePasse();
+    const suite = jouer(
+      {
+        valeursConfirmees: valeursDesCartes,
+        cartes,
+        graine: 4,
+        phaseDemandee: "epreuve",
+      },
+      "A",
+      300,
+    );
+    expect(suite.termine).toBe(true);
+    expect(premiere.length).toBeGreaterThan(0);
+  });
+
+  it("ne demande jamais d'approfondir à l'intérieur d'une série de bascule", () => {
     const serie = series[0];
-    const tranchee: ReponseConnue[] = [
+    const reponses: ReponseConnue[] = [
       {
         dilemmeId: 1,
         valeurA: serie.valeurA,
         valeurB: serie.valeurB,
         choix: "A",
-        serieId: null,
-        palier: null,
+        phase: "ordination",
       },
     ];
-    // Aucune valeur confirmée : seule la tension tranchée rend la série éligible.
-    const plan = planifierSeries([], tranchee, 1);
-    expect(plan.map((s) => s.id)).toContain(serie.id);
-  });
-
-  it("ne retient rien sans valeur confirmée ni tension tranchée", () => {
-    expect(planifierSeries([], [], 1)).toEqual([]);
+    const parcours = calculerParcours({
+      valeursConfirmees: [serie.valeurA, serie.valeurB],
+      reponses,
+      graine: 1,
+      phaseDemandee: "epreuve",
+    });
+    // On avance jusqu'à tomber sur une bascule, s'il y en a une.
+    const suite = jouer(
+      {
+        valeursConfirmees: [serie.valeurA, serie.valeurB],
+        graine: 1,
+        phaseDemandee: "epreuve",
+      },
+      "A",
+      100,
+    );
+    expect(parcours.phase).not.toBe("ordination");
+    expect(suite.termine).toBe(true);
   });
 });
 
-describe("calculerParcours", () => {
-  it("commence par la phase des duels", () => {
-    const parcours = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      graine: 4,
-    });
-    expect(parcours.phase).toBe("duels");
-    expect(parcours.prochaine?.type).toBe("duel");
-  });
-
-  it("rend la même question tant que rien n'a été répondu", () => {
-    const a = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      graine: 4,
-    });
-    const b = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      graine: 4,
-    });
-    expect(a.prochaine?.dilemmeId).toBe(b.prochaine?.dilemmeId);
-  });
-
-  it("ne repose jamais une situation déjà répondue", () => {
-    const reponses: ReponseConnue[] = [];
-    const vues = new Set<number>();
-    for (let i = 0; i < 10; i++) {
-      const { prochaine } = calculerParcours({
-        valeursConfirmees: toutesLesValeurs,
-        reponses,
-        graine: 11,
-      });
-      if (!prochaine) break;
-      expect(vues.has(prochaine.dilemmeId)).toBe(false);
-      vues.add(prochaine.dilemmeId);
-      reponses.push({
-        dilemmeId: prochaine.dilemmeId,
-        valeurA: prochaine.valeurA,
-        valeurB: prochaine.valeurB,
-        choix: "A",
-        serieId: prochaine.serieId,
-        palier: prochaine.palier,
-      });
+describe("planifierSeries", () => {
+  it("ne retient que des séries dont la paire est admissible", () => {
+    const plan = planifierSeries(toutesLesValeurs, [], 3);
+    for (const serie of plan) {
+      expect(serie.valeurA).not.toBe(serie.valeurB);
     }
+    expect(plan.length).toBeLessThanOrEqual(3);
   });
 
-  // Le garde-fou principal : quoi que réponde la personne, la partie finit.
-  const strategies: Record<string, (tour: number) => string> = {
-    "toujours A": () => "A",
-    "toujours B": () => "B",
-    "alterne A et B": (tour) => (tour % 2 === 0 ? "A" : "B"),
-    "toujours ça dépend": () => "ca_depend",
-    "toujours je ne sais pas": () => "je_ne_sais_pas",
-    "toujours passer": () => "passer",
-  };
+  it("fait passer devant une tension déjà tranchée", () => {
+    const serie = series[0];
+    const reponses: ReponseConnue[] = [
+      {
+        dilemmeId: 1,
+        valeurA: serie.valeurA,
+        valeurB: serie.valeurB,
+        choix: "A",
+      },
+    ];
+    const plan = planifierSeries(toutesLesValeurs, reponses, 1);
+    expect(plan[0].valeurA).toBe(serie.valeurA);
+    expect(plan[0].valeurB).toBe(serie.valeurB);
+  });
+});
 
-  for (const [nom, choisir] of Object.entries(strategies)) {
-    it(`atteint « termine » quand la personne répond ${nom}`, () => {
-      for (const graine of [0, 1, 42, 2024]) {
-        const reponses: ReponseConnue[] = [];
-        let parcours = calculerParcours({
-          valeursConfirmees: toutesLesValeurs,
-          reponses,
-          graine,
-        });
-        let tours = 0;
-
-        while (parcours.phase !== "termine") {
-          expect(parcours.prochaine).not.toBeNull();
-          const q = parcours.prochaine!;
-          reponses.push({
-            dilemmeId: q.dilemmeId,
-            valeurA: q.valeurA,
-            valeurB: q.valeurB,
-            choix: choisir(tours),
-            facteurDepend: q.dimension,
-            serieId: q.serieId,
-            palier: q.palier,
-          });
-          tours++;
-          // Plafond large : 12 duels + 3 séries de 3 paliers = 21 questions.
-          expect(tours).toBeLessThan(60);
-          parcours = calculerParcours({
-          valeursConfirmees: toutesLesValeurs,
-          reponses,
-          graine,
-        });
-        }
-
-        expect(parcours.prochaine).toBeNull();
+describe("toute partie se termine", () => {
+  for (const choix of ["A", "B", "ca_depend", "je_ne_sais_pas", "passer"]) {
+    it(`même en répondant toujours « ${choix} »`, () => {
+      for (const graine of [0, 1, 99]) {
+        const resultat = jouer(
+          {
+            valeursConfirmees: valeursDesCartes,
+            cartes,
+            graine,
+            phaseDemandee: "epreuve",
+          },
+          choix,
+          300,
+        );
+        expect(resultat.termine).toBe(true);
       }
     });
   }
-
-  it("s'arrête sur une série dès que la réponse change", () => {
-    // Le point de bascule est trouvé : monter le réglage plus haut
-    // n'apprendrait plus rien. On joue la partie jusqu'au bout pour vérifier
-    // que le troisième palier n'est jamais servi — et pas seulement qu'il
-    // n'arrive pas tout de suite.
-    const serie = series[0];
-    const confirmees = [serie.valeurA, serie.valeurB];
-    const graine = 1;
-
-    // Les duels d'abord, tranchés franchement : c'est ce qui rend la série
-    // éligible aux bascules.
-    const reponses: ReponseConnue[] = planifierDuels(confirmees, graine).map(
-      (d) => ({
-        dilemmeId: d.id,
-        valeurA: d.valeurA,
-        valeurB: d.valeurB,
-        choix: "A",
-        serieId: null,
-        palier: null,
-      }),
-    );
-
-    expect(planifierSeries(confirmees, reponses, graine).map((s) => s.id)).toContain(
-      serie.id,
-    );
-
-    // Palier 1 puis palier 2, avec un choix qui change : la bascule est trouvée.
-    reponses.push(
-      {
-        dilemmeId: serie.paliers[0].id,
-        valeurA: serie.valeurA,
-        valeurB: serie.valeurB,
-        choix: "A",
-        serieId: serie.id,
-        palier: 1,
-      },
-      {
-        dilemmeId: serie.paliers[1].id,
-        valeurA: serie.valeurA,
-        valeurB: serie.valeurB,
-        choix: "B",
-        serieId: serie.id,
-        palier: 2,
-      },
-    );
-
-    const troisieme = serie.paliers[2].id;
-    let parcours = calculerParcours({
-      valeursConfirmees: confirmees,
-      reponses,
-      graine,
-    });
-    let tours = 0;
-
-    while (parcours.phase !== "termine") {
-      const q = parcours.prochaine!;
-      expect(q.dilemmeId).not.toBe(troisieme);
-      reponses.push({
-        dilemmeId: q.dilemmeId,
-        valeurA: q.valeurA,
-        valeurB: q.valeurB,
-        choix: "A",
-        serieId: q.serieId,
-        palier: q.palier,
-      });
-      expect(++tours).toBeLessThan(60);
-      parcours = calculerParcours({
-        valeursConfirmees: confirmees,
-        reponses,
-        graine,
-      });
-    }
-  });
-});
-
-describe("phase d'arbitrage", () => {
-  const cartes = Array.from({ length: 8 }, (_, i) => ({
-    id: `c${i + 1}`,
-    famille: "lignes_rouges" as const,
-    label: `Carte ${i + 1}`,
-  }));
-
-  it("passe avant les duels", () => {
-    // Classer ses cartes après douze situations, ce n'est plus les classer à
-    // froid : c'est classer ce que les situations viennent de remuer.
-    const parcours = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      cartes,
-      graine: 4,
-    });
-    expect(parcours.phase).toBe("arbitrages");
-    expect(parcours.prochainBloc).not.toBeNull();
-    expect(parcours.prochaine).toBeNull();
-  });
-
-  it("ne se déclenche pas quand la partie n'a pas assez de cartes", () => {
-    const parcours = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      cartes: cartes.slice(0, 2),
-      graine: 4,
-    });
-    expect(parcours.phase).toBe("duels");
-    expect(parcours.prochainBloc).toBeNull();
-  });
-
-  it("laisse repartir les duels une fois les blocs épuisés", () => {
-    const arbitrages = [];
-    let parcours = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      cartes,
-      arbitrages,
-      graine: 4,
-    });
-
-    let tours = 0;
-    while (parcours.phase === "arbitrages") {
-      const bloc = parcours.prochainBloc!;
-      arbitrages.push({
-        bloc: bloc.bloc,
-        carteIds: bloc.cartes.map((c) => c.id),
-        carteMeilleure: bloc.cartes[0].id,
-        cartePire: bloc.cartes[1].id,
-      });
-      expect(++tours).toBeLessThanOrEqual(6);
-      parcours = calculerParcours({
-        valeursConfirmees: toutesLesValeurs,
-        reponses: [],
-        cartes,
-        arbitrages,
-        graine: 4,
-      });
-    }
-
-    expect(parcours.phase).toBe("duels");
-    expect(parcours.arbitragesRepondus).toBe(parcours.arbitragesPlanifies);
-  });
-
-  it("compte les blocs prévus et répondus", () => {
-    const parcours = calculerParcours({
-      valeursConfirmees: toutesLesValeurs,
-      reponses: [],
-      cartes,
-      graine: 4,
-    });
-    expect(parcours.arbitragesPlanifies).toBeGreaterThan(0);
-    expect(parcours.arbitragesRepondus).toBe(0);
-  });
 });

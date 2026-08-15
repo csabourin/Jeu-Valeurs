@@ -19,4 +19,6 @@ export interface ReponseCollisionUpdate {
   certitude?: number | null;
   /** @nullable */
   valeurProtegee?: string | null;
+  /** @nullable */
+  ceQuiChangerait?: string | null;
 }

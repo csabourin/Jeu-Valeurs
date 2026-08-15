@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+/**
+ * Grande famille théorique (cadre de haut niveau)
+ */
 export type ValeurCatalogueFamille = typeof ValeurCatalogueFamille[keyof typeof ValeurCatalogueFamille];
 
 

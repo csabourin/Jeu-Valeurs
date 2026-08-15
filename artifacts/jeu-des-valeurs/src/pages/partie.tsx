@@ -1,8 +1,8 @@
 import { useParams, useLocation } from "wouter";
 import { Shell } from "@/components/shell";
-import { BlocArbitrage } from "@/components/bloc-arbitrage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import {
   useGetProgres,
@@ -17,21 +17,25 @@ import { libellesContexte, libellesDimension } from "@workspace/contenu";
 import type { Contexte, Dimension } from "@workspace/contenu";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoveRight, Loader2, SlidersHorizontal, Swords } from "lucide-react";
+import {
+  MoveRight,
+  Loader2,
+  SlidersHorizontal,
+  Swords,
+  Compass,
+  Sparkles,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-/** Toutes les N réponses tranchées, on demande ce que la personne protégeait. */
-const CADENCE_QUESTION_PROTEGEE = 4;
-
 /**
- * L'étape à enregistrer pour chaque phase calculée. `termine` n'y est pas :
- * c'est le bouton « Voir ma carte » qui fait passer à la constellation, pas le
- * simple fait d'avoir répondu à tout.
+ * L'étape à enregistrer pour chaque phase calculée.
+ *
+ * `termine` n'y est pas : c'est un bouton qui fait passer au portrait, jamais
+ * le simple fait d'avoir répondu à tout. Et `epreuve` non plus — la mise à
+ * l'épreuve se demande depuis le portrait, elle ne s'attrape pas en jouant.
  */
 const etapeParPhase: Record<string, SessionUpdateEtapeCourante | undefined> = {
-  arbitrages: "arbitrages",
-  duels: "collisions",
-  bascules: "bascules",
+  ordination: "ordination",
 };
 
 const facteurs: { id: string; label: string }[] = [
@@ -46,7 +50,7 @@ const facteurs: { id: string; label: string }[] = [
   { id: "autre", label: "Autre chose" },
 ];
 
-type Etape = "choix" | "depend" | "reglages";
+type Etape = "choix" | "depend" | "approfondir";
 
 export default function Partie() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -70,13 +74,14 @@ export default function Partie() {
   const [facteur, setFacteur] = useState<string>("");
   const [facteurLibre, setFacteurLibre] = useState("");
   const [difficulte, setDifficulte] = useState(3);
-  const [certitude, setCertitude] = useState(3);
   const [valeurProtegee, setValeurProtegee] = useState<string | null>(null);
+  const [ceQuiChangerait, setCeQuiChangerait] = useState("");
   // Verrou local : la mutation est finie bien avant que la question suivante
   // soit revenue du serveur. Sans lui, on peut répondre deux fois au même duel.
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
 
   const question = progres?.prochaineQuestion ?? null;
+  const enEpreuve = progres?.phase === "epreuve";
 
   // Chaque nouvelle question repart à neuf.
   useEffect(() => {
@@ -85,8 +90,8 @@ export default function Partie() {
     setFacteur("");
     setFacteurLibre("");
     setDifficulte(3);
-    setCertitude(3);
     setValeurProtegee(null);
+    setCeQuiChangerait("");
     setEnvoiEnCours(false);
   }, [question?.dilemmeId]);
 
@@ -105,15 +110,13 @@ export default function Partie() {
     majSession.mutate({ sessionId, data: { etapeCourante: attendue } });
   }, [progres, sessionId, majSession]);
 
-  // La question « qu'est-ce que tu protégeais ? » revient de temps en temps.
-  // Posée à chaque fois, elle transformerait la partie en interrogatoire.
-  const demanderValeurProtegee =
-    question != null &&
-    (progres?.nombreReponses ?? 0) % CADENCE_QUESTION_PROTEGEE === 0;
-
   const envoyer = (choixFinal: ReponseCollisionInputChoix) => {
     if (!question || envoiEnCours) return;
     const passe = choixFinal === "passer";
+    // Les questions de relance n'existent qu'en mise à l'épreuve. Pendant la
+    // première passe, on n'envoie rien de plus que le choix : c'est ce qui la
+    // garde rapide.
+    const approfondie = question.approfondir === true && !passe;
     setEnvoiEnCours(true);
 
     creerReponse.mutate(
@@ -123,15 +126,22 @@ export default function Partie() {
           dilemmeId: question.dilemmeId,
           valeurA: question.valeurA,
           valeurB: question.valeurB,
+          carteA: question.carteA ?? null,
+          carteB: question.carteB ?? null,
+          contexte: question.contexte ?? null,
+          phase: question.phase,
           choix: choixFinal,
           facteurDepend: choixFinal === "ca_depend" ? facteur : null,
           facteurDependLibre: facteur === "autre" ? facteurLibre : null,
-          difficulte: passe ? null : difficulte,
-          certitude: passe ? null : certitude,
+          difficulte: approfondie ? difficulte : null,
+          valeurProtegee: approfondie ? valeurProtegee : null,
+          ceQuiChangerait:
+            approfondie && ceQuiChangerait.trim().length > 0
+              ? ceQuiChangerait.trim()
+              : null,
           serieId: question.serieId ?? null,
           palier: question.palier ?? null,
           dimension: question.dimension ?? null,
-          valeurProtegee: passe ? null : valeurProtegee,
         },
       },
       {
@@ -154,12 +164,23 @@ export default function Partie() {
 
   const choisir = (c: ReponseCollisionInputChoix) => {
     setChoix(c);
-    if (c === "passer") envoyer(c);
-    else if (c === "ca_depend") setEtape("depend");
-    else setEtape("reglages");
+    if (c === "passer") {
+      envoyer(c);
+      return;
+    }
+    if (c === "ca_depend") {
+      setEtape("depend");
+      return;
+    }
+    // Première passe : le choix est la réponse complète.
+    if (!question?.approfondir) {
+      envoyer(c);
+      return;
+    }
+    setEtape("approfondir");
   };
 
-  const terminer = () => {
+  const versLeportrait = () => {
     majSession.mutate(
       { sessionId, data: { etapeCourante: "constellation" } },
       {
@@ -184,34 +205,19 @@ export default function Partie() {
     );
   }
 
-  // Les arbitrages passent avant les duels : on classe ses cartes à froid,
-  // avant que la moindre situation ait pu déplacer l'ordre.
-  if (progres?.phase === "arbitrages" && progres.prochainBloc) {
-    return (
-      <Shell sessionId={sessionId} etape="partie">
-        <BlocArbitrage
-          sessionId={sessionId}
-          bloc={progres.prochainBloc}
-          repondus={progres.arbitragesRepondus}
-          planifies={progres.arbitragesPlanifies}
-        />
-      </Shell>
-    );
-  }
-
-  if (progres && progres.duelsPlanifies === 0 && !question) {
+  if (progres && progres.comparaisonsPlanifiees === 0 && !question) {
     return (
       <Shell sessionId={sessionId} etape="partie">
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto">
           <h1 className="text-2xl font-serif font-bold">
-            Pas encore de combat possible
+            Pas encore de duel possible
           </h1>
           <p className="text-muted-foreground">
-            Choisis au moins une limite et une aspiration ou un essentiel pour
-            que le jeu puisse les mettre face à face.
+            Il faut au moins deux cartes qui protègent des valeurs différentes.
+            Deux cartes qui disent la même chose ne se départagent pas.
           </p>
-          <Button onClick={() => setLocation(`/session/${sessionId}/cartes`)}>
-            Retourner aux cartes
+          <Button onClick={() => setLocation(`/session/${sessionId}/valeurs`)}>
+            Revoir ce que mes cartes protègent
           </Button>
         </div>
       </Shell>
@@ -222,30 +228,38 @@ export default function Partie() {
     return (
       <Shell sessionId={sessionId} etape="partie">
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 max-w-lg mx-auto animate-in fade-in zoom-in duration-500">
-          <h1 className="text-3xl font-serif font-bold">Manche terminée</h1>
-          <p className="text-lg text-muted-foreground">
-            Tu as joué {progres?.duelsRepondus ?? 0} combat
-            {(progres?.duelsRepondus ?? 0) > 1 && "s"}
-            {(progres?.seriesTerminees ?? 0) > 0 &&
-              ` et ${progres?.seriesTerminees} série${(progres?.seriesTerminees ?? 0) > 1 ? "s" : ""} de bascule`}
-            . Voyons ce que ça donne.
+          <p className="eyebrow mx-auto">
+            {enEpreuve ? "Mise à l'épreuve terminée" : "Première passe terminée"}
           </p>
-          <Button size="lg" onClick={terminer} disabled={majSession.isPending}>
-            Voir ma carte <MoveRight className="w-5 h-5 ml-2" />
+          <h1 className="text-3xl font-serif font-bold">
+            {enEpreuve ? "On a fait le tour, pour l'instant" : "Assez pour un premier portrait"}
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            {progres?.comparaisonsRepondues ?? 0} comparaison
+            {(progres?.comparaisonsRepondues ?? 0) > 1 ? "s" : ""} jouée
+            {(progres?.comparaisonsRepondues ?? 0) > 1 ? "s" : ""} ·{" "}
+            {progres?.pairesCouvertes ?? 0} paire
+            {(progres?.pairesCouvertes ?? 0) > 1 ? "s" : ""} de valeurs sur{" "}
+            {progres?.pairesPertinentes ?? 0}. Le portrait ne parlera que de
+            celles-là — et il se précisera si tu continues.
+          </p>
+          <Button size="lg" onClick={versLeportrait} disabled={majSession.isPending}>
+            Voir ma constellation <MoveRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
       </Shell>
     );
   }
 
-  const estCombatCartes = question.dilemmeId >= 1_000_000_000;
-  const estBascule =
-    question.type === "bascule" || (estCombatCartes && question.estVariante);
-  const totalPrevu =
-    (progres?.duelsPlanifies ?? 0) + (progres?.seriesPlanifiees ?? 0);
-  const faits = (progres?.duelsRepondus ?? 0) + (progres?.seriesTerminees ?? 0);
+  const totalPrevu = enEpreuve
+    ? (progres?.comparaisonsRepondues ?? 0) + (progres?.tensionsRestantes ?? 0)
+    : (progres?.comparaisonsPlanifiees ?? 0);
+  const faits = enEpreuve
+    ? (progres?.comparaisonsRepondues ?? 0)
+    : (progres?.comparaisonsRepondues ?? 0);
   const avancement = totalPrevu > 0 ? (faits / totalPrevu) * 100 : 0;
   const enCours = creerReponse.isPending || envoiEnCours;
+  const estBascule = question.type === "bascule";
 
   return (
     <Shell sessionId={sessionId} etape="partie">
@@ -256,16 +270,22 @@ export default function Partie() {
               {estBascule ? (
                 <>
                   <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />{" "}
-                  Bascule
+                  Point de bascule
+                </>
+              ) : enEpreuve ? (
+                <>
+                  <Sparkles className="w-4 h-4" aria-hidden="true" /> Mise à
+                  l'épreuve
                 </>
               ) : (
                 <>
-                  <Swords className="w-4 h-4" aria-hidden="true" /> Combat
+                  <Swords className="w-4 h-4" aria-hidden="true" /> Duel
                 </>
               )}
             </span>
             <span>
-              {progres?.duelsRepondus} / {progres?.duelsPlanifies} combats
+              {progres?.pairesCouvertes} / {progres?.pairesPertinentes} paires
+              de valeurs
             </span>
           </div>
           <Progress
@@ -286,12 +306,14 @@ export default function Partie() {
               <OptionCarte
                 texte={question.optionA}
                 valeur={question.valeurA}
+                carte={question.carteALabel ?? null}
                 onClick={() => choisir("A")}
                 disabled={enCours}
               />
               <OptionCarte
                 texte={question.optionB}
                 valeur={question.valeurB}
+                carte={question.carteBLabel ?? null}
                 onClick={() => choisir("B")}
                 disabled={enCours}
               />
@@ -338,7 +360,7 @@ export default function Partie() {
               </h2>
               <p className="text-muted-foreground">
                 C'est une vraie réponse. Le jeu s'en sert pour te renvoyer la
-                même situation avec ce réglage-là qui change.
+                même tension avec ce réglage-là qui change.
               </p>
             </div>
 
@@ -373,9 +395,15 @@ export default function Partie() {
               <Button
                 size="lg"
                 disabled={
-                  !facteur || (facteur === "autre" && !facteurLibre.trim())
+                  enCours ||
+                  !facteur ||
+                  (facteur === "autre" && !facteurLibre.trim())
                 }
-                onClick={() => setEtape("reglages")}
+                onClick={() =>
+                  question.approfondir
+                    ? setEtape("approfondir")
+                    : envoyer("ca_depend")
+                }
               >
                 Continuer <MoveRight className="w-4 h-4 ml-2" />
               </Button>
@@ -383,14 +411,15 @@ export default function Partie() {
           </div>
         )}
 
-        {etape === "reglages" && (
+        {etape === "approfondir" && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-8 max-w-xl mx-auto w-full">
             <div className="text-center space-y-2">
               <h2 className="text-2xl md:text-3xl font-serif font-bold">
-                Deux petites questions
+                Deux questions, si tu veux
               </h2>
               <p className="text-muted-foreground">
-                Puis on passe à la suivante.
+                Tu peux tout sauter : ce qui compte, c'est le choix que tu viens
+                de faire.
               </p>
             </div>
 
@@ -402,17 +431,8 @@ export default function Partie() {
                 valeur={difficulte}
                 onChange={setDifficulte}
               />
-              <div className="pt-6 border-t border-border/40">
-                <Echelle
-                  label="Tu répondrais pareil demain ?"
-                  bas="Aucune idée"
-                  haut="Certain"
-                  valeur={certitude}
-                  onChange={setCertitude}
-                />
-              </div>
 
-              {demanderValeurProtegee && choix !== "je_ne_sais_pas" && (
+              {choix !== "je_ne_sais_pas" && (
                 <fieldset className="pt-6 border-t border-border/40 space-y-3">
                   <legend className="font-medium">
                     Qu'est-ce que tu essayais de protéger ?
@@ -441,6 +461,22 @@ export default function Partie() {
                   </div>
                 </fieldset>
               )}
+
+              <div className="pt-6 border-t border-border/40 space-y-3">
+                <label htmlFor="ce-qui-changerait" className="font-medium block">
+                  Qu'est-ce qui aurait pu changer ta réponse ?
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  Dans tes mots. Rien n'est interprété à ta place.
+                </p>
+                <Textarea
+                  id="ce-qui-changerait"
+                  value={ceQuiChangerait}
+                  onChange={(e) => setCeQuiChangerait(e.target.value)}
+                  placeholder="Si ça avait été…"
+                  className="bg-background min-h-20"
+                />
+              </div>
             </div>
 
             <div className="flex justify-center gap-3">
@@ -462,7 +498,7 @@ export default function Partie() {
                 {enCours ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  "C'est mon choix"
+                  "Continuer"
                 )}
               </Button>
             </div>
@@ -473,11 +509,12 @@ export default function Partie() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={terminer}
+            onClick={versLeportrait}
             disabled={majSession.isPending}
             className="text-muted-foreground"
           >
-            Arrêter ici et voir ma carte
+            <Compass className="size-4 mr-2" />
+            Arrêter ici et voir ma constellation
           </Button>
         </div>
       </div>
@@ -486,25 +523,6 @@ export default function Partie() {
 }
 
 function EnTeteQuestion({ question }: { question: Question }) {
-  if (question.estVariante && question.dimension === "enjeu") {
-    return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-2">
-          <p className="text-xs uppercase tracking-wider text-accent font-medium">
-            Même limite — nouvel enjeu
-          </p>
-          <p className="text-muted-foreground">
-            L'acte reste le même. Regarde si cette nouvelle raison déplace ta
-            réponse.
-          </p>
-        </div>
-        <p className="text-xl md:text-2xl font-serif leading-snug">
-          {question.situation}
-        </p>
-      </div>
-    );
-  }
-
   if (question.type === "bascule") {
     const dimension =
       libellesDimension[question.dimension as Dimension] ?? "le réglage";
@@ -532,16 +550,24 @@ function EnTeteQuestion({ question }: { question: Question }) {
   const contexte = libellesContexte[question.contexte as Contexte];
   return (
     <div className="space-y-4">
+      {question.motifTexte && (
+        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-1">
+          <p className="text-xs uppercase tracking-wider text-accent font-medium">
+            Pourquoi cette question maintenant
+          </p>
+          <p className="text-muted-foreground">{question.motifTexte}</p>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
         {contexte && (
           <span className="bg-muted px-2 py-1 rounded-full">{contexte}</span>
         )}
         <span className="bg-muted px-2 py-1 rounded-full">
-          {question.valeurA} contre {question.valeurB}
+          {question.valeurA} · {question.valeurB}
         </span>
         {question.estVariante && (
           <span className="bg-muted px-2 py-1 rounded-full">
-            Déjà croisé, autrement
+            Même tension, autre forme
           </span>
         )}
       </div>
@@ -555,11 +581,13 @@ function EnTeteQuestion({ question }: { question: Question }) {
 function OptionCarte({
   texte,
   valeur,
+  carte,
   onClick,
   disabled,
 }: {
   texte: string;
   valeur: string;
+  carte: string | null;
   onClick: () => void;
   disabled: boolean;
 }) {
@@ -574,7 +602,14 @@ function OptionCarte({
         {texte}
       </span>
       <span className="text-xs uppercase tracking-wider text-muted-foreground">
-        Tu protèges : {valeur}
+        {/* Formulation neutre : l'énoncé peut être au « je », l'étiquette ne
+            doit pas repasser au « tu ». */}
+        Ce que ça protège : {valeur}
+        {carte && texte !== carte && (
+          <span className="block normal-case tracking-normal mt-1 opacity-80">
+            {carte}
+          </span>
+        )}
       </span>
     </button>
   );

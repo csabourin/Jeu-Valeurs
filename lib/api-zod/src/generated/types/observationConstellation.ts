@@ -9,12 +9,10 @@ import type { ObservationConstellationType } from './observationConstellationTyp
 
 export interface ObservationConstellation {
   id: string;
-  /** Formulation prudente (ex. "Dans les situations explorées jusqu'ici…") */
+  /** Formulation prudente et bornée à ce qui a été joué. Emploie partout la terminologie symétrique « a été prioritaire sur » / « a été secondaire face à ». */
   texte: string;
   type: ObservationConstellationType;
   valeursConcernees: string[];
   /** IDs dans `reponses_collision` qui appuient cette observation */
   reponsesSources: number[];
-  /** IDs dans `arbitrages`. Séparés des précédents : les deux tables ont des identifiants qui se recouvrent, et « D'où ça sort ? » afficherait un bloc à la place d'une situation. */
-  arbitragesSources: number[];
 }

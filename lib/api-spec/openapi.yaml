@@ -18,8 +18,6 @@ tags:
     description: Cartes sélectionnées dans une session
   - name: reponses
     description: Réponses aux collisions
-  - name: arbitrages
-    description: Comparaisons entre les cartes de la personne
   - name: constellation
     description: Constellation personnelle
 
@@ -154,11 +152,18 @@ paths:
       tags: [cartes]
       summary: La main de cartes tirée pour cette partie
       description: >
-        825 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main
+        900 cartes ne se parcourent pas à l'écran. Chaque partie reçoit une main
         tirée avec sa graine : stable pour une partie donnée, différente d'une
-        partie à l'autre.
+        partie à l'autre. `parFamille` élargit la main sans la rebattre — les
+        cartes déjà vues restent en place, d'autres s'ajoutent après elles.
       parameters:
         - $ref: "#/components/parameters/SessionId"
+        - in: query
+          name: parFamille
+          required: false
+          schema:
+            type: number
+          description: Combien de cartes par famille (18 par défaut, 54 au plus)
       responses:
         "200":
           description: Cartes proposées
@@ -309,46 +314,6 @@ paths:
         "404":
           description: Réponse introuvable
 
-  # ─── Arbitrages ───────────────────────────────────────────────────────────────
-
-  /sessions/{sessionId}/arbitrages:
-    get:
-      operationId: listArbitrages
-      tags: [arbitrages]
-      summary: Liste les blocs d'arbitrage joués dans une session
-      parameters:
-        - $ref: "#/components/parameters/SessionId"
-      responses:
-        "200":
-          description: Blocs joués
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Arbitrage"
-    post:
-      operationId: createArbitrage
-      tags: [arbitrages]
-      summary: Enregistre le résultat d'un bloc d'arbitrage
-      parameters:
-        - $ref: "#/components/parameters/SessionId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ArbitrageInput"
-      responses:
-        "201":
-          description: Bloc enregistré
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Arbitrage"
-        "400":
-          description: Données invalides
-
   # ─── Constellation ────────────────────────────────────────────────────────────
 
   /sessions/{sessionId}/constellation:
@@ -446,7 +411,7 @@ components:
 
     ValeurCatalogue:
       type: object
-      required: [label, description, famille]
+      required: [label, description, famille, familleValeur]
       properties:
         label:
           type: string
@@ -456,15 +421,39 @@ components:
         famille:
           type: string
           enum: [ouverture, attention_aux_autres, continuite, affirmation]
+          description: Grande famille théorique (cadre de haut niveau)
+        familleValeur:
+          type: string
+          description: >
+            Famille de valeurs — l'étage qui décide de l'admissibilité d'un
+            duel (autonomie, bienveillance, justice, securite…)
+        quasiSynonymes:
+          type: array
+          items:
+            type: string
+          description: Valeurs trop proches pour être confrontées à celle-ci
 
     Question:
       type: object
       description: >
-        Une situation concrète à trancher. `optionA` protège `valeurA`,
-        `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un
-        contexte donné ; une bascule reprend la même tension en ne faisant
-        bouger qu'une seule dimension d'un palier à l'autre.
-      required: [type, dilemmeId, valeurA, valeurB, situation, optionA, optionB, estVariante]
+        Une comparaison à trancher. `optionA` protège `valeurA`, `optionB`
+        protège `valeurB`. Un duel oppose deux valeurs — soit à travers deux
+        cartes de la personne, soit à travers une situation écrite ; une bascule
+        reprend la même tension en ne faisant bouger qu'une seule dimension d'un
+        palier à l'autre.
+      required:
+        [
+          type,
+          dilemmeId,
+          valeurA,
+          valeurB,
+          situation,
+          optionA,
+          optionB,
+          estVariante,
+          phase,
+          approfondir,
+        ]
       properties:
         type:
           type: string
@@ -483,10 +472,38 @@ components:
           type: string
         contexte:
           type: ["string", "null"]
-          description: "Duel : amis, ecole, maison, en_ligne, equipe, public"
+          description: "Situation écrite : amis, ecole, maison, en_ligne, equipe, public"
         estVariante:
           type: boolean
           description: Vrai si cette tension a déjà été vue sous une autre forme
+        carteA:
+          type: ["string", "null"]
+          description: Carte de session qui manifeste `valeurA`, si la question vient des cartes
+        carteB:
+          type: ["string", "null"]
+        carteALabel:
+          type: ["string", "null"]
+        carteBLabel:
+          type: ["string", "null"]
+        phase:
+          type: string
+          enum: [ordination, epreuve]
+          description: Phase à enregistrer avec la réponse
+        motif:
+          type: ["string", "null"]
+          description: >
+            Mise à l'épreuve : pourquoi cette tension maintenant —
+            reponses_variables, forces_proches, ca_depend_frequent,
+            paire_jamais_vue, jamais_secondaire, domine_presque_tout
+        motifTexte:
+          type: ["string", "null"]
+          description: Le motif, en une phrase affichable
+        approfondir:
+          type: boolean
+          description: >
+            Vrai quand le jeu a le droit de poser ses questions de relance
+            (difficulté, valeur protégée, ce qui aurait pu changer la réponse).
+            Toujours faux pendant la première passe.
         serieId:
           type: ["string", "null"]
         palier:
@@ -519,10 +536,9 @@ components:
               accueil,
               selection_cartes,
               confirmation_valeurs,
-              arbitrages,
-              collisions,
-              bascules,
+              ordination,
               constellation,
+              epreuve,
             ]
         creeLe:
           type: string
@@ -541,10 +557,9 @@ components:
               accueil,
               selection_cartes,
               confirmation_valeurs,
-              arbitrages,
-              collisions,
-              bascules,
+              ordination,
               constellation,
+              epreuve,
             ]
           default: accueil
 
@@ -558,10 +573,9 @@ components:
               accueil,
               selection_cartes,
               confirmation_valeurs,
-              arbitrages,
-              collisions,
-              bascules,
+              ordination,
               constellation,
+              epreuve,
             ]
 
     # ─── Cartes session ────────────────────────────────────────────────────────
@@ -637,7 +651,7 @@ components:
 
     ReponseCollision:
       type: object
-      required: [id, sessionId, valeurA, valeurB, choix, version, creeLe]
+      required: [id, sessionId, valeurA, valeurB, choix, phase, version, creeLe]
       properties:
         id:
           type: number
@@ -649,9 +663,20 @@ components:
           type: string
         valeurB:
           type: string
+        carteA:
+          type: ["string", "null"]
+          description: Carte de session qui manifestait `valeurA`
+        carteB:
+          type: ["string", "null"]
         choix:
           type: string
           enum: [A, B, ca_depend, je_ne_sais_pas, passer]
+        contexte:
+          type: ["string", "null"]
+          description: Où ça se passait, quand la situation le précisait
+        phase:
+          type: string
+          enum: [ordination, epreuve]
         facteurDepend:
           type: ["string", "null"]
           description: >
@@ -663,10 +688,10 @@ components:
           description: Réponse libre si facteurDepend = autre
         difficulte:
           type: ["number", "null"]
-          description: 1 à 5, absent si choix=passer
+          description: 1 à 5. Demandé seulement en phase de mise à l'épreuve.
         certitude:
           type: ["number", "null"]
-          description: 1 à 5, absent si choix=passer
+          description: 1 à 5. Demandé seulement en phase de mise à l'épreuve.
         serieId:
           type: ["string", "null"]
           description: Série de bascule, si la réponse en fait partie
@@ -677,6 +702,9 @@ components:
         valeurProtegee:
           type: ["string", "null"]
           description: Valeur que la personne dit avoir voulu protéger (jamais déduite)
+        ceQuiChangerait:
+          type: ["string", "null"]
+          description: Ce qui aurait pu faire changer sa réponse, dans ses mots
         version:
           type: number
           description: Numéro de version (incrémenter à chaque correction)
@@ -697,9 +725,18 @@ components:
           type: string
         valeurB:
           type: string
+        carteA:
+          type: ["string", "null"]
+        carteB:
+          type: ["string", "null"]
         choix:
           type: string
           enum: [A, B, ca_depend, je_ne_sais_pas, passer]
+        contexte:
+          type: ["string", "null"]
+        phase:
+          type: ["string", "null"]
+          description: ordination (défaut) ou epreuve
         facteurDepend:
           type: ["string", "null"]
         facteurDependLibre:
@@ -715,6 +752,8 @@ components:
         dimension:
           type: ["string", "null"]
         valeurProtegee:
+          type: ["string", "null"]
+        ceQuiChangerait:
           type: ["string", "null"]
 
     ReponseCollisionUpdate:
@@ -733,125 +772,8 @@ components:
           type: ["number", "null"]
         valeurProtegee:
           type: ["string", "null"]
-
-    # ─── Arbitrages ────────────────────────────────────────────────────────────
-
-    CarteArbitrable:
-      type: object
-      description: Une carte de la personne, réduite à ce qu'un bloc affiche.
-      required: [id, famille, label]
-      properties:
-        id:
-          type: string
-          description: Identifiant de la carte de session, en texte
-        famille:
-          type: string
-          enum: [lignes_rouges, horizons, tresors]
-        label:
-          type: string
-
-    BlocArbitrage:
-      type: object
-      description: >
-        Quatre cartes de la personne mises côte à côte, hors situation. On
-        demande laquelle compte le plus et laquelle compte le moins.
-      required: [bloc, cartes]
-      properties:
-        bloc:
-          type: number
-          description: Rang du bloc dans la partie, à partir de 1
-        cartes:
-          type: array
-          items:
-            $ref: "#/components/schemas/CarteArbitrable"
-
-    Arbitrage:
-      type: object
-      required: [id, sessionId, bloc, carteIds, version, creeLe]
-      properties:
-        id:
-          type: number
-        sessionId:
-          type: string
-        bloc:
-          type: number
-        carteIds:
-          type: array
-          items:
-            type: string
-          description: >
-            Composition du bloc au moment où il a été joué. Figée : une carte
-            retirée ensuite ne doit pas rendre la réponse illisible.
-        carteMeilleure:
+        ceQuiChangerait:
           type: ["string", "null"]
-          description: Null avec cartePire quand le bloc a été passé
-        cartePire:
-          type: ["string", "null"]
-        version:
-          type: number
-        creeLe:
-          type: string
-          format: date-time
-        miseAJourLe:
-          type: string
-          format: date-time
-
-    ArbitrageInput:
-      type: object
-      required: [bloc, carteIds]
-      properties:
-        bloc:
-          type: number
-        carteIds:
-          type: array
-          items:
-            type: string
-        carteMeilleure:
-          type: ["string", "null"]
-        cartePire:
-          type: ["string", "null"]
-
-    ScoreCarte:
-      type: object
-      description: La place d'une carte dans le classement déclaré de la personne.
-      required:
-        [carteId, label, famille, apparitions, foisMeilleure, foisPire, score]
-      properties:
-        carteId:
-          type: string
-        label:
-          type: string
-        famille:
-          type: string
-          enum: [lignes_rouges, horizons, tresors]
-        apparitions:
-          type: number
-          description: Nombre de blocs où la carte a été proposée
-        foisMeilleure:
-          type: number
-        foisPire:
-          type: number
-        score:
-          type: number
-          description: (meilleure − pire) / apparitions, dans [-1, 1]
-
-    ValeurDeclaree:
-      type: object
-      description: >
-        Score moyen des cartes portant cette valeur. Hypothèse, pas mesure : la
-        personne a classé des cartes, pas des valeurs. Ne sert qu'à repérer un
-        écart franc avec ce qui s'est joué en situation.
-      required: [valeur, scoreDeclare, cartes]
-      properties:
-        valeur:
-          type: string
-        scoreDeclare:
-          type: number
-        cartes:
-          type: array
-          items:
-            type: string
-          description: Libellés des cartes qui portent cette valeur
 
     # ─── Constellation ─────────────────────────────────────────────────────────
 
@@ -971,28 +893,31 @@ components:
 
     ObservationConstellation:
       type: object
-      required:
-        [id, texte, type, valeursConcernees, reponsesSources, arbitragesSources]
+      required: [id, texte, type, valeursConcernees, reponsesSources]
       properties:
         id:
           type: string
         texte:
           type: string
-          description: Formulation prudente (ex. "Dans les situations explorées jusqu'ici…")
+          description: >
+            Formulation prudente et bornée à ce qui a été joué. Emploie partout
+            la terminologie symétrique « a été prioritaire sur » / « a été
+            secondaire face à ».
         type:
           type: string
           enum:
             [
-              tendance,
-              tension,
-              territoire_inexplore,
-              stabilite,
-              couverture,
-              point_de_bascule,
+              ordination,
+              valeur_forte,
+              valeur_contextuelle,
               valeur_protegee,
-              contexte,
-              arbitrage,
-              ecart_declare,
+              tension,
+              stabilite,
+              point_de_bascule,
+              cycle,
+              territoire_inexplore,
+              couverture,
+              confiance,
             ]
         valeursConcernees:
           type: array
@@ -1003,29 +928,220 @@ components:
           items:
             type: number
           description: IDs dans `reponses_collision` qui appuient cette observation
-        arbitragesSources:
+
+    LigneOrdination:
+      type: object
+      description: >
+        La place estimée d'une valeur, selon un modèle de comparaison par paires
+        (Bradley-Terry). Ce n'est pas un palmarès : c'est une estimation
+        évolutive, avec son incertitude.
+      required:
+        [
+          valeur,
+          rang,
+          force,
+          incertitude,
+          intervalleBas,
+          intervalleHaut,
+          niveauConfiance,
+          comparaisons,
+          foisPrioritaire,
+          foisSecondaire,
+          indecis,
+          jamaisSecondaire,
+          prioritaireSur,
+          secondaireFaceA,
+          contextes,
+        ]
+      properties:
+        valeur:
+          type: string
+        rang:
+          type: number
+          description: À partir de 1. Deux forces indiscernables partagent leur rang.
+        force:
+          type: number
+          description: Force relative en échelle logarithmique, centrée sur 0
+        incertitude:
+          type: number
+          description: Erreur type sur la force. Grande ⇒ on ne sait pas encore.
+        intervalleBas:
+          type: number
+        intervalleHaut:
+          type: number
+        niveauConfiance:
+          type: string
+          enum:
+            [
+              tendance_forte,
+              tendance_probable,
+              encore_incertain,
+              territoire_peu_explore,
+            ]
+        comparaisons:
+          type: number
+        foisPrioritaire:
+          type: number
+        foisSecondaire:
+          type: number
+        indecis:
+          type: number
+          description: ca_depend + je_ne_sais_pas
+        jamaisSecondaire:
+          type: boolean
+          description: >
+            Vrai tant qu'aucune comparaison tranchée ne l'a fait passer derrière.
+            Ce n'est pas un classement : c'est l'absence d'exception connue.
+        prioritaireSur:
           type: array
           items:
-            type: number
+            type: string
+        secondaireFaceA:
+          type: array
+          items:
+            type: string
+        contextes:
+          type: array
+          items:
+            type: string
+          description: Contextes où cette valeur a été prioritaire
+
+    RelationValeurs:
+      type: object
+      required:
+        [
+          valeurA,
+          valeurB,
+          prioritaire,
+          probabilite,
+          comparaisons,
+          manifestations,
+          indecis,
+          variable,
+        ]
+      properties:
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        prioritaire:
+          type: ["string", "null"]
+          description: Valeur passée devant le plus souvent, null si rien ne se détache
+        probabilite:
+          type: number
+          description: P(valeurA prioritaire sur valeurB) selon le modèle ajusté
+        comparaisons:
+          type: number
+        manifestations:
+          type: number
+          description: Combien de formes différentes ont servi cette même tension
+        indecis:
+          type: number
+        variable:
+          type: boolean
           description: >
-            IDs dans `arbitrages`. Séparés des précédents : les deux tables ont
-            des identifiants qui se recouvrent, et « D'où ça sort ? »
-            afficherait un bloc à la place d'une situation.
+            Vrai si la réponse a changé d'une manifestation à l'autre. Ce n'est
+            jamais une contradiction : le contexte a compté.
+
+    ValeurContextuelle:
+      type: object
+      required: [valeur, contextes, texte]
+      properties:
+        valeur:
+          type: string
+        contextes:
+          type: array
+          items:
+            type: string
+        texte:
+          type: string
+
+    TensionPrincipale:
+      type: object
+      required: [valeurA, valeurB, type, texte]
+      properties:
+        valeurA:
+          type: string
+        valeurB:
+          type: string
+        type:
+          type: string
+          enum: [renversement, indecise, serree, tranchee]
+        texte:
+          type: string
+          description: Ce que la tension a montré, en une phrase
+
+    DimensionSensible:
+      type: object
+      description: >
+        Un réglage qui semble déplacer les décisions : proximité, coût
+        personnel, gravité, certitude, urgence, réversibilité, nombre de
+        personnes touchées.
+      required: [dimension, libelle, occurrences, source]
+      properties:
+        dimension:
+          type: string
+        libelle:
+          type: string
+        occurrences:
+          type: number
+        source:
+          type: string
+          enum: [ca_depend, bascule]
+          description: >
+            `ca_depend` : la personne a nommé ce facteur elle-même.
+            `bascule` : sa réponse a changé quand le jeu a monté ce réglage.
+
+    Couverture:
+      type: object
+      required:
+        [
+          part,
+          pairesPertinentes,
+          pairesCouvertes,
+          comparaisonsRetenues,
+          manifestationsRejouees,
+        ]
+      properties:
+        part:
+          type: number
+          description: Part des paires pertinentes déjà confrontées (0 à 1)
+        pairesPertinentes:
+          type: number
+          description: n(n−1)/2 restreint aux paires que les règles autorisent
+        pairesCouvertes:
+          type: number
+        comparaisonsRetenues:
+          type: number
+        manifestationsRejouees:
+          type: number
+          description: Tensions revues sous une autre forme
 
     Constellation:
       type: object
+      description: >
+        Une carte des relations entre valeurs, à plusieurs niveaux de lecture —
+        pas un palmarès. Tout est recalculable depuis les réponses brutes, et
+        chaque observation transporte ses sources.
       required:
         [
           sessionId,
           version,
+          ordination,
+          relations,
+          valeursFortes,
+          valeursContextuelles,
+          valeursProtegees,
+          tensionsPrincipales,
+          dimensionsSensibles,
+          cycles,
           tendances,
           tensions,
           bascules,
-          cartesJugees,
-          valeursDeclarees,
           observations,
           couverture,
           stabilite,
+          niveauConfianceGlobal,
           versionCalcul,
         ]
       properties:
@@ -1033,10 +1149,49 @@ components:
           type: string
         version:
           type: number
+        ordination:
+          type: array
+          items:
+            $ref: "#/components/schemas/LigneOrdination"
+          description: Les valeurs classées par force estimée. Estimation évolutive.
+        relations:
+          type: array
+          items:
+            $ref: "#/components/schemas/RelationValeurs"
+        valeursFortes:
+          type: array
+          items:
+            type: string
+          description: Valeurs prioritaires de façon régulière, dans plusieurs contextes
+        valeursContextuelles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValeurContextuelle"
+        valeursProtegees:
+          type: array
+          items:
+            type: string
+          description: Valeurs pour lesquelles aucun compromis n'a encore été observé
+        tensionsPrincipales:
+          type: array
+          items:
+            $ref: "#/components/schemas/TensionPrincipale"
+        dimensionsSensibles:
+          type: array
+          items:
+            $ref: "#/components/schemas/DimensionSensible"
+        cycles:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+          description: Boucles A > B > C > A observées. Signalées, jamais corrigées.
         tendances:
           type: array
           items:
             $ref: "#/components/schemas/TendanceValeur"
+          description: Le détail chiffré, valeur par valeur
         tensions:
           type: array
           items:
@@ -1045,27 +1200,26 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PointDeBascule"
-        cartesJugees:
-          type: array
-          items:
-            $ref: "#/components/schemas/ScoreCarte"
-          description: Classement déclaré des cartes. Vide si la phase n'a pas été jouée.
-        valeursDeclarees:
-          type: array
-          items:
-            $ref: "#/components/schemas/ValeurDeclaree"
         observations:
           type: array
           items:
             $ref: "#/components/schemas/ObservationConstellation"
         couverture:
-          type: number
-          description: Proportion de collisions possibles explorées (0 à 1)
+          $ref: "#/components/schemas/Couverture"
         stabilite:
           type: number
           description: >
             Part des tensions revues sous une autre forme qui ont reçu la même
             réponse (0 à 1). Vaut 1 tant qu'aucune tension n'a été revue.
+        niveauConfianceGlobal:
+          type: string
+          enum:
+            [
+              tendance_forte,
+              tendance_probable,
+              encore_incertain,
+              territoire_peu_explore,
+            ]
         versionCalcul:
           type: number
           description: Version du moteur de calcul utilisé
@@ -1081,15 +1235,17 @@ components:
           phase,
           nombreCartes,
           nombreValeurs,
-          arbitragesPlanifies,
-          arbitragesRepondus,
-          duelsPlanifies,
-          duelsRepondus,
+          comparaisonsPlanifiees,
+          comparaisonsRepondues,
+          pairesPertinentes,
+          pairesCouvertes,
+          tensionsRestantes,
           seriesPlanifiees,
           seriesTerminees,
           nombreReponses,
+          premiereOrdinationPrete,
+          peutAffiner,
           prochaineQuestion,
-          prochainBloc,
         ]
       properties:
         sessionId:
@@ -1101,44 +1257,45 @@ components:
               accueil,
               selection_cartes,
               confirmation_valeurs,
-              arbitrages,
-              collisions,
-              bascules,
+              ordination,
               constellation,
+              epreuve,
             ]
         phase:
           type: string
-          enum: [arbitrages, duels, bascules, termine]
+          enum: [ordination, epreuve, termine]
           description: Où en est la partie, calculé depuis les réponses
         nombreCartes:
           type: number
         nombreValeurs:
           type: number
-        arbitragesPlanifies:
+        comparaisonsPlanifiees:
           type: number
-          description: Nombre de blocs d'arbitrage prévus pour cette partie
-        arbitragesRepondus:
+          description: Duels prévus pour la première passe
+        comparaisonsRepondues:
           type: number
-        duelsPlanifies:
+        pairesPertinentes:
           type: number
-          description: Nombre de duels prévus pour cette partie
-        duelsRepondus:
+          description: n(n−1)/2 restreint aux paires admissibles
+        pairesCouvertes:
           type: number
+        tensionsRestantes:
+          type: number
+          description: Tensions que la mise à l'épreuve pourrait encore poser
         seriesPlanifiees:
           type: number
         seriesTerminees:
           type: number
         nombreReponses:
           type: number
-          description: Toutes réponses confondues, duels et bascules
+          description: Toutes réponses confondues
+        premiereOrdinationPrete:
+          type: boolean
+          description: Vrai dès qu'il y a assez de matière pour un premier portrait
+        peutAffiner:
+          type: boolean
+          description: Vrai s'il reste des paires jamais confrontées à compléter
         prochaineQuestion:
           oneOf:
             - $ref: "#/components/schemas/Question"
-            - type: "null"
-        prochainBloc:
-          description: >
-            Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une
-            Question : il ne pose pas de situation et n'oppose pas deux valeurs.
-          oneOf:
-            - $ref: "#/components/schemas/BlocArbitrage"
             - type: "null"

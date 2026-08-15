@@ -294,11 +294,11 @@ export default function Comparaison() {
 
             <section className="grid md:grid-cols-2 gap-4">
               <PortraitCompact
-                titre="Mes valeurs qui passent devant"
+                titre="Mes valeurs les plus souvent prioritaires"
                 tendances={valeursFortes(moi.tendances)}
               />
               <PortraitCompact
-                titre="Ses valeurs qui passent devant"
+                titre="Ses valeurs les plus souvent prioritaires"
                 tendances={valeursFortes(autre.tendances)}
               />
             </section>
