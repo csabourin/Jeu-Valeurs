@@ -116,6 +116,7 @@ export const SessionEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
+  arbitrages: 'arbitrages',
   collisions: 'collisions',
   bascules: 'bascules',
   constellation: 'constellation',
@@ -135,6 +136,7 @@ export const SessionInputEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
+  arbitrages: 'arbitrages',
   collisions: 'collisions',
   bascules: 'bascules',
   constellation: 'constellation',
@@ -151,6 +153,7 @@ export const SessionUpdateEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
+  arbitrages: 'arbitrages',
   collisions: 'collisions',
   bascules: 'bascules',
   constellation: 'constellation',
@@ -331,6 +334,95 @@ export interface ReponseCollisionUpdate {
   valeurProtegee?: string | null;
 }
 
+export type CarteArbitrableFamille = typeof CarteArbitrableFamille[keyof typeof CarteArbitrableFamille];
+
+
+export const CarteArbitrableFamille = {
+  lignes_rouges: 'lignes_rouges',
+  horizons: 'horizons',
+  tresors: 'tresors',
+} as const;
+
+/**
+ * Une carte de la personne, réduite à ce qu'un bloc affiche.
+ */
+export interface CarteArbitrable {
+  /** Identifiant de la carte de session, en texte */
+  id: string;
+  famille: CarteArbitrableFamille;
+  label: string;
+}
+
+/**
+ * Quatre cartes de la personne mises côte à côte, hors situation. On demande laquelle compte le plus et laquelle compte le moins.
+ */
+export interface BlocArbitrage {
+  /** Rang du bloc dans la partie, à partir de 1 */
+  bloc: number;
+  cartes: CarteArbitrable[];
+}
+
+export interface Arbitrage {
+  id: number;
+  sessionId: string;
+  bloc: number;
+  /** Composition du bloc au moment où il a été joué. Figée : une carte retirée ensuite ne doit pas rendre la réponse illisible. */
+  carteIds: string[];
+  /**
+     * Null avec cartePire quand le bloc a été passé
+     * @nullable
+     */
+  carteMeilleure?: string | null;
+  /** @nullable */
+  cartePire?: string | null;
+  version: number;
+  creeLe: string;
+  miseAJourLe?: string;
+}
+
+export interface ArbitrageInput {
+  bloc: number;
+  carteIds: string[];
+  /** @nullable */
+  carteMeilleure?: string | null;
+  /** @nullable */
+  cartePire?: string | null;
+}
+
+export type ScoreCarteFamille = typeof ScoreCarteFamille[keyof typeof ScoreCarteFamille];
+
+
+export const ScoreCarteFamille = {
+  lignes_rouges: 'lignes_rouges',
+  horizons: 'horizons',
+  tresors: 'tresors',
+} as const;
+
+/**
+ * La place d'une carte dans le classement déclaré de la personne.
+ */
+export interface ScoreCarte {
+  carteId: string;
+  label: string;
+  famille: ScoreCarteFamille;
+  /** Nombre de blocs où la carte a été proposée */
+  apparitions: number;
+  foisMeilleure: number;
+  foisPire: number;
+  /** (meilleure − pire) / apparitions, dans [-1, 1] */
+  score: number;
+}
+
+/**
+ * Score moyen des cartes portant cette valeur. Hypothèse, pas mesure : la personne a classé des cartes, pas des valeurs. Ne sert qu'à repérer un écart franc avec ce qui s'est joué en situation.
+ */
+export interface ValeurDeclaree {
+  valeur: string;
+  scoreDeclare: number;
+  /** Libellés des cartes qui portent cette valeur */
+  cartes: string[];
+}
+
 export interface TendanceValeur {
   valeur: string;
   /** Score net (victoires - défaites) / total significatifs */
@@ -413,6 +505,8 @@ export const ObservationConstellationType = {
   point_de_bascule: 'point_de_bascule',
   valeur_protegee: 'valeur_protegee',
   contexte: 'contexte',
+  arbitrage: 'arbitrage',
+  ecart_declare: 'ecart_declare',
 } as const;
 
 export interface ObservationConstellation {
@@ -421,8 +515,10 @@ export interface ObservationConstellation {
   texte: string;
   type: ObservationConstellationType;
   valeursConcernees: string[];
-  /** IDs des réponses qui appuient cette observation */
+  /** IDs dans `reponses_collision` qui appuient cette observation */
   reponsesSources: number[];
+  /** IDs dans `arbitrages`. Séparés des précédents : les deux tables ont des identifiants qui se recouvrent, et « D'où ça sort ? » afficherait un bloc à la place d'une situation. */
+  arbitragesSources: number[];
 }
 
 export interface Constellation {
@@ -431,6 +527,9 @@ export interface Constellation {
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
   bascules: PointDeBascule[];
+  /** Classement déclaré des cartes. Vide si la phase n'a pas été jouée. */
+  cartesJugees: ScoreCarte[];
+  valeursDeclarees: ValeurDeclaree[];
   observations: ObservationConstellation[];
   /** Proportion de collisions possibles explorées (0 à 1) */
   couverture: number;
@@ -447,6 +546,7 @@ export const ProgresEtapeCourante = {
   accueil: 'accueil',
   selection_cartes: 'selection_cartes',
   confirmation_valeurs: 'confirmation_valeurs',
+  arbitrages: 'arbitrages',
   collisions: 'collisions',
   bascules: 'bascules',
   constellation: 'constellation',
@@ -459,6 +559,7 @@ export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 
 
 export const ProgresPhase = {
+  arbitrages: 'arbitrages',
   duels: 'duels',
   bascules: 'bascules',
   termine: 'termine',
@@ -471,6 +572,9 @@ export interface Progres {
   phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
+  /** Nombre de blocs d'arbitrage prévus pour cette partie */
+  arbitragesPlanifies: number;
+  arbitragesRepondus: number;
   /** Nombre de duels prévus pour cette partie */
   duelsPlanifies: number;
   duelsRepondus: number;
@@ -479,6 +583,8 @@ export interface Progres {
   /** Toutes réponses confondues, duels et bascules */
   nombreReponses: number;
   prochaineQuestion: Question | null;
+  /** Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une Question : il ne pose pas de situation et n'oppose pas deux valeurs. */
+  prochainBloc: BlocArbitrage | null;
 }
 
 export type ListCartessCatalogueParams = {

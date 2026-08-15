@@ -13,6 +13,8 @@ export interface ObservationConstellation {
   texte: string;
   type: ObservationConstellationType;
   valeursConcernees: string[];
-  /** IDs des réponses qui appuient cette observation */
+  /** IDs dans `reponses_collision` qui appuient cette observation */
   reponsesSources: number[];
+  /** IDs dans `arbitrages`. Séparés des précédents : les deux tables ont des identifiants qui se recouvrent, et « D'où ça sort ? » afficherait un bloc à la place d'une situation. */
+  arbitragesSources: number[];
 }

@@ -7,8 +7,10 @@
  */
 import type { ObservationConstellation } from './observationConstellation';
 import type { PointDeBascule } from './pointDeBascule';
+import type { ScoreCarte } from './scoreCarte';
 import type { TendanceValeur } from './tendanceValeur';
 import type { TensionObservee } from './tensionObservee';
+import type { ValeurDeclaree } from './valeurDeclaree';
 
 export interface Constellation {
   sessionId: string;
@@ -16,6 +18,9 @@ export interface Constellation {
   tendances: TendanceValeur[];
   tensions: TensionObservee[];
   bascules: PointDeBascule[];
+  /** Classement déclaré des cartes. Vide si la phase n'a pas été jouée. */
+  cartesJugees: ScoreCarte[];
+  valeursDeclarees: ValeurDeclaree[];
   observations: ObservationConstellation[];
   /** Proportion de collisions possibles explorées (0 à 1) */
   couverture: number;

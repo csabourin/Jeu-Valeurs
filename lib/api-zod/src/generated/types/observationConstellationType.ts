@@ -18,4 +18,6 @@ export const ObservationConstellationType = {
   point_de_bascule: 'point_de_bascule',
   valeur_protegee: 'valeur_protegee',
   contexte: 'contexte',
+  arbitrage: 'arbitrage',
+  ecart_declare: 'ecart_declare',
 } as const;

@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './arbitrage';
+export * from './arbitrageInput';
+export * from './blocArbitrage';
+export * from './carteArbitrable';
+export * from './carteArbitrableFamille';
 export * from './carteCatalogue';
 export * from './carteCatalogueFamille';
 export * from './carteCatalogueOrigine';
@@ -33,6 +38,8 @@ export * from './reponseCollisionInput';
 export * from './reponseCollisionInputChoix';
 export * from './reponseCollisionUpdate';
 export * from './reponseCollisionUpdateChoix';
+export * from './scoreCarte';
+export * from './scoreCarteFamille';
 export * from './session';
 export * from './sessionEtapeCourante';
 export * from './sessionInput';
@@ -43,3 +50,4 @@ export * from './tendanceValeur';
 export * from './tensionObservee';
 export * from './valeurCatalogue';
 export * from './valeurCatalogueFamille';
+export * from './valeurDeclaree';

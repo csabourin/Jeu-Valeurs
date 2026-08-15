@@ -5,6 +5,7 @@
  * Jeu des valeurs — API
  * OpenAPI spec version: 0.1.0
  */
+import type { BlocArbitrage } from './blocArbitrage';
 import type { ProgresEtapeCourante } from './progresEtapeCourante';
 import type { ProgresPhase } from './progresPhase';
 import type { Question } from './question';
@@ -16,6 +17,9 @@ export interface Progres {
   phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
+  /** Nombre de blocs d'arbitrage prévus pour cette partie */
+  arbitragesPlanifies: number;
+  arbitragesRepondus: number;
   /** Nombre de duels prévus pour cette partie */
   duelsPlanifies: number;
   duelsRepondus: number;
@@ -24,4 +28,6 @@ export interface Progres {
   /** Toutes réponses confondues, duels et bascules */
   nombreReponses: number;
   prochaineQuestion: Question | null;
+  /** Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une Question : il ne pose pas de situation et n'oppose pas deux valeurs. */
+  prochainBloc: BlocArbitrage | null;
 }

@@ -20,6 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Arbitrage,
+  ArbitrageInput,
   CarteCatalogue,
   CarteSession,
   CarteSessionInput,
@@ -1188,6 +1190,155 @@ export const useUpdateReponse = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateReponseMutationOptions(options));
+    }
+
+export const getListArbitragesUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/arbitrages`
+}
+
+/**
+ * @summary Liste les blocs d'arbitrage joués dans une session
+ */
+export const listArbitrages = async (sessionId: string, options?: Parameters<typeof customFetch>[1]): Promise<Arbitrage[]> => {
+
+  return customFetch<Arbitrage[]>(getListArbitragesUrl(sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListArbitragesQueryKey = (sessionId: string,) => {
+    return [
+    `/api/sessions/${sessionId}/arbitrages`
+    ] as const;
+    }
+
+
+export const getListArbitragesQueryOptions = <TData = Awaited<ReturnType<typeof listArbitrages>>, TError = ErrorType<unknown>>(sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listArbitrages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListArbitragesQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listArbitrages>>> = ({ signal }) => listArbitrages(sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listArbitrages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListArbitragesQueryResult = NonNullable<Awaited<ReturnType<typeof listArbitrages>>>
+export type ListArbitragesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Liste les blocs d'arbitrage joués dans une session
+ */
+
+export function useListArbitrages<TData = Awaited<ReturnType<typeof listArbitrages>>, TError = ErrorType<unknown>>(
+ sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listArbitrages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListArbitragesQueryOptions(sessionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateArbitrageUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/sessions/${sessionId}/arbitrages`
+}
+
+/**
+ * @summary Enregistre le résultat d'un bloc d'arbitrage
+ */
+export const createArbitrage = async (sessionId: string,
+    arbitrageInput: ArbitrageInput, options?: Parameters<typeof customFetch>[1]): Promise<Arbitrage> => {
+
+  return customFetch<Arbitrage>(getCreateArbitrageUrl(sessionId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(arbitrageInput)
+  }
+);}
+
+
+
+
+
+export const getCreateArbitrageMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createArbitrage>>, TError,{sessionId: string;data: BodyType<ArbitrageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createArbitrage>>, TError,{sessionId: string;data: BodyType<ArbitrageInput>}, TContext> => {
+
+const mutationKey = ['createArbitrage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createArbitrage>>, {sessionId: string;data: BodyType<ArbitrageInput>}> = (props) => {
+          const {sessionId,data} = props ?? {};
+
+          return  createArbitrage(sessionId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateArbitrageMutationResult = NonNullable<Awaited<ReturnType<typeof createArbitrage>>>
+    export type CreateArbitrageMutationBody = BodyType<ArbitrageInput>
+    export type CreateArbitrageMutationError = ErrorType<void>
+
+    /**
+ * @summary Enregistre le résultat d'un bloc d'arbitrage
+ */
+export const useCreateArbitrage = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createArbitrage>>, TError,{sessionId: string;data: BodyType<ArbitrageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createArbitrage>>,
+        TError,
+        {sessionId: string;data: BodyType<ArbitrageInput>},
+        TContext
+      > => {
+      return useMutation(getCreateArbitrageMutationOptions(options));
     }
 
 export const getGetConstellationUrl = (sessionId: string,) => {

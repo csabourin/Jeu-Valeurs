@@ -53,12 +53,12 @@ export const ListValeursCatalogueResponse = zod.array(ListValeursCatalogueRespon
 export const createSessionBodyEtapeCouranteDefault = `accueil`;
 
 export const CreateSessionBody = zod.object({
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']).default(createSessionBodyEtapeCouranteDefault)
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']).default(createSessionBodyEtapeCouranteDefault)
 })
 
 export const CreateSessionResponse = zod.object({
   "id": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date()
 })
@@ -73,7 +73,7 @@ export const GetSessionParams = zod.object({
 
 export const GetSessionResponse = zod.object({
   "id": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date()
 })
@@ -87,12 +87,12 @@ export const UpdateSessionParams = zod.object({
 })
 
 export const UpdateSessionBody = zod.object({
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']).optional()
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']).optional()
 })
 
 export const UpdateSessionResponse = zod.object({
   "id": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']),
   "creeLe": zod.coerce.date(),
   "miseAJourLe": zod.coerce.date()
 })
@@ -332,6 +332,54 @@ export const UpdateReponseResponse = zod.object({
 
 
 /**
+ * @summary Liste les blocs d'arbitrage joués dans une session
+ */
+export const ListArbitragesParams = zod.object({
+  "sessionId": zod.coerce.string()
+})
+
+export const ListArbitragesResponseItem = zod.object({
+  "id": zod.number(),
+  "sessionId": zod.string(),
+  "bloc": zod.number(),
+  "carteIds": zod.array(zod.string()).describe('Composition du bloc au moment où il a été joué. Figée : une carte retirée ensuite ne doit pas rendre la réponse illisible.\n'),
+  "carteMeilleure": zod.string().nullish().describe('Null avec cartePire quand le bloc a été passé'),
+  "cartePire": zod.string().nullish(),
+  "version": zod.number(),
+  "creeLe": zod.coerce.date(),
+  "miseAJourLe": zod.coerce.date().optional()
+})
+export const ListArbitragesResponse = zod.array(ListArbitragesResponseItem)
+
+
+/**
+ * @summary Enregistre le résultat d'un bloc d'arbitrage
+ */
+export const CreateArbitrageParams = zod.object({
+  "sessionId": zod.coerce.string()
+})
+
+export const CreateArbitrageBody = zod.object({
+  "bloc": zod.number(),
+  "carteIds": zod.array(zod.string()),
+  "carteMeilleure": zod.string().nullish(),
+  "cartePire": zod.string().nullish()
+})
+
+export const CreateArbitrageResponse = zod.object({
+  "id": zod.number(),
+  "sessionId": zod.string(),
+  "bloc": zod.number(),
+  "carteIds": zod.array(zod.string()).describe('Composition du bloc au moment où il a été joué. Figée : une carte retirée ensuite ne doit pas rendre la réponse illisible.\n'),
+  "carteMeilleure": zod.string().nullish().describe('Null avec cartePire quand le bloc a été passé'),
+  "cartePire": zod.string().nullish(),
+  "version": zod.number(),
+  "creeLe": zod.coerce.date(),
+  "miseAJourLe": zod.coerce.date().optional()
+})
+
+
+/**
  * @summary Calcule et retourne la constellation personnelle (déterministe)
  */
 export const GetConstellationParams = zod.object({
@@ -374,12 +422,27 @@ export const GetConstellationResponse = zod.object({
   "paliers": zod.number().describe('Nombre de paliers joués dans la série'),
   "reglageBascule": zod.string().nullable().describe('Le cran où la réponse a changé. Null si elle n\'a pas changé sur l\'étendue jouée — le point de bascule est alors hors de portée du jeu.\n')
 })),
+  "cartesJugees": zod.array(zod.object({
+  "carteId": zod.string(),
+  "label": zod.string(),
+  "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
+  "apparitions": zod.number().describe('Nombre de blocs où la carte a été proposée'),
+  "foisMeilleure": zod.number(),
+  "foisPire": zod.number(),
+  "score": zod.number().describe('(meilleure − pire) \/ apparitions, dans [-1, 1]')
+}).describe('La place d\'une carte dans le classement déclaré de la personne.')).describe('Classement déclaré des cartes. Vide si la phase n\'a pas été jouée.'),
+  "valeursDeclarees": zod.array(zod.object({
+  "valeur": zod.string(),
+  "scoreDeclare": zod.number(),
+  "cartes": zod.array(zod.string()).describe('Libellés des cartes qui portent cette valeur')
+}).describe('Score moyen des cartes portant cette valeur. Hypothèse, pas mesure : la personne a classé des cartes, pas des valeurs. Ne sert qu\'à repérer un écart franc avec ce qui s\'est joué en situation.\n')),
   "observations": zod.array(zod.object({
   "id": zod.string(),
   "texte": zod.string().describe('Formulation prudente (ex. \"Dans les situations explorées jusqu\'ici…\")'),
-  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture', 'point_de_bascule', 'valeur_protegee', 'contexte']),
+  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture', 'point_de_bascule', 'valeur_protegee', 'contexte', 'arbitrage', 'ecart_declare']),
   "valeursConcernees": zod.array(zod.string()),
-  "reponsesSources": zod.array(zod.number()).describe('IDs des réponses qui appuient cette observation')
+  "reponsesSources": zod.array(zod.number()).describe('IDs dans `reponses_collision` qui appuient cette observation'),
+  "arbitragesSources": zod.array(zod.number()).describe('IDs dans `arbitrages`. Séparés des précédents : les deux tables ont des identifiants qui se recouvrent, et « D\'où ça sort ? » afficherait un bloc à la place d\'une situation.\n')
 })),
   "couverture": zod.number().describe('Proportion de collisions possibles explorées (0 à 1)'),
   "stabilite": zod.number().describe('Part des tensions revues sous une autre forme qui ont reçu la même réponse (0 à 1). Vaut 1 tant qu\'aucune tension n\'a été revue.\n'),
@@ -396,10 +459,12 @@ export const GetProgresParams = zod.object({
 
 export const GetProgresResponse = zod.object({
   "sessionId": zod.string(),
-  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'collisions', 'bascules', 'constellation']),
-  "phase": zod.enum(['duels', 'bascules', 'termine']).describe('Où en est la partie, calculé depuis les réponses'),
+  "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']),
+  "phase": zod.enum(['arbitrages', 'duels', 'bascules', 'termine']).describe('Où en est la partie, calculé depuis les réponses'),
   "nombreCartes": zod.number(),
   "nombreValeurs": zod.number(),
+  "arbitragesPlanifies": zod.number().describe('Nombre de blocs d\'arbitrage prévus pour cette partie'),
+  "arbitragesRepondus": zod.number(),
   "duelsPlanifies": zod.number().describe('Nombre de duels prévus pour cette partie'),
   "duelsRepondus": zod.number(),
   "seriesPlanifiees": zod.number(),
@@ -420,7 +485,15 @@ export const GetProgresResponse = zod.object({
   "dimension": zod.string().nullish().describe('Bascule : la seule dimension qui bouge — ampleur_impact, proximite_sociale, certitude, cout_personnel, urgence, nombre_personnes, reversibilite\n'),
   "reglage": zod.string().nullish().describe('Bascule : le cran atteint à ce palier'),
   "amorce": zod.string().nullish().describe('Bascule : le décor, identique à tous les paliers de la série')
-}).describe('Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu\'une seule dimension d\'un palier à l\'autre.\n'),zod.null()])
+}).describe('Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu\'une seule dimension d\'un palier à l\'autre.\n'),zod.null()]),
+  "prochainBloc": zod.union([zod.object({
+  "bloc": zod.number().describe('Rang du bloc dans la partie, à partir de 1'),
+  "cartes": zod.array(zod.object({
+  "id": zod.string().describe('Identifiant de la carte de session, en texte'),
+  "famille": zod.enum(['lignes_rouges', 'horizons', 'tresors']),
+  "label": zod.string()
+}).describe('Une carte de la personne, réduite à ce qu\'un bloc affiche.'))
+}).describe('Quatre cartes de la personne mises côte à côte, hors situation. On demande laquelle compte le plus et laquelle compte le moins.\n'),zod.null()]).describe('Servi seulement pendant la phase d\'arbitrage. Un bloc n\'est pas une Question : il ne pose pas de situation et n\'oppose pas deux valeurs.\n')
 })
 
 
