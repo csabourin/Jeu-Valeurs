@@ -265,3 +265,13 @@ sur le niveau de détail, jamais sur la gravité du sujet.
 - Toute mutation dont dépend la suite du jeu doit brancher `onError` sur
   `useSignalerErreur()` : sans ça, un serveur en échec donne un bouton qui ne
   fait rien, sans aucune trace à l'écran.
+- **Un champ d'API récent se lit comme s'il pouvait manquer.** Le frontend est
+  un paquet statique et l'API un service à part : les deux ne se déploient pas
+  au même instant, et un serveur d'une version antérieure répond sans le champ.
+  Le contrat OpenAPI a beau le déclarer obligatoire, le type généré ment alors
+  sur la réalité, et `champ.filter(...)` fait tomber tout l'écran. Écrire
+  `(champ ?? [])` tant que la version qui l'introduit n'est pas déployée
+  partout — la section disparaît, le reste s'affiche.
+- Après un `git pull`, **redémarrer le serveur API** : il tourne depuis
+  `dist/index.mjs`, donc du code tiré mais pas rebâti continue de répondre
+  l'ancien contrat.
