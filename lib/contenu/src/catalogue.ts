@@ -22,7 +22,7 @@ import {
 } from "./cartes";
 import { valeursParCategorie } from "./categories";
 import { reecritures } from "./reecritures";
-import { limitesSimples } from "./limites-simples";
+import { limitesSaillantesIds, limitesSimples } from "./limites-simples";
 import { generateurAleatoire, melanger } from "./hasard";
 import lignesRougesImportees from "./data/red_lines.json";
 import horizonsImportes from "./data/horizons.json";
@@ -108,10 +108,27 @@ export function distribuerCartes(
   const main: CarteContenu[] = [];
 
   for (const famille of familles) {
-    const maison = melanger(
-      cartesMaison.filter((c) => c.famille === famille),
-      suivant,
-    ).slice(0, Math.min(PART_MAISON, parFamille));
+    const maisonDisponibles = cartesMaison.filter((c) => c.famille === famille);
+    const nombreMaison = Math.min(PART_MAISON, parFamille);
+    let maison: CarteContenu[];
+
+    if (famille === "lignes_rouges") {
+      // Une main doit confronter à plusieurs limites réellement saillantes,
+      // sans perdre le contraste avec les limites ordinaires du quotidien.
+      const saillantes = melanger(
+        maisonDisponibles.filter((c) => limitesSaillantesIds.has(c.id)),
+        suivant,
+      ).slice(0, Math.min(3, nombreMaison));
+      const dejaPrises = new Set(saillantes.map((c) => c.id));
+      const autres = melanger(
+        maisonDisponibles.filter((c) => !dejaPrises.has(c.id)),
+        suivant,
+      ).slice(0, nombreMaison - saillantes.length);
+
+      maison = melanger([...saillantes, ...autres], suivant);
+    } else {
+      maison = melanger(maisonDisponibles, suivant).slice(0, nombreMaison);
+    }
 
     const prises = new Set(maison.map((c) => c.id));
     const importees = melanger(

@@ -5,6 +5,28 @@
  * pression qui pourrait faire hésiter appartient au point de bascule, plus
  * tard dans le parcours — jamais au libellé de départ.
  */
+export const limitesSaillantesIds = new Set([
+  "JV1036",
+  "JV1037",
+  "JV1038",
+  "JV1039",
+  "JV1040",
+  "JV1041",
+  "JV1042",
+  "JV1043",
+  "JV1044",
+  "JV1045",
+  "JV1046",
+  "JV1047",
+  "JV1048",
+  "JV1049",
+  "JV1050",
+  "JV1051",
+  "JV1052",
+  "JV1053",
+  "JV1054",
+]);
+
 export const limitesSimples: Record<string, string> = {
   // Cartes maison
   JV1002: "Mentir à quelqu'un qui me fait confiance",
