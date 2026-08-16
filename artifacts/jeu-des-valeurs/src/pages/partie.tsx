@@ -205,6 +205,37 @@ export default function Partie() {
     );
   }
 
+  // Le frontend est un paquet statique, l'API un service à part : les deux ne
+  // se déploient pas au même instant. Un compteur **absent** n'est pas un
+  // compteur à zéro — les confondre fait afficher « 0 paire de valeurs sur 0 »
+  // avec aplomb, sur l'écran de fin, alors que la partie n'a jamais commencé.
+  // On préfère le dire.
+  const compteurs = progres as Partial<typeof progres> | undefined;
+  const apiDepassee =
+    compteurs !== undefined &&
+    compteurs.comparaisonsPlanifiees === undefined &&
+    compteurs.pairesPertinentes === undefined;
+
+  if (apiDepassee) {
+    return (
+      <Shell sessionId={sessionId} etape="partie">
+        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto">
+          <h1 className="text-2xl font-serif font-bold">
+            L'écran et le serveur ne parlent pas la même version
+          </h1>
+          <p className="text-muted-foreground">
+            L'API ne renvoie pas les compteurs que cette page attend. Ta partie
+            n'est pas perdue — c'est le serveur qui n'a pas encore été redémarré
+            avec la version courante.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Relance l'API, puis recharge cette page.
+          </p>
+        </div>
+      </Shell>
+    );
+  }
+
   if (progres && progres.comparaisonsPlanifiees === 0 && !question) {
     return (
       <Shell sessionId={sessionId} etape="partie">
@@ -229,10 +260,14 @@ export default function Partie() {
       <Shell sessionId={sessionId} etape="partie">
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 max-w-lg mx-auto animate-in fade-in zoom-in duration-500">
           <p className="eyebrow mx-auto">
-            {enEpreuve ? "Mise à l'épreuve terminée" : "Première passe terminée"}
+            {enEpreuve
+              ? "Mise à l'épreuve terminée"
+              : "Première passe terminée"}
           </p>
           <h1 className="text-3xl font-serif font-bold">
-            {enEpreuve ? "On a fait le tour, pour l'instant" : "Assez pour un premier portrait"}
+            {enEpreuve
+              ? "On a fait le tour, pour l'instant"
+              : "Assez pour un premier portrait"}
           </h1>
           <p className="text-lg text-muted-foreground">
             {progres?.comparaisonsRepondues ?? 0} comparaison
@@ -243,7 +278,11 @@ export default function Partie() {
             {progres?.pairesPertinentes ?? 0}. Le portrait ne parlera que de
             celles-là — et il se précisera si tu continues.
           </p>
-          <Button size="lg" onClick={versLeportrait} disabled={majSession.isPending}>
+          <Button
+            size="lg"
+            onClick={versLeportrait}
+            disabled={majSession.isPending}
+          >
             Voir ma constellation <MoveRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
@@ -463,7 +502,10 @@ export default function Partie() {
               )}
 
               <div className="pt-6 border-t border-border/40 space-y-3">
-                <label htmlFor="ce-qui-changerait" className="font-medium block">
+                <label
+                  htmlFor="ce-qui-changerait"
+                  className="font-medium block"
+                >
                   Qu'est-ce qui aurait pu changer ta réponse ?
                 </label>
                 <p className="text-sm text-muted-foreground">
