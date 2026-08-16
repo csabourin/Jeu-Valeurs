@@ -42,10 +42,21 @@ export interface CarteDuel extends CarteComparable {
   valeursConfirmees?: string[];
 }
 
-export type FormeDuelCartes =
-  | "limite_enjeu"
-  | "enjeu_enjeu"
-  | "limite_limite";
+/**
+ * Le jeu n'a qu'une forme de duel, et c'est volontaire.
+ *
+ * Le mécanisme est **asymétrique** : une limite — un geste qu'on refuse — mise
+ * en face d'un enjeu — une aspiration à atteindre, un essentiel à préserver.
+ *
+ *     « Jusqu'où irais-je pour obtenir ou préserver ce qui compte ? »
+ *
+ * Ce qui est exploré n'est donc pas une préférence, c'est un **prix acceptable**.
+ * Opposer deux limites entre elles, ou deux enjeux entre eux, remplirait la
+ * matrice n(n−1)/2 plus vite, mais ferait un tournoi de cartes — pas ce jeu-ci.
+ * Une paire de valeurs que seule une forme symétrique pourrait couvrir n'est
+ * donc jamais posée : elle reste hors de portée, et la couverture le dit.
+ */
+export type FormeDuelCartes = "limite_enjeu";
 
 export interface DuelCarteContenu {
   id: number;
@@ -104,63 +115,40 @@ interface Enonce {
 }
 
 /**
- * L'énoncé d'un duel, selon ce que les deux cartes sont.
+ * L'énoncé d'un duel : l'enjeu en A, la limite en B.
  *
  * `optionA` protège toujours la valeur de la carte A, `optionB` celle de la
- * carte B — comme partout ailleurs dans le jeu.
+ * carte B — comme partout ailleurs dans le jeu. Dire oui, c'est payer le prix
+ * demandé ; dire non, c'est garder la limite.
  */
-function formulerDuel(
-  carteA: CarteDuel,
-  carteB: CarteDuel,
-  forme: FormeDuelCartes,
-): Enonce {
-  if (forme === "limite_enjeu") {
-    // A est l'enjeu, B la limite : dire oui protège l'enjeu, dire non protège
-    // la limite.
-    const limite = minusculeInitiale(sansPointFinal(carteB.label));
-    return {
-      situation: `Pour ${formulerEnjeu(carteA)}, il faudrait ${limite}.`,
-      optionA: "Je le fais.",
-      optionB: "Je ne le fais pas.",
-    };
-  }
-
-  if (forme === "limite_limite") {
-    return {
-      situation: "Une des deux limites va céder. Laquelle est-ce que je garde ?",
-      optionA: `Je garde cette limite : ${sansPointFinal(carteA.label)}`,
-      optionB: `Je garde cette limite : ${sansPointFinal(carteB.label)}`,
-    };
-  }
-
+function formulerDuel(carteA: CarteDuel, carteB: CarteDuel): Enonce {
+  const limite = minusculeInitiale(sansPointFinal(carteB.label));
   return {
-    situation: "Il faut choisir : un des deux passe en premier.",
-    optionA: `Je choisis : ${sansPointFinal(carteA.label)}`,
-    optionB: `Je choisis : ${sansPointFinal(carteB.label)}`,
+    situation: `Pour ${formulerEnjeu(carteA)}, il faudrait ${limite}.`,
+    optionA: "Je le fais.",
+    optionB: "Je ne le fais pas.",
   };
 }
 
 /**
- * Ordonne la paire pour que la carte A soit toujours celle dont l'option A
- * protège la valeur — et, dans un duel limite/enjeu, que l'enjeu soit en A.
+ * Ordonne la paire : l'enjeu en A, la limite en B.
+ *
+ * Rend `null` quand la paire n'est pas une limite contre un enjeu — deux
+ * limites, ou deux enjeux. Ce n'est pas un rejet d'éligibilité (les deux cartes
+ * peuvent très bien être admissibles l'une à l'autre) : c'est que la question
+ * n'existe pas sous cette forme. Le refus vit ici plutôt que dans un filtre
+ * ailleurs, pour qu'on ne puisse pas fabriquer un duel symétrique par accident.
  */
 function ordonner(
   x: CarteDuel,
   y: CarteDuel,
-): { carteA: CarteDuel; carteB: CarteDuel; forme: FormeDuelCartes } {
+): { carteA: CarteDuel; carteB: CarteDuel } | null {
   const xEstLimite = x.famille === "lignes_rouges";
   const yEstLimite = y.famille === "lignes_rouges";
 
-  if (xEstLimite && yEstLimite) {
-    return { carteA: x, carteB: y, forme: "limite_limite" };
-  }
-  if (xEstLimite && estEnjeu(y)) {
-    return { carteA: y, carteB: x, forme: "limite_enjeu" };
-  }
-  if (yEstLimite && estEnjeu(x)) {
-    return { carteA: x, carteB: y, forme: "limite_enjeu" };
-  }
-  return { carteA: x, carteB: y, forme: "enjeu_enjeu" };
+  if (xEstLimite && estEnjeu(y)) return { carteA: y, carteB: x };
+  if (yEstLimite && estEnjeu(x)) return { carteA: x, carteB: y };
+  return null;
 }
 
 /**
@@ -180,7 +168,11 @@ export function duelsCartesPossibles(cartes: CarteDuel[]): DuelCarteContenu[] {
       const y = triees[j];
       if (!duelCartesAdmissible(x, y).admissible) continue;
 
-      const { carteA, carteB, forme } = ordonner(x, y);
+      // Deux limites, ou deux enjeux : la question n'existe pas sous cette forme.
+      const paire = ordonner(x, y);
+      if (!paire) continue;
+
+      const { carteA, carteB } = paire;
       const valeurA = valeurPortee(carteA);
       const valeurB = valeurPortee(carteB);
       if (!valeurA || !valeurB) continue;
@@ -196,8 +188,8 @@ export function duelsCartesPossibles(cartes: CarteDuel[]): DuelCarteContenu[] {
         id,
         valeurA,
         valeurB,
-        ...formulerDuel(carteA, carteB, forme),
-        forme,
+        ...formulerDuel(carteA, carteB),
+        forme: "limite_enjeu",
         carteAId: carteA.id,
         carteALabel: carteA.label,
         carteBId: carteB.id,

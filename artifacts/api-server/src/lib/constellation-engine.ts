@@ -340,7 +340,9 @@ function calculerTendances(
         contextesFavorables,
       };
     })
-    .sort((a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur));
+    .sort(
+      (a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur),
+    );
 }
 
 // ─── Tensions ────────────────────────────────────────────────────────────────
@@ -543,8 +545,7 @@ function construireTensionsPrincipales(
       type = "indecise";
     else if (
       relation.comparaisons >= 2 &&
-      Math.abs(relation.probabilite - 0.5) <
-        SEUIL_PROBABILITE_SERREE - 0.5
+      Math.abs(relation.probabilite - 0.5) < SEUIL_PROBABILITE_SERREE - 0.5
     )
       type = "serree";
 
@@ -562,9 +563,7 @@ function construireTensionsPrincipales(
   // Une paire tranchée une seule fois ne « montre » rien que l'ordination ne
   // dise déjà. On ne la remonte que si elle a tenu sur plusieurs situations.
   return classees
-    .filter(
-      (c) => c.type !== "tranchee" || c.relation.comparaisons >= 2,
-    )
+    .filter((c) => c.type !== "tranchee" || c.relation.comparaisons >= 2)
     .sort(
       (a, b) =>
         rang[a.type] - rang[b.type] ||
@@ -649,7 +648,11 @@ function calculerDimensionsSensibles(
   };
 
   for (const r of reponses) {
-    if (r.choix === "ca_depend" && r.facteurDepend && r.facteurDepend !== "autre") {
+    if (
+      r.choix === "ca_depend" &&
+      r.facteurDepend &&
+      r.facteurDepend !== "autre"
+    ) {
       ajouter(r.facteurDepend, "ca_depend");
     }
   }
@@ -658,7 +661,8 @@ function calculerDimensionsSensibles(
   }
 
   return Array.from(comptes.values()).sort(
-    (a, b) => b.occurrences - a.occurrences || a.libelle.localeCompare(b.libelle),
+    (a, b) =>
+      b.occurrences - a.occurrences || a.libelle.localeCompare(b.libelle),
   );
 }
 
@@ -939,9 +943,13 @@ export function calculerConstellation({
     new Set([...pairesDesCartes, ...pairesEcrites].flat()),
   );
 
+  // Le dénominateur se limite à ce que la partie peut réellement poser. Le
+  // mécanisme n'oppose qu'une limite à un enjeu : compter des paires hors de
+  // portée annoncerait « 12 des 40 » à quelqu'un qui a pourtant tout joué.
   const couvertureBrute = calculerCouverture(
     valeursConnues.length > 0 ? valeursConnues : valeursJouables,
     comparaisons,
+    [...pairesDesCartes, ...pairesEcrites],
   );
 
   const manifestations = new Set(
