@@ -98,8 +98,6 @@ function versReponseConnue(r: LigneReponse): ReponseConnue {
     valeurB: r.valeurB,
     choix: r.choix,
     facteurDepend: r.facteurDepend,
-    serieId: r.serieId,
-    palier: r.palier,
   };
 }
 
@@ -114,9 +112,6 @@ function versReponseSource(r: LigneReponse): ReponseSource {
     facteurDependLibre: r.facteurDependLibre ?? null,
     difficulte: r.difficulte ?? null,
     certitude: r.certitude ?? null,
-    serieId: r.serieId ?? null,
-    palier: r.palier ?? null,
-    dimension: r.dimension ?? null,
     valeurProtegee: r.valeurProtegee ?? null,
     version: r.version,
   };
@@ -182,11 +177,13 @@ router.get("/sessions/:sessionId/progres", async (req, res): Promise<void> => {
   }
 
   const parcours = calculerParcours({
-    valeursConfirmees: donnees.valeursConfirmees,
     reponses: donnees.reponses.map(versReponseConnue),
     cartes: donnees.cartes.map(versCarteArbitrable),
     arbitrages: donnees.arbitrages.map(versArbitrageSource),
     graine: donnees.session.graine,
+    // Le portrait est une porte : la personne le voit, puis décide de mettre
+    // sa constellation à l'épreuve. L'étape enregistrée retient ce choix.
+    approfondissementDemande: donnees.session.etapeCourante === "bascules",
   });
 
   res.json({
@@ -199,8 +196,9 @@ router.get("/sessions/:sessionId/progres", async (req, res): Promise<void> => {
     arbitragesRepondus: parcours.arbitragesRepondus,
     duelsPlanifies: parcours.duelsPlanifies,
     duelsRepondus: parcours.duelsRepondus,
-    seriesPlanifiees: parcours.seriesPlanifiees,
-    seriesTerminees: parcours.seriesTerminees,
+    collisionsPossibles: parcours.collisionsPossibles,
+    collisionsRepondues: parcours.collisionsRepondues,
+    classement: parcours.classement,
     nombreReponses: donnees.reponses.length,
     prochaineQuestion: parcours.prochaine,
     prochainBloc: parcours.prochainBloc,

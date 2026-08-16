@@ -391,20 +391,16 @@ export const GetConstellationResponse = zod.object({
   "version": zod.number(),
   "tendances": zod.array(zod.object({
   "valeur": zod.string(),
-  "scoreNet": zod.number().describe('Score net (victoires - défaites) \/ total significatifs'),
+  "force": zod.number().describe('Force Bradley–Terry, normalisée autour de 1'),
+  "rang": zod.number().describe('Rang à partir de 1. Les ex æquo partagent le rang.'),
   "totalCollisions": zod.number(),
   "foisPrivilegiee": zod.number().describe('Fois où cette valeur est passée devant l\'autre'),
   "foisCedee": zod.number().describe('Fois où cette valeur a cédé la place'),
   "incertitudes": zod.number().describe('ca_depend + je_ne_sais_pas'),
-  "abandonnes": zod.number().describe('passer'),
-  "difficulteMoyenne": zod.number().nullable(),
+  "difficulteMoyenne": zod.number().nullable().describe('Recueillie seulement pendant l\'approfondissement : souvent nulle après la première passe, et ce n\'est pas une anomalie.\n'),
   "certitudeMoyenne": zod.number().nullable(),
-  "territoireInexplore": zod.boolean().describe('Vrai si aucune collision résolue pour cette valeur'),
-  "estProtegee": zod.boolean().describe('Vrai si aucun compromis n\'a encore été observé — la valeur a été privilégiée à chaque fois qu\'elle a été mise à l\'épreuve. Ce n\'est pas un classement : c\'est l\'absence d\'exception connue à ce jour.\n'),
-  "domine": zod.array(zod.string()).describe('Valeurs devant lesquelles celle-ci est passée'),
-  "cedeDevant": zod.array(zod.string()).describe('Valeurs devant lesquelles celle-ci a cédé'),
-  "contextesFavorables": zod.array(zod.string()).describe('Contextes où cette valeur est passée devant')
-})),
+  "territoireInexplore": zod.boolean().describe('Vrai si aucune collision résolue pour cette valeur')
+}).describe('Une valeur telle que la partie l\'a située. La force et le rang viennent de l\'ordination Bradley–Terry ; le reste dit sur quoi elle repose.\n')),
   "tensions": zod.array(zod.object({
   "valeurA": zod.string(),
   "valeurB": zod.string(),
@@ -414,14 +410,14 @@ export const GetConstellationResponse = zod.object({
   "estStable": zod.boolean().nullable().describe('Null si la tension n\'a été rencontrée qu\'une fois. Sinon, vrai si la même tension a reçu la même réponse sous ses différentes formes.\n')
 })),
   "bascules": zod.array(zod.object({
-  "serieId": zod.string(),
-  "valeurA": zod.string(),
-  "valeurB": zod.string(),
-  "dimension": zod.string(),
-  "choixInitial": zod.enum(['A', 'B']).describe('Réponse au premier palier'),
-  "paliers": zod.number().describe('Nombre de paliers joués dans la série'),
-  "reglageBascule": zod.string().nullable().describe('Le cran où la réponse a changé. Null si elle n\'a pas changé sur l\'étendue jouée — le point de bascule est alors hors de portée du jeu.\n')
-})),
+  "limiteId": zod.string(),
+  "limiteLabel": zod.string(),
+  "tientDevant": zod.string().nullable().describe('L\'enjeu le plus lourd devant lequel la limite a tenu'),
+  "cedeDevant": zod.string().nullable().describe('L\'enjeu le plus léger devant lequel la limite a cédé'),
+  "jamaisFranchie": zod.boolean(),
+  "toujoursFranchie": zod.boolean(),
+  "ordreInverse": zod.boolean().describe('La limite a cédé devant un enjeu plus léger que celui devant lequel elle a tenu. Ce n\'est pas une incohérence à corriger : c\'est le signe que le contexte, et non le poids de l\'enjeu, a fait la différence.\n')
+}).describe('Jusqu\'où une limite tient, et à partir de quel enjeu elle devient franchissable. La question posée est : quelle importance doit avoir l\'enjeu pour que cette limite cède ?\n')),
   "cartesJugees": zod.array(zod.object({
   "carteId": zod.string(),
   "label": zod.string(),
@@ -439,7 +435,7 @@ export const GetConstellationResponse = zod.object({
   "observations": zod.array(zod.object({
   "id": zod.string(),
   "texte": zod.string().describe('Formulation prudente (ex. \"Dans les situations explorées jusqu\'ici…\")'),
-  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture', 'point_de_bascule', 'valeur_protegee', 'contexte', 'arbitrage', 'ecart_declare']),
+  "type": zod.enum(['tendance', 'tension', 'territoire_inexplore', 'stabilite', 'couverture', 'point_de_bascule', 'limite_tenue', 'arbitrage', 'ecart_declare']),
   "valeursConcernees": zod.array(zod.string()),
   "reponsesSources": zod.array(zod.number()).describe('IDs dans `reponses_collision` qui appuient cette observation'),
   "arbitragesSources": zod.array(zod.number()).describe('IDs dans `arbitrages`. Séparés des précédents : les deux tables ont des identifiants qui se recouvrent, et « D\'où ça sort ? » afficherait un bloc à la place d\'une situation.\n')
@@ -460,32 +456,40 @@ export const GetProgresParams = zod.object({
 export const GetProgresResponse = zod.object({
   "sessionId": zod.string(),
   "etapeCourante": zod.enum(['accueil', 'selection_cartes', 'confirmation_valeurs', 'arbitrages', 'collisions', 'bascules', 'constellation']),
-  "phase": zod.enum(['arbitrages', 'duels', 'bascules', 'termine']).describe('Où en est la partie, calculé depuis les réponses'),
+  "phase": zod.enum(['arbitrages', 'duels', 'portrait', 'bascules', 'termine']).describe('Où en est la partie, calculé depuis les réponses. `duels` est la première vague de collisions ; `portrait` est la porte où la personne voit son ordination et décide de la mettre à l\'épreuve ; `bascules` est l\'approfondissement.\n'),
   "nombreCartes": zod.number(),
   "nombreValeurs": zod.number(),
   "arbitragesPlanifies": zod.number().describe('Nombre de blocs d\'arbitrage prévus pour cette partie'),
   "arbitragesRepondus": zod.number(),
-  "duelsPlanifies": zod.number().describe('Nombre de duels prévus pour cette partie'),
+  "duelsPlanifies": zod.number().describe('Taille de la première vague — ce qu\'il faut jouer pour voir le portrait. Un exemplaire de chaque couple de valeurs.\n'),
   "duelsRepondus": zod.number(),
-  "seriesPlanifiees": zod.number(),
-  "seriesTerminees": zod.number(),
-  "nombreReponses": zod.number().describe('Toutes réponses confondues, duels et bascules'),
+  "collisionsPossibles": zod.number().describe('Toutes les collisions admissibles entre les cartes de la personne. Le jeu n\'impose aucun plafond : il les sert par vagues.\n'),
+  "collisionsRepondues": zod.number(),
+  "classement": zod.array(zod.object({
+  "valeur": zod.string(),
+  "force": zod.number().describe('Force Bradley–Terry, normalisée autour de 1'),
+  "rang": zod.number().describe('Rang à partir de 1. Les ex æquo partagent le rang.'),
+  "confrontations": zod.number(),
+  "gagnees": zod.number(),
+  "perdues": zod.number(),
+  "indecises": zod.number()
+}).describe('Une valeur dans l\'ordination. La force vient d\'un modèle de Bradley–Terry sur les collisions jouées : battre une valeur qui gagne souvent pèse plus que battre une valeur qui perd partout. Le classement n\'est jamais demandé à la personne, il émerge de ses arbitrages.\n')).describe('L\'ordination telle qu\'elle se présente. Vide tant que la première vague n\'est pas terminée : le portrait n\'existe pas encore.\n'),
+  "nombreReponses": zod.number().describe('Toutes réponses confondues'),
   "prochaineQuestion": zod.union([zod.object({
-  "type": zod.enum(['duel', 'bascule']),
+  "type": zod.enum(['collision']),
   "dilemmeId": zod.number(),
-  "valeurA": zod.string(),
-  "valeurB": zod.string(),
+  "valeurA": zod.string().describe('Valeur portée par l\'enjeu — celle que « oui » fait gagner'),
+  "valeurB": zod.string().describe('Valeur protégée par la limite — celle que « non » fait tenir'),
   "situation": zod.string(),
   "optionA": zod.string(),
   "optionB": zod.string(),
-  "contexte": zod.string().nullish().describe('Duel : amis, ecole, maison, en_ligne, equipe, public'),
-  "estVariante": zod.boolean().describe('Vrai si cette tension a déjà été vue sous une autre forme'),
-  "serieId": zod.string().nullish(),
-  "palier": zod.number().nullish(),
-  "dimension": zod.string().nullish().describe('Bascule : la seule dimension qui bouge — ampleur_impact, proximite_sociale, certitude, cout_personnel, urgence, nombre_personnes, reversibilite\n'),
-  "reglage": zod.string().nullish().describe('Bascule : le cran atteint à ce palier'),
-  "amorce": zod.string().nullish().describe('Bascule : le décor, identique à tous les paliers de la série')
-}).describe('Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu\'une seule dimension d\'un palier à l\'autre.\n'),zod.null()]),
+  "limiteLabel": zod.string(),
+  "enjeuLabel": zod.string(),
+  "enjeuFamille": zod.enum(['horizons', 'tresors']).describe('horizons = une aspiration à obtenir, tresors = un essentiel à garder'),
+  "estReprise": zod.boolean().describe('Vrai si ce couple de valeurs a déjà été vu à travers d\'autres cartes. C\'est ainsi que se mesure la stabilité, sans jamais demander à la personne si elle se trouve cohérente.\n'),
+  "approfondissement": zod.boolean().describe('Vrai pendant la deuxième passe seulement. C\'est le seul moment où l\'on pose les questions de difficulté, de certitude et de valeur protégée : posées à chaque collision, elles cassent le rythme.\n'),
+  "motifs": zod.array(zod.string()).describe('Pourquoi le moteur a choisi cette collision. Vide en première vague.')
+}).describe('Une collision : une limite de la personne mise en face d\'un enjeu — une aspiration qu\'elle veut atteindre, ou un essentiel qu\'elle veut préserver. `optionA` (« oui, je franchirais ») fait passer `valeurA`, portée par l\'enjeu, devant `valeurB`, protégée par la limite.\n'),zod.null()]),
   "prochainBloc": zod.union([zod.object({
   "bloc": zod.number().describe('Rang du bloc dans la partie, à partir de 1'),
   "cartes": zod.array(zod.object({

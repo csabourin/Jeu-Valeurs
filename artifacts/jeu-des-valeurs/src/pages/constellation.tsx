@@ -12,19 +12,8 @@ import {
   type ReponseCollision,
   type TendanceValeur,
 } from "@workspace/api-client-react";
-import {
-  trouverDuel,
-  trouverSerie,
-  trouverPalier,
-  libellesDimension,
-  libellesContexte,
-  combatsCartesPossibles,
-} from "@workspace/contenu";
-import type {
-  CombatCarteContenu,
-  Contexte,
-  Dimension,
-} from "@workspace/contenu";
+import { collisionsPossibles } from "@workspace/contenu";
+import type { Collision } from "@workspace/contenu";
 import { useMemo } from "react";
 import {
   Loader2,
@@ -42,7 +31,7 @@ const rubriques: Record<
   ObservationConstellation["type"],
   { titre: string; ton: string }
 > = {
-  valeur_protegee: {
+  limite_tenue: {
     titre: "N'a pas plié",
     ton: "border-secondary/30 bg-secondary/5",
   },
@@ -59,7 +48,6 @@ const rubriques: Record<
     titre: "Même conflit, autre forme",
     ton: "border-border bg-card",
   },
-  contexte: { titre: "Question de contexte", ton: "border-border bg-card" },
   territoire_inexplore: {
     titre: "Pas encore exploré",
     ton: "border-border bg-muted/30",
@@ -75,45 +63,19 @@ const rubriques: Record<
 /** Retrouve la situation jouée derrière une réponse, pour pouvoir la remontrer. */
 function decrireReponse(
   r: ReponseCollision,
-  combats: Map<number, CombatCarteContenu>,
+  collisions: Map<number, Collision>,
 ): { situation: string; choix: string } | null {
-  if (r.serieId && r.palier != null) {
-    const serie = trouverSerie(r.serieId);
-    const palier = trouverPalier(r.serieId, r.palier);
-    if (!serie || !palier) return null;
-    return {
-      situation: `${palier.situation}`,
-      choix:
-        r.choix === "A"
-          ? serie.optionA
-          : r.choix === "B"
-            ? serie.optionB
-            : libelleChoix(r.choix),
-    };
-  }
   if (r.dilemmeId == null) return null;
-  const combat = combats.get(r.dilemmeId);
-  if (combat) {
-    return {
-      situation: combat.situation,
-      choix:
-        r.choix === "A"
-          ? combat.optionA
-          : r.choix === "B"
-            ? combat.optionB
-            : libelleChoix(r.choix),
-    };
-  }
+  const collision = collisions.get(r.dilemmeId);
+  if (!collision) return null;
 
-  const duel = trouverDuel(r.dilemmeId);
-  if (!duel) return null;
   return {
-    situation: duel.situation,
+    situation: collision.situation,
     choix:
       r.choix === "A"
-        ? duel.optionA
+        ? collision.optionA
         : r.choix === "B"
-          ? duel.optionB
+          ? collision.optionB
           : libelleChoix(r.choix),
   };
 }
@@ -154,12 +116,12 @@ export default function Constellation() {
 
   const combatsPossibles = useMemo(
     () =>
-      combatsCartesPossibles(
+      collisionsPossibles(
         (cartes ?? []).map((carte) => ({
           id: String(carte.id),
           famille: carte.famille,
           label: carte.label,
-          valeursConfirmees: carte.valeursConfirmées,
+          valeurs: carte.valeursConfirmées,
         })),
       ),
     [cartes],
@@ -200,8 +162,12 @@ export default function Constellation() {
   // le reste de la carte s'affiche.
   const classees = (cartesJugees ?? []).filter((c) => c.apparitions > 0);
   const misesALepreuve = tendances.filter((t) => !t.territoireInexplore);
-  const protegees = tendances.filter((t) => t.estProtegee);
-  const bousculees = bascules.filter((b) => b.reglageBascule !== null);
+  // Une limite qui n'a cédé devant aucun enjeu rencontré. Ce n'est pas une
+  // vertu prouvée : seulement l'absence d'exception connue à ce jour.
+  const tenues = bascules.filter((b) => b.jamaisFranchie);
+  const bousculees = bascules.filter(
+    (b) => b.tientDevant !== null && b.cedeDevant !== null,
+  );
   const rien = misesALepreuve.length === 0;
   const reponseParDilemme = new Map(
     (reponses ?? [])
@@ -217,13 +183,13 @@ export default function Constellation() {
       (
         entree,
       ): entree is {
-        combat: CombatCarteContenu;
+        combat: Collision;
         reponse: ReponseCollision;
       } => entree.reponse !== undefined,
     );
   const combatsParLimite = new Map<
     string,
-    { combat: CombatCarteContenu; reponse: ReponseCollision }[]
+    { combat: Collision; reponse: ReponseCollision }[]
   >();
   for (const entree of combatsJoues) {
     const groupe = combatsParLimite.get(entree.combat.limiteId);
@@ -253,8 +219,8 @@ export default function Constellation() {
       (
         bascule,
       ): bascule is {
-        refuse: { combat: CombatCarteContenu; reponse: ReponseCollision };
-        accepte: { combat: CombatCarteContenu; reponse: ReponseCollision };
+        refuse: { combat: Collision; reponse: ReponseCollision };
+        accepte: { combat: Collision; reponse: ReponseCollision };
       } => bascule.refuse !== undefined && bascule.accepte !== undefined,
     );
 
@@ -406,7 +372,7 @@ export default function Constellation() {
               />
             </div>
 
-            {protegees.length > 0 && (
+            {tenues.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
                   <ShieldCheck
@@ -416,16 +382,16 @@ export default function Constellation() {
                   Ce qui n'a pas plié
                 </h2>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {protegees.map((t) => (
+                  {tenues.map((b) => (
                     <div
-                      key={t.valeur}
+                      key={b.limiteId}
                       className="rounded-xl border border-secondary/30 bg-secondary/5 p-4"
                     >
-                      <p className="font-medium">{t.valeur}</p>
+                      <p className="font-medium">{b.limiteLabel}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Choisie {t.foisPrivilegiee} fois sur {t.foisPrivilegiee}
-                        , contre {t.domine.join(", ")}. Aucune situation jouée
-                        ne l'a fait céder — jusqu'ici.
+                        Aucun des enjeux rencontrés ne t'a fait franchir cette
+                        limite. Ça ne veut pas dire qu'elle ne céderait jamais —
+                        seulement qu'aucune situation jouée ne l'a fait bouger.
                       </p>
                     </div>
                   ))}
@@ -466,7 +432,7 @@ export default function Constellation() {
               </section>
             )}
 
-            {bascules.length > 0 && (
+            {bousculees.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-serif font-semibold flex items-center gap-2">
                   <SlidersHorizontal
@@ -476,32 +442,24 @@ export default function Constellation() {
                   Tes points de bascule
                 </h2>
                 <div className="space-y-3">
-                  {bascules.map((b) => (
+                  {bousculees.map((b) => (
                     <div
-                      key={b.serieId}
+                      key={b.limiteId}
                       className="rounded-xl border border-accent/30 bg-accent/5 p-4"
                     >
                       <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                        {b.valeurA} contre {b.valeurB} — on faisait monter{" "}
-                        {libellesDimension[b.dimension as Dimension] ??
-                          b.dimension}
+                        {b.limiteLabel}
                       </p>
                       <p className="mt-2">
-                        {b.reglageBascule ? (
-                          <>
-                            Ta réponse a changé à :{" "}
-                            <span className="font-medium">
-                              {b.reglageBascule}
-                            </span>
-                            .
-                          </>
-                        ) : (
-                          <>
-                            Ta réponse n'a pas bougé, même au dernier cran. Si
-                            un point de bascule existe, il est plus loin que ce
-                            que le jeu est allé.
-                          </>
-                        )}
+                        Tu tiens devant{" "}
+                        <span className="font-medium">{b.tientDevant}</span>, et
+                        tu cèdes devant{" "}
+                        <span className="font-medium">{b.cedeDevant}</span>.
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {b.ordreInverse
+                          ? "L'enjeu devant lequel tu as cédé pèse pourtant moins lourd, ailleurs dans ta partie. Ce n'est pas une contradiction : quelque chose dans la situation, et pas seulement le poids de l'enjeu, a changé la priorité."
+                          : "C'est entre les deux que passe ta limite."}
                       </p>
                     </div>
                   ))}
@@ -522,7 +480,7 @@ export default function Constellation() {
                     reponses={obs.reponsesSources
                       .map((id) => parId.get(id))
                       .filter((r): r is ReponseCollision => r !== undefined)}
-                    combats={combatsParId}
+                    collisions={combatsParId}
                   />
                 ))}
               </div>
@@ -584,7 +542,7 @@ export default function Constellation() {
   );
 }
 
-function formulerEnjeu(combat: CombatCarteContenu): string {
+function formulerEnjeu(combat: Collision): string {
   const label =
     combat.enjeuLabel.length > 0
       ? combat.enjeuLabel[0].toLocaleLowerCase("fr") +
@@ -610,15 +568,15 @@ function Tuile({ valeur, label }: { valeur: string; label: string }) {
 function Observation({
   obs,
   reponses,
-  combats,
+  collisions,
 }: {
   obs: ObservationConstellation;
   reponses: ReponseCollision[];
-  combats: Map<number, CombatCarteContenu>;
+  collisions: Map<number, Collision>;
 }) {
   const rubrique = rubriques[obs.type];
   const sources = reponses
-    .map((r) => ({ id: r.id, detail: decrireReponse(r, combats) }))
+    .map((r) => ({ id: r.id, detail: decrireReponse(r, collisions) }))
     .filter(
       (s): s is { id: number; detail: { situation: string; choix: string } } =>
         s.detail !== null,
@@ -651,14 +609,15 @@ function Observation({
 }
 
 function LigneTendance({ tendance }: { tendance: TendanceValeur }) {
-  const contextes = tendance.contextesFavorables
-    .map((c) => libellesContexte[c as Contexte])
-    .filter(Boolean);
-
   return (
     <div className="rounded-lg border border-border/60 bg-card p-4">
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
-        <span className="font-medium">{tendance.valeur}</span>
+        <span className="font-medium">
+          <span className="text-muted-foreground tabular-nums mr-2">
+            {tendance.rang}.
+          </span>
+          {tendance.valeur}
+        </span>
         <span className="text-sm text-muted-foreground">
           {tendance.foisPrivilegiee} fois devant · {tendance.foisCedee} fois
           derrière
@@ -666,26 +625,12 @@ function LigneTendance({ tendance }: { tendance: TendanceValeur }) {
             ` · ${tendance.incertitudes} non tranchée${tendance.incertitudes > 1 ? "s" : ""}`}
         </span>
       </div>
-      <dl className="mt-2 space-y-1 text-sm text-muted-foreground">
-        {tendance.domine.length > 0 && (
-          <div className="flex gap-2">
-            <dt className="shrink-0">Est passée devant :</dt>
-            <dd>{tendance.domine.join(", ")}</dd>
-          </div>
-        )}
-        {tendance.cedeDevant.length > 0 && (
-          <div className="flex gap-2">
-            <dt className="shrink-0">A cédé devant :</dt>
-            <dd>{tendance.cedeDevant.join(", ")}</dd>
-          </div>
-        )}
-        {contextes.length > 0 && (
-          <div className="flex gap-2">
-            <dt className="shrink-0">Gagne surtout :</dt>
-            <dd>{contextes.join(", ").toLowerCase()}</dd>
-          </div>
-        )}
-      </dl>
+      {tendance.territoireInexplore && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Cette valeur n'a encore rencontré aucune situation. Sa place reste à
+          découvrir.
+        </p>
+      )}
     </div>
   );
 }

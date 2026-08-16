@@ -9,23 +9,27 @@ import type { BlocArbitrage } from './blocArbitrage';
 import type { ProgresEtapeCourante } from './progresEtapeCourante';
 import type { ProgresPhase } from './progresPhase';
 import type { Question } from './question';
+import type { RangValeur } from './rangValeur';
 
 export interface Progres {
   sessionId: string;
   etapeCourante: ProgresEtapeCourante;
-  /** Où en est la partie, calculé depuis les réponses */
+  /** Où en est la partie, calculé depuis les réponses. `duels` est la première vague de collisions ; `portrait` est la porte où la personne voit son ordination et décide de la mettre à l'épreuve ; `bascules` est l'approfondissement. */
   phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
   /** Nombre de blocs d'arbitrage prévus pour cette partie */
   arbitragesPlanifies: number;
   arbitragesRepondus: number;
-  /** Nombre de duels prévus pour cette partie */
+  /** Taille de la première vague — ce qu'il faut jouer pour voir le portrait. Un exemplaire de chaque couple de valeurs. */
   duelsPlanifies: number;
   duelsRepondus: number;
-  seriesPlanifiees: number;
-  seriesTerminees: number;
-  /** Toutes réponses confondues, duels et bascules */
+  /** Toutes les collisions admissibles entre les cartes de la personne. Le jeu n'impose aucun plafond : il les sert par vagues. */
+  collisionsPossibles: number;
+  collisionsRepondues: number;
+  /** L'ordination telle qu'elle se présente. Vide tant que la première vague n'est pas terminée : le portrait n'existe pas encore. */
+  classement: RangValeur[];
+  /** Toutes réponses confondues */
   nombreReponses: number;
   prochaineQuestion: Question | null;
   /** Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une Question : il ne pose pas de situation et n'oppose pas deux valeurs. */

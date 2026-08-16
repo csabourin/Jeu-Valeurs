@@ -1,9 +1,17 @@
 # Le jeu des valeurs
 
-Un jeu Web en français canadien. La personne prend des cartes concrètes (lignes
-rouges, horizons, trésors), le jeu les met en duel dans des situations
-ordinaires, puis fait monter un seul réglage à la fois pour trouver où sa
-réponse bascule. À la fin, une carte de ce qui est passé devant quoi — et rien
+Un jeu Web en français canadien. Il explore **le prix qu'on est prêt à payer
+pour ce qui compte**. La personne prend des cartes concrètes — ses **limites**
+(ce qu'elle refuse de faire), ses **aspirations** (ce qu'elle veut atteindre),
+ses **essentiels** (ce qu'elle veut préserver) — et le jeu met une limite en
+face d'un enjeu :
+
+> « Serais-tu prêt à franchir cette limite pour obtenir ou préserver cet
+> enjeu ? »
+
+Les valeurs restent dessous : chaque carte en porte une ou plusieurs, et le
+classement **émerge** des arbitrages plutôt que d'être demandé. À la fin, une
+carte de ce qui est passé devant quoi, jusqu'où chaque limite tient — et rien
 de plus.
 
 **Ce n'est pas un test, pas un diagnostic, pas un outil de connaissance de soi
@@ -62,8 +70,14 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
 
 ## Where things live
 
-- `lib/contenu/` — **tout le matériel du jeu, en code** : valeurs, cartes, duels,
-  séries de bascule, et le planificateur de parcours
+- `lib/contenu/` — **tout le matériel du jeu, en code** : lexique des valeurs,
+  cartes, règles d'éligibilité, générateur de collisions, modèle de préférence
+  et planificateur de parcours
+- `lib/contenu/src/lexique.ts` — les trois couches : valeur fine → famille → domaine
+- `lib/contenu/src/eligibilite.ts` — la distance entre deux valeurs, et ce qu'on refuse d'opposer
+- `lib/contenu/src/collisions.ts` — la génération des questions limite × enjeu
+- `lib/contenu/src/ordination.ts` — Bradley–Terry, tensions et points de bascule
+- `lib/contenu/src/exploration.ts` — où creuser pendant la deuxième passe
 - `lib/contenu/src/data/` — le jeu de 825 cartes importé, laissé tel quel
 - `lib/contenu/src/reecritures.ts` — la relecture des libellés importés, par identifiant
 - `lib/contenu/src/categories.ts` — les 70 catégories importées vers les valeurs
@@ -102,9 +116,9 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
   parcourent pas : `distribuerCartes(graine)` en tire 18 par famille, dont 6
   maison garanties pour ancrer le ton. Stable pour une partie donnée.
 - **Le parcours est piloté par le contenu, pas par les paires de valeurs.** On ne
-  pose que des situations écrites à la main. C'est ce qui empêche le jeu de
-  retomber sur « Liberté ou Sécurité ? » posé à froid. Une paire sans situation
-  écrite n'est simplement jamais posée.
+  pose que des collisions entre **ses** cartes. C'est ce qui empêche le jeu de
+  retomber sur « Liberté ou Sécurité ? » posé à froid : la question est toujours
+  un acte concret mis en face d'un enjeu concret.
 - **Hasard reproductible, pas déterminisme figé.** Chaque partie tire une
   `graine` à sa création (colonne `sessions.graine`) ; tout le tirage de
   situations en découle. Deux parties bâties sur les mêmes cartes ne servent
@@ -112,13 +126,30 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
   elle-même — rafraîchir la page ne rejoue rien. Un `Math.random()` direct
   casserait la seconde propriété, puisque le parcours est recalculé à chaque
   requête de progrès. Aucun LLM nulle part.
-- **Une bascule ne fait bouger qu'une chose.** Les deux options d'une série sont
-  définies au niveau de la série, jamais du palier : seule la situation change.
-  C'est ce qui rend le point de bascule interprétable.
-- **Un changement de réponse n'est jamais une contradiction.** La stabilité se
-  mesure uniquement sur les duels (variantes d'une même tension). Un basculement
-  à l'intérieur d'une série est le résultat recherché, pas une incohérence.
-- **Les arbitrages passent avant les duels.** On compare les cartes de la
+- **Le mécanisme est asymétrique.** Limite contre enjeu, jamais limite contre
+  limite ni aspiration contre aspiration. Remplir une matrice statistique en
+  opposant n'importe quelles cartes ferait un tournoi, pas ce jeu-ci.
+- **Jamais de collision circulaire.** Si la limite protège l'autonomie et que
+  l'enjeu porte l'autonomie, la question devient « sacrifierais-tu ton autonomie
+  pour préserver ton autonomie ? ». Deux cartes lexicalement très différentes
+  peuvent protéger la même chose : c'est la distance entre les valeurs
+  sous-jacentes qui décide, pas les libellés. Voir `eligibilite.ts`.
+- **Le classement émerge, on ne le demande pas.** Bradley–Terry sur les
+  collisions jouées : battre une valeur qui gagne souvent pèse plus que battre
+  une valeur qui perd partout. Un compte de victoires mettrait à égalité deux
+  valeurs dont l'une n'a affronté que des faibles.
+- **Un cycle n'est pas une erreur.** A > B, B > C, C > A est humain. Les trois
+  forces sortent voisines, et c'est un excellent endroit où creuser ensuite.
+- **Un changement de réponse n'est jamais une contradiction.** Une limite
+  franchie ici et tenue là dit que le contexte a changé la priorité. C'est
+  l'information la plus intéressante du jeu. La stabilité se mesure en revoyant
+  un même couple de valeurs sous d'autres cartes — jamais en demandant à la
+  personne si elle se trouve cohérente.
+- **La première passe reste légère.** La question, quatre réponses, rien
+  d'autre. Difficulté, certitude et « qu'est-ce que tu protégeais » cassent le
+  rythme quand elles suivent chaque collision : elles n'arrivent qu'à
+  l'approfondissement, une fois que la personne a déjà un portrait à elle.
+- **Les arbitrages passent avant les collisions.** On compare les cartes de la
   personne à froid, puis les situations les mettent à l'épreuve. L'inverse
   mesurerait ce que les duels viennent de mettre en tête, et l'écart entre le
   dit et le joué — l'observation que cette phase existe pour rendre possible —
@@ -154,17 +185,24 @@ que sur le `postMerge` de Replit — pas sur un `git pull` lancé à la main.
    n'est coché d'avance** : une suggestion du jeu n'est pas une réponse. Minimum
    2 raisons distinctes.
 4. **Tes cartes entre elles** — jusqu'à 6 blocs de 4 cartes : laquelle compte le
-   plus, laquelle le moins. Hors situation, avant les duels. Minimum 3 cartes.
-5. **Duels** — jusqu'à 12 situations, tirées par la graine parmi toutes celles
-   que tes cartes rendent possibles. Réponses : A / B / Ça dépend / Je ne sais
-   pas / Passer. Les variantes rejouent une même tension autrement, en fin de
-   phase. « Ça dépend » demande de quoi.
-6. **Bascules** — jusqu'à 3 séries de 3 paliers, servies pour les tensions déjà
-   tranchées franchement. La série s'arrête dès que la réponse change : le point
-   de bascule est trouvé. Pas de « ça dépend » ici — c'est le jeu qui tient le
-   réglage.
-7. **Ta carte** — ce qui n'a pas plié, les points de bascule, les tensions
-   ouvertes, le détail chiffré, et ce que tout ça ne dit pas.
+   plus, laquelle le moins. Hors situation, avant les collisions. Minimum 3 cartes.
+5. **Collisions** — « Serais-tu prêt à _[limite]_ pour _[enjeu]_ ? ». Réponses :
+   Oui / Non / Ça dépend / Je ne sais pas / Passer, et rien d'autre. La première
+   vague sert un exemplaire de chaque couple de valeurs, plafonnée à 24 pour que
+   le portrait arrive vite — le nombre de couples croît en n(n−1)/2, et au-delà
+   d'une vingtaine on répond à une série plutôt qu'à des questions.
+6. **Ton premier portrait** — l'ordination obtenue, montrée telle quelle. C'est
+   une porte, pas une fin : « mettre à l'épreuve » ouvre la deuxième passe, et
+   la personne teste alors sa propre constellation au lieu de répondre à une
+   interminable série de questions.
+7. **À l'épreuve** — le moteur choisit les collisions les plus informatives :
+   deux valeurs à égalité, un couple qui a déjà changé de réponse, un « ça
+   dépend » qui revient, une limite qui n'a jamais cédé, une limite qui a cédé
+   devant un enjeu plus léger. C'est ici qu'on demande la difficulté et la
+   certitude. Aucun plafond : tout ce qui est admissible finit par se jouer.
+8. **Ta carte** — l'ordination, les limites qui n'ont pas plié, les points de
+   bascule (jusqu'où une limite tient, à partir de quel enjeu elle cède), les
+   tensions ouvertes, et ce que tout ça ne dit pas.
 
 ## Relire une carte importée
 
@@ -197,16 +235,23 @@ identifiant inexistant.
 
 ## Écrire du contenu
 
-Les règles sont en tête de `duels.ts` et `bascules.ts`. En résumé :
+Les situations ne s'écrivent plus à la main : elles se fabriquent à partir des
+cartes de la personne (`collisions.ts`). Ce qui s'écrit, ce sont les **cartes**
+et le **lexique**. Les règles sont en tête de `cartes.ts` et `lexique.ts`. En
+résumé :
 
-- une situation se passe quelque part de précis, en une ou deux phrases ;
-- `optionA` protège `valeurA`, `optionB` protège `valeurB` — jamais les deux,
-  jamais ni l'une ni l'autre ;
-- les deux options coûtent quelque chose : pas de bonne réponse ;
-- une seule chose change entre les deux options (pas de coût caché d'un côté) ;
-- **la situation a le droit de coûter cher** — un renvoi, une plainte, un couple
+- une carte nomme un acte, un projet ou un bien concret — pas une valeur ;
+- une limite doit être une limite : un geste qu'on refuse, nommé franchement ;
+- une aspiration s'obtient, un essentiel se garde — la nuance change le verbe
+  de la question qui sera fabriquée ;
+- **une carte a le droit de coûter cher** — un renvoi, une plainte, un couple
   qui casse. C'est là que deux valeurs se départagent vraiment ;
-- les identifiants sont stables — ne jamais réutiliser un identifiant retiré.
+- une valeur fine dit ce qu'elle fait _faire_, à la deuxième personne ;
+- deux valeurs qu'on ne voudrait jamais voir opposées se déclarent `voisines` ;
+  deux valeurs d'une même famille ne se rencontrent que si une `tension` est
+  déclarée entre elles ;
+- les identifiants de carte sont stables — ne jamais réutiliser un identifiant
+  retiré.
 
 ### Pour qui, et la seule limite
 
@@ -230,12 +275,20 @@ sur le niveau de détail, jamais sur la gravité du sujet.
 - **« D'où ça sort ? » ne rouvre pas les blocs d'arbitrage.** Les identifiants
   voyagent déjà (`arbitragesSources`) et sont stockés ; c'est l'écran de
   constellation qui n'affiche encore que les situations.
-- **Les 30 dilemmes importés** (`data/dilemmas.json`) ont servi de squelettes
-  aux duels 201-230 ; le fichier reste comme trace, il n'est pas lu à
-  l'exécution.
+- **Les 30 dilemmes importés** (`data/dilemmas.json`) et les anciens duels
+  écrits à la main (`duels.ts`, `bascules.ts`) ne sont plus lus à l'exécution :
+  le parcours ne sert que des collisions. Les fichiers restent comme trace, à
+  supprimer quand on aura confirmé qu'on n'y revient pas.
+- **Le lexique est à étoffer.** 78 valeurs fines sous 19 familles ; il en
+  faudrait plus, et surtout des `voisines` déclarées entre familles — c'est la
+  seule chose qui empêche « perdre ma liberté de décision pour préserver mon
+  indépendance ».
+- **Les cartes du catalogue ne portent que des familles**, pas de valeurs fines.
+  Le moteur travaille alors à la maille famille, ce qui marche mais dit moins.
+  L'écran « Tes mots » devrait proposer les valeurs fines de la famille suggérée.
+- **« Je ne trouve pas ce qui me correspond »** — l'échappatoire à la sélection
+  de cartes, avec réponse libre et association confirmée par la personne.
 - **Comparaison entre deux profils**, avec consentement.
-- Reprise fine à l'intérieur d'une série après fermeture de l'onglet (on reprend
-  au palier suivant, ce qui est correct, mais l'étape affichée reste large).
 
 ## Gotchas
 

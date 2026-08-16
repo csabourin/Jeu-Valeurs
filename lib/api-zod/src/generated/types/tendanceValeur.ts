@@ -6,10 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
+/**
+ * Une valeur telle que la partie l'a située. La force et le rang viennent de l'ordination Bradley–Terry ; le reste dit sur quoi elle repose.
+ */
 export interface TendanceValeur {
   valeur: string;
-  /** Score net (victoires - défaites) / total significatifs */
-  scoreNet: number;
+  /** Force Bradley–Terry, normalisée autour de 1 */
+  force: number;
+  /** Rang à partir de 1. Les ex æquo partagent le rang. */
+  rang: number;
   totalCollisions: number;
   /** Fois où cette valeur est passée devant l'autre */
   foisPrivilegiee: number;
@@ -17,20 +22,13 @@ export interface TendanceValeur {
   foisCedee: number;
   /** ca_depend + je_ne_sais_pas */
   incertitudes: number;
-  /** passer */
-  abandonnes: number;
-  /** @nullable */
+  /**
+     * Recueillie seulement pendant l'approfondissement : souvent nulle après la première passe, et ce n'est pas une anomalie.
+     * @nullable
+     */
   difficulteMoyenne: number | null;
   /** @nullable */
   certitudeMoyenne: number | null;
   /** Vrai si aucune collision résolue pour cette valeur */
   territoireInexplore: boolean;
-  /** Vrai si aucun compromis n'a encore été observé — la valeur a été privilégiée à chaque fois qu'elle a été mise à l'épreuve. Ce n'est pas un classement : c'est l'absence d'exception connue à ce jour. */
-  estProtegee: boolean;
-  /** Valeurs devant lesquelles celle-ci est passée */
-  domine: string[];
-  /** Valeurs devant lesquelles celle-ci a cédé */
-  cedeDevant: string[];
-  /** Contextes où cette valeur est passée devant */
-  contextesFavorables: string[];
 }

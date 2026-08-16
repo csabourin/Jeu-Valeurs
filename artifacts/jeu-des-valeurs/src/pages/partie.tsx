@@ -13,11 +13,10 @@ import {
   type ReponseCollisionInputChoix,
   type SessionUpdateEtapeCourante,
 } from "@workspace/api-client-react";
-import { libellesContexte, libellesDimension } from "@workspace/contenu";
-import type { Contexte, Dimension } from "@workspace/contenu";
+
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoveRight, Loader2, SlidersHorizontal, Swords } from "lucide-react";
+import { MoveRight, Loader2, Swords, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 /** Toutes les N réponses tranchées, on demande ce que la personne protégeait. */
@@ -31,6 +30,9 @@ const CADENCE_QUESTION_PROTEGEE = 4;
 const etapeParPhase: Record<string, SessionUpdateEtapeCourante | undefined> = {
   arbitrages: "arbitrages",
   duels: "collisions",
+  // `portrait` n'y est pas : c'est la personne qui décide de passer à
+  // l'approfondissement, et c'est ce clic qui enregistre « bascules ». Le noter
+  // ici sauterait la porte.
   bascules: "bascules",
 };
 
@@ -114,6 +116,9 @@ export default function Partie() {
   const envoyer = (choixFinal: ReponseCollisionInputChoix) => {
     if (!question || envoiEnCours) return;
     const passe = choixFinal === "passer";
+    // La première passe reste légère : la question, quatre réponses, rien
+    // d'autre. Difficulté et certitude n'arrivent qu'à l'approfondissement.
+    const detaille = question.approfondissement && !passe;
     setEnvoiEnCours(true);
 
     creerReponse.mutate(
@@ -126,12 +131,9 @@ export default function Partie() {
           choix: choixFinal,
           facteurDepend: choixFinal === "ca_depend" ? facteur : null,
           facteurDependLibre: facteur === "autre" ? facteurLibre : null,
-          difficulte: passe ? null : difficulte,
-          certitude: passe ? null : certitude,
-          serieId: question.serieId ?? null,
-          palier: question.palier ?? null,
-          dimension: question.dimension ?? null,
-          valeurProtegee: passe ? null : valeurProtegee,
+          difficulte: detaille ? difficulte : null,
+          certitude: detaille ? certitude : null,
+          valeurProtegee: detaille ? valeurProtegee : null,
         },
       },
       {
@@ -156,7 +158,34 @@ export default function Partie() {
     setChoix(c);
     if (c === "passer") envoyer(c);
     else if (c === "ca_depend") setEtape("depend");
-    else setEtape("reglages");
+    else if (question?.approfondissement) setEtape("reglages");
+    // Première vague : on enchaîne. Les questions de réglage cassent le rythme
+    // quand elles suivent chaque collision.
+    else envoyer(c);
+  };
+
+  /** Après « ça dépend », on ne pousse vers les réglages qu'en approfondissement. */
+  const apresFacteur = () => {
+    if (question?.approfondissement) setEtape("reglages");
+    else envoyer("ca_depend");
+  };
+
+  const approfondir = () => {
+    majSession.mutate(
+      { sessionId, data: { etapeCourante: "bascules" } },
+      {
+        onSuccess: () =>
+          queryClient.invalidateQueries({
+            queryKey: getGetProgresQueryKey(sessionId),
+          }),
+        onError: (erreur) =>
+          toast({
+            title: "Impossible de continuer",
+            description: erreur.message,
+            variant: "destructive",
+          }),
+      },
+    );
   };
 
   const terminer = () => {
@@ -218,17 +247,81 @@ export default function Partie() {
     );
   }
 
+  // Le portrait : la personne voit ce que ses premiers choix dessinent, puis
+  // décide si elle veut le mettre à l'épreuve. Ce n'est pas une fin d'écran,
+  // c'est une porte — et c'est ce qui change la nature de la deuxième passe.
+  if (progres?.phase === "portrait") {
+    const restantes =
+      (progres.collisionsPossibles ?? 0) - (progres.collisionsRepondues ?? 0);
+
+    return (
+      <Shell sessionId={sessionId} etape="partie">
+        <div className="max-w-2xl mx-auto w-full space-y-8 animate-in fade-in duration-500">
+          <header className="text-center space-y-3">
+            <p className="eyebrow">Première constellation</p>
+            <h1 className="text-3xl md:text-4xl font-serif font-bold">
+              Voici ce que tes premiers choix semblent montrer
+            </h1>
+            <p className="text-muted-foreground">
+              Rien n'est figé : c'est ce qui est ressorti des situations que tu
+              viens de jouer, pas un verdict sur toi.
+            </p>
+          </header>
+
+          <ol className="space-y-2">
+            {(progres.classement ?? []).slice(0, 8).map((rang) => (
+              <li
+                key={rang.valeur}
+                className="flex items-center gap-4 rounded-xl border border-border/60 bg-card px-4 py-3"
+              >
+                <span className="text-sm font-medium text-muted-foreground w-6 shrink-0">
+                  {rang.rang}
+                </span>
+                <span className="flex-1 font-medium">{rang.valeur}</span>
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {rang.gagnees}/{rang.confrontations} fois devant
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <div className="rounded-2xl border border-accent/30 bg-accent/5 p-5 space-y-3 text-center">
+            <p className="font-medium">Maintenant, mettons-la à l'épreuve.</p>
+            <p className="text-sm text-muted-foreground">
+              {restantes} situation{restantes > 1 ? "s" : ""} peuvent encore
+              être jouées. Le jeu ira chercher celles qui en apprennent le plus.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3 pt-1">
+              <Button
+                size="lg"
+                onClick={approfondir}
+                disabled={majSession.isPending}
+              >
+                <Sparkles className="w-4 h-4 mr-2" /> Mettre à l'épreuve
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={terminer}
+                disabled={majSession.isPending}
+              >
+                M'en tenir là
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Shell>
+    );
+  }
+
   if (!question) {
     return (
       <Shell sessionId={sessionId} etape="partie">
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 max-w-lg mx-auto animate-in fade-in zoom-in duration-500">
           <h1 className="text-3xl font-serif font-bold">Manche terminée</h1>
           <p className="text-lg text-muted-foreground">
-            Tu as joué {progres?.duelsRepondus ?? 0} combat
-            {(progres?.duelsRepondus ?? 0) > 1 && "s"}
-            {(progres?.seriesTerminees ?? 0) > 0 &&
-              ` et ${progres?.seriesTerminees} série${(progres?.seriesTerminees ?? 0) > 1 ? "s" : ""} de bascule`}
-            . Voyons ce que ça donne.
+            Tu as joué {progres?.collisionsRepondues ?? 0} situation
+            {(progres?.collisionsRepondues ?? 0) > 1 && "s"}. Voyons ce que ça
+            donne.
           </p>
           <Button size="lg" onClick={terminer} disabled={majSession.isPending}>
             Voir ma carte <MoveRight className="w-5 h-5 ml-2" />
@@ -238,12 +331,15 @@ export default function Partie() {
     );
   }
 
-  const estCombatCartes = question.dilemmeId >= 1_000_000_000;
-  const estBascule =
-    question.type === "bascule" || (estCombatCartes && question.estVariante);
-  const totalPrevu =
-    (progres?.duelsPlanifies ?? 0) + (progres?.seriesPlanifiees ?? 0);
-  const faits = (progres?.duelsRepondus ?? 0) + (progres?.seriesTerminees ?? 0);
+  // Pendant la première vague, la barre mesure le chemin jusqu'au portrait ;
+  // ensuite, ce qu'il reste de collisions possibles.
+  const enApprofondissement = question.approfondissement;
+  const totalPrevu = enApprofondissement
+    ? (progres?.collisionsPossibles ?? 0)
+    : (progres?.duelsPlanifies ?? 0);
+  const faits = enApprofondissement
+    ? (progres?.collisionsRepondues ?? 0)
+    : (progres?.duelsRepondus ?? 0);
   const avancement = totalPrevu > 0 ? (faits / totalPrevu) * 100 : 0;
   const enCours = creerReponse.isPending || envoiEnCours;
 
@@ -253,19 +349,19 @@ export default function Partie() {
         <div>
           <div className="flex justify-between text-sm text-muted-foreground mb-2 font-medium">
             <span className="inline-flex items-center gap-2">
-              {estBascule ? (
+              {enApprofondissement ? (
                 <>
-                  <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />{" "}
-                  Bascule
+                  <Sparkles className="w-4 h-4" aria-hidden="true" /> À
+                  l'épreuve
                 </>
               ) : (
                 <>
-                  <Swords className="w-4 h-4" aria-hidden="true" /> Combat
+                  <Swords className="w-4 h-4" aria-hidden="true" /> Collision
                 </>
               )}
             </span>
             <span>
-              {progres?.duelsRepondus} / {progres?.duelsPlanifies} combats
+              {faits} / {totalPrevu} situations
             </span>
           </div>
           <Progress
@@ -298,18 +394,14 @@ export default function Partie() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
-              {/* Dans une bascule, le réglage est justement ce que le jeu
-                  contrôle : « ça dépend » n'y a plus de sens. */}
-              {!estBascule && (
-                <Button
-                  variant="outline"
-                  className="rounded-full"
-                  disabled={enCours}
-                  onClick={() => choisir("ca_depend")}
-                >
-                  Ça dépend
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                className="rounded-full"
+                disabled={enCours}
+                onClick={() => choisir("ca_depend")}
+              >
+                Ça dépend
+              </Button>
               <Button
                 variant="outline"
                 className="rounded-full"
@@ -375,7 +467,7 @@ export default function Partie() {
                 disabled={
                   !facteur || (facteur === "autre" && !facteurLibre.trim())
                 }
-                onClick={() => setEtape("reglages")}
+                onClick={apresFacteur}
               >
                 Continuer <MoveRight className="w-4 h-4 ml-2" />
               </Button>
@@ -486,65 +578,41 @@ export default function Partie() {
 }
 
 function EnTeteQuestion({ question }: { question: Question }) {
-  if (question.estVariante && question.dimension === "enjeu") {
-    return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-2">
-          <p className="text-xs uppercase tracking-wider text-accent font-medium">
-            Même limite — nouvel enjeu
-          </p>
-          <p className="text-muted-foreground">
-            L'acte reste le même. Regarde si cette nouvelle raison déplace ta
-            réponse.
-          </p>
-        </div>
-        <p className="text-xl md:text-2xl font-serif leading-snug">
-          {question.situation}
-        </p>
-      </div>
-    );
-  }
+  // Une aspiration s'obtient, un essentiel se garde. La nuance change ce que la
+  // question met en balance, donc elle est dite à l'écran.
+  const roleEnjeu =
+    question.enjeuFamille === "tresors"
+      ? "Ce que tu voudrais garder"
+      : "Ce que tu voudrais atteindre";
 
-  if (question.type === "bascule") {
-    const dimension =
-      libellesDimension[question.dimension as Dimension] ?? "le réglage";
-    return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-2">
-          <p className="text-xs uppercase tracking-wider text-accent font-medium">
-            Même situation — on monte {dimension}
-          </p>
-          <p className="text-muted-foreground">{question.amorce}</p>
-          {question.reglage && (
-            <p className="font-medium">
-              Cette fois :{" "}
-              <span className="text-foreground">{question.reglage}</span>
-            </p>
-          )}
-        </div>
-        <p className="text-xl md:text-2xl font-serif leading-snug">
-          {question.situation}
-        </p>
-      </div>
-    );
-  }
-
-  const contexte = libellesContexte[question.contexte as Contexte];
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-        {contexte && (
-          <span className="bg-muted px-2 py-1 rounded-full">{contexte}</span>
-        )}
-        <span className="bg-muted px-2 py-1 rounded-full">
-          {question.valeurA} contre {question.valeurB}
-        </span>
-        {question.estVariante && (
-          <span className="bg-muted px-2 py-1 rounded-full">
-            Déjà croisé, autrement
-          </span>
-        )}
+      {question.estReprise && (
+        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-2">
+          <p className="text-xs uppercase tracking-wider text-accent font-medium">
+            On y revient autrement
+          </p>
+          <p className="text-muted-foreground">
+            Même tension, autre situation. Regarde si ta réponse tient.
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="rounded-xl border border-border/60 bg-card p-4">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
+            Ta limite
+          </p>
+          <p className="font-medium mt-1">{question.limiteLabel}</p>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">
+            {roleEnjeu}
+          </p>
+          <p className="font-medium mt-1">{question.enjeuLabel}</p>
+        </div>
       </div>
+
       <p className="text-xl md:text-2xl font-serif leading-snug">
         {question.situation}
       </p>

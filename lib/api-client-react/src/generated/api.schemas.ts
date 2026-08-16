@@ -66,47 +66,43 @@ export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
 
 
 export const QuestionType = {
-  duel: 'duel',
-  bascule: 'bascule',
+  collision: 'collision',
 } as const;
 
 /**
- * Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
+ * horizons = une aspiration à obtenir, tresors = un essentiel à garder
+ */
+export type QuestionEnjeuFamille = typeof QuestionEnjeuFamille[keyof typeof QuestionEnjeuFamille];
+
+
+export const QuestionEnjeuFamille = {
+  horizons: 'horizons',
+  tresors: 'tresors',
+} as const;
+
+/**
+ * Une collision : une limite de la personne mise en face d'un enjeu — une aspiration qu'elle veut atteindre, ou un essentiel qu'elle veut préserver. `optionA` (« oui, je franchirais ») fait passer `valeurA`, portée par l'enjeu, devant `valeurB`, protégée par la limite.
  */
 export interface Question {
   type: QuestionType;
   dilemmeId: number;
+  /** Valeur portée par l'enjeu — celle que « oui » fait gagner */
   valeurA: string;
+  /** Valeur protégée par la limite — celle que « non » fait tenir */
   valeurB: string;
   situation: string;
   optionA: string;
   optionB: string;
-  /**
-     * Duel : amis, ecole, maison, en_ligne, equipe, public
-     * @nullable
-     */
-  contexte?: string | null;
-  /** Vrai si cette tension a déjà été vue sous une autre forme */
-  estVariante: boolean;
-  /** @nullable */
-  serieId?: string | null;
-  /** @nullable */
-  palier?: number | null;
-  /**
-     * Bascule : la seule dimension qui bouge — ampleur_impact, proximite_sociale, certitude, cout_personnel, urgence, nombre_personnes, reversibilite
-     * @nullable
-     */
-  dimension?: string | null;
-  /**
-     * Bascule : le cran atteint à ce palier
-     * @nullable
-     */
-  reglage?: string | null;
-  /**
-     * Bascule : le décor, identique à tous les paliers de la série
-     * @nullable
-     */
-  amorce?: string | null;
+  limiteLabel: string;
+  enjeuLabel: string;
+  /** horizons = une aspiration à obtenir, tresors = un essentiel à garder */
+  enjeuFamille: QuestionEnjeuFamille;
+  /** Vrai si ce couple de valeurs a déjà été vu à travers d'autres cartes. C'est ainsi que se mesure la stabilité, sans jamais demander à la personne si elle se trouve cohérente. */
+  estReprise: boolean;
+  /** Vrai pendant la deuxième passe seulement. C'est le seul moment où l'on pose les questions de difficulté, de certitude et de valeur protégée : posées à chaque collision, elles cassent le rythme. */
+  approfondissement: boolean;
+  /** Pourquoi le moteur a choisi cette collision. Vide en première vague. */
+  motifs: string[];
 }
 
 export type SessionEtapeCourante = typeof SessionEtapeCourante[keyof typeof SessionEtapeCourante];
@@ -423,10 +419,15 @@ export interface ValeurDeclaree {
   cartes: string[];
 }
 
+/**
+ * Une valeur telle que la partie l'a située. La force et le rang viennent de l'ordination Bradley–Terry ; le reste dit sur quoi elle repose.
+ */
 export interface TendanceValeur {
   valeur: string;
-  /** Score net (victoires - défaites) / total significatifs */
-  scoreNet: number;
+  /** Force Bradley–Terry, normalisée autour de 1 */
+  force: number;
+  /** Rang à partir de 1. Les ex æquo partagent le rang. */
+  rang: number;
   totalCollisions: number;
   /** Fois où cette valeur est passée devant l'autre */
   foisPrivilegiee: number;
@@ -434,22 +435,15 @@ export interface TendanceValeur {
   foisCedee: number;
   /** ca_depend + je_ne_sais_pas */
   incertitudes: number;
-  /** passer */
-  abandonnes: number;
-  /** @nullable */
+  /**
+     * Recueillie seulement pendant l'approfondissement : souvent nulle après la première passe, et ce n'est pas une anomalie.
+     * @nullable
+     */
   difficulteMoyenne: number | null;
   /** @nullable */
   certitudeMoyenne: number | null;
   /** Vrai si aucune collision résolue pour cette valeur */
   territoireInexplore: boolean;
-  /** Vrai si aucun compromis n'a encore été observé — la valeur a été privilégiée à chaque fois qu'elle a été mise à l'épreuve. Ce n'est pas un classement : c'est l'absence d'exception connue à ce jour. */
-  estProtegee: boolean;
-  /** Valeurs devant lesquelles celle-ci est passée */
-  domine: string[];
-  /** Valeurs devant lesquelles celle-ci a cédé */
-  cedeDevant: string[];
-  /** Contextes où cette valeur est passée devant */
-  contextesFavorables: string[];
 }
 
 export interface TensionObservee {
@@ -467,30 +461,40 @@ export interface TensionObservee {
 }
 
 /**
- * Réponse au premier palier
+ * Jusqu'où une limite tient, et à partir de quel enjeu elle devient franchissable. La question posée est : quelle importance doit avoir l'enjeu pour que cette limite cède ?
  */
-export type PointDeBasculeChoixInitial = typeof PointDeBasculeChoixInitial[keyof typeof PointDeBasculeChoixInitial];
-
-
-export const PointDeBasculeChoixInitial = {
-  A: 'A',
-  B: 'B',
-} as const;
-
 export interface PointDeBascule {
-  serieId: string;
-  valeurA: string;
-  valeurB: string;
-  dimension: string;
-  /** Réponse au premier palier */
-  choixInitial: PointDeBasculeChoixInitial;
-  /** Nombre de paliers joués dans la série */
-  paliers: number;
+  limiteId: string;
+  limiteLabel: string;
   /**
-     * Le cran où la réponse a changé. Null si elle n'a pas changé sur l'étendue jouée — le point de bascule est alors hors de portée du jeu.
+     * L'enjeu le plus lourd devant lequel la limite a tenu
      * @nullable
      */
-  reglageBascule: string | null;
+  tientDevant: string | null;
+  /**
+     * L'enjeu le plus léger devant lequel la limite a cédé
+     * @nullable
+     */
+  cedeDevant: string | null;
+  jamaisFranchie: boolean;
+  toujoursFranchie: boolean;
+  /** La limite a cédé devant un enjeu plus léger que celui devant lequel elle a tenu. Ce n'est pas une incohérence à corriger : c'est le signe que le contexte, et non le poids de l'enjeu, a fait la différence. */
+  ordreInverse: boolean;
+}
+
+/**
+ * Une valeur dans l'ordination. La force vient d'un modèle de Bradley–Terry sur les collisions jouées : battre une valeur qui gagne souvent pèse plus que battre une valeur qui perd partout. Le classement n'est jamais demandé à la personne, il émerge de ses arbitrages.
+ */
+export interface RangValeur {
+  valeur: string;
+  /** Force Bradley–Terry, normalisée autour de 1 */
+  force: number;
+  /** Rang à partir de 1. Les ex æquo partagent le rang. */
+  rang: number;
+  confrontations: number;
+  gagnees: number;
+  perdues: number;
+  indecises: number;
 }
 
 export type ObservationConstellationType = typeof ObservationConstellationType[keyof typeof ObservationConstellationType];
@@ -503,8 +507,7 @@ export const ObservationConstellationType = {
   stabilite: 'stabilite',
   couverture: 'couverture',
   point_de_bascule: 'point_de_bascule',
-  valeur_protegee: 'valeur_protegee',
-  contexte: 'contexte',
+  limite_tenue: 'limite_tenue',
   arbitrage: 'arbitrage',
   ecart_declare: 'ecart_declare',
 } as const;
@@ -553,7 +556,7 @@ export const ProgresEtapeCourante = {
 } as const;
 
 /**
- * Où en est la partie, calculé depuis les réponses
+ * Où en est la partie, calculé depuis les réponses. `duels` est la première vague de collisions ; `portrait` est la porte où la personne voit son ordination et décide de la mettre à l'épreuve ; `bascules` est l'approfondissement.
  */
 export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 
@@ -561,6 +564,7 @@ export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 export const ProgresPhase = {
   arbitrages: 'arbitrages',
   duels: 'duels',
+  portrait: 'portrait',
   bascules: 'bascules',
   termine: 'termine',
 } as const;
@@ -568,19 +572,22 @@ export const ProgresPhase = {
 export interface Progres {
   sessionId: string;
   etapeCourante: ProgresEtapeCourante;
-  /** Où en est la partie, calculé depuis les réponses */
+  /** Où en est la partie, calculé depuis les réponses. `duels` est la première vague de collisions ; `portrait` est la porte où la personne voit son ordination et décide de la mettre à l'épreuve ; `bascules` est l'approfondissement. */
   phase: ProgresPhase;
   nombreCartes: number;
   nombreValeurs: number;
   /** Nombre de blocs d'arbitrage prévus pour cette partie */
   arbitragesPlanifies: number;
   arbitragesRepondus: number;
-  /** Nombre de duels prévus pour cette partie */
+  /** Taille de la première vague — ce qu'il faut jouer pour voir le portrait. Un exemplaire de chaque couple de valeurs. */
   duelsPlanifies: number;
   duelsRepondus: number;
-  seriesPlanifiees: number;
-  seriesTerminees: number;
-  /** Toutes réponses confondues, duels et bascules */
+  /** Toutes les collisions admissibles entre les cartes de la personne. Le jeu n'impose aucun plafond : il les sert par vagues. */
+  collisionsPossibles: number;
+  collisionsRepondues: number;
+  /** L'ordination telle qu'elle se présente. Vide tant que la première vague n'est pas terminée : le portrait n'existe pas encore. */
+  classement: RangValeur[];
+  /** Toutes réponses confondues */
   nombreReponses: number;
   prochaineQuestion: Question | null;
   /** Servi seulement pendant la phase d'arbitrage. Un bloc n'est pas une Question : il ne pose pas de situation et n'oppose pas deux valeurs. */

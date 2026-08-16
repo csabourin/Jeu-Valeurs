@@ -21,12 +21,17 @@ import {
   reecritures,
   CARTES_PAR_FAMILLE,
   valeurs,
-  duels,
-  series,
   familles,
   calculerParcours,
-  planifierDuels,
-  clePaire,
+  planifierCollisions,
+  collisionsPossibles,
+  peutEntrerEnCollision,
+  situerValeur,
+  valeursFines,
+  type CarteJeu,
+  type CarteContenu,
+  type CarteArbitrable,
+  type ReponseArbitrage,
   type ReponseConnue,
 } from "@workspace/contenu";
 
@@ -137,7 +142,9 @@ for (const c of cartesImportees) {
     }
   }
   if (c.label.length > LONGUEUR_MAX) {
-    avertissements.push(`${c.id} fait ${c.label.length} caractères : ${c.label}`);
+    avertissements.push(
+      `${c.id} fait ${c.label.length} caractères : ${c.label}`,
+    );
   }
   verifier(
     !c.label.includes("\u2019"),
@@ -149,7 +156,10 @@ for (const c of cartesImportees) {
 // ne s'affichera jamais et personne ne le remarquera.
 const idsImportes = new Set(cartesImportees.map((c) => c.id));
 for (const id of Object.keys(reecritures)) {
-  verifier(idsImportes.has(id), `Réécriture orpheline : « ${id} » ne correspond à aucune carte.`);
+  verifier(
+    idsImportes.has(id),
+    `Réécriture orpheline : « ${id} » ne correspond à aucune carte.`,
+  );
 }
 
 // ── Identifiants uniques, toutes situations confondues ───────────────────────
@@ -157,7 +167,10 @@ for (const id of Object.keys(reecritures)) {
 const identifiants = new Map<number, string>();
 function reserver(id: number, quoi: string): void {
   const deja = identifiants.get(id);
-  verifier(deja === undefined, `Identifiant ${id} utilisé par ${deja} et ${quoi}.`);
+  verifier(
+    deja === undefined,
+    `Identifiant ${id} utilisé par ${deja} et ${quoi}.`,
+  );
   identifiants.set(id, quoi);
 }
 
@@ -166,59 +179,59 @@ function reserver(id: number, quoi: string): void {
 const idsCartes = new Map<string, string>();
 for (const c of cartes) {
   const deja = idsCartes.get(c.id);
-  verifier(deja === undefined, `Identifiant de carte ${c.id} en double (${deja}).`);
+  verifier(
+    deja === undefined,
+    `Identifiant de carte ${c.id} en double (${deja}).`,
+  );
   idsCartes.set(c.id, c.label);
 }
 
-for (const d of duels) reserver(d.id, `duel ${d.id}`);
-for (const s of series) {
-  for (const p of s.paliers) reserver(p.id, `palier ${s.id}/${p.palier}`);
-}
+// ── Lexique des valeurs ──────────────────────────────────────────────────────
 
-// ── Duels ────────────────────────────────────────────────────────────────────
-
-for (const d of duels) {
-  verifier(labelsConnus.has(d.valeurA), `Duel ${d.id} : valeurA inconnue « ${d.valeurA} ».`);
-  verifier(labelsConnus.has(d.valeurB), `Duel ${d.id} : valeurB inconnue « ${d.valeurB} ».`);
-  verifier(d.valeurA !== d.valeurB, `Duel ${d.id} : la même valeur des deux côtés.`);
-  verifier(d.optionA !== d.optionB, `Duel ${d.id} : deux options identiques.`);
-}
-
-// Une variante n'a de sens que s'il existe un duel principal sur la même paire.
-for (const d of duels.filter((x) => x.variante)) {
-  const principal = duels.some(
-    (x) => !x.variante && clePaire(x.valeurA, x.valeurB) === clePaire(d.valeurA, d.valeurB),
-  );
-  verifier(principal, `Duel ${d.id} est une variante sans duel principal sur sa paire.`);
-}
-
-// ── Séries de bascule ────────────────────────────────────────────────────────
-
-const idsSeries = new Set<string>();
-for (const s of series) {
-  verifier(!idsSeries.has(s.id), `Série ${s.id} : identifiant en double.`);
-  idsSeries.add(s.id);
-
-  verifier(labelsConnus.has(s.valeurA), `Série ${s.id} : valeurA inconnue.`);
-  verifier(labelsConnus.has(s.valeurB), `Série ${s.id} : valeurB inconnue.`);
-  verifier(s.valeurA !== s.valeurB, `Série ${s.id} : la même valeur des deux côtés.`);
-  verifier(s.optionA !== s.optionB, `Série ${s.id} : deux options identiques.`);
-
-  const rangs = s.paliers.map((p) => p.palier);
+// Une valeur fine doit se rattacher à une famille qui existe, sinon le moteur
+// ne peut plus mesurer la distance entre deux valeurs et se remet à fabriquer
+// des collisions circulaires.
+const labelsFins = new Set<string>();
+for (const fine of valeursFines) {
   verifier(
-    rangs.length >= 2,
-    `Série ${s.id} : il faut au moins deux paliers pour qu'une bascule existe.`,
+    !labelsFins.has(fine.label),
+    `Valeur fine « ${fine.label} » en double.`,
+  );
+  labelsFins.add(fine.label);
+
+  verifier(
+    labelsConnus.has(fine.famille),
+    `Valeur fine « ${fine.label} » : famille inconnue « ${fine.famille} ».`,
   );
   verifier(
-    rangs.every((r, i) => r === i + 1),
-    `Série ${s.id} : les paliers doivent être numérotés 1, 2, 3… (reçu ${rangs.join(", ")}).`,
+    !labelsConnus.has(fine.label),
+    `Valeur fine « ${fine.label} » porte le nom d'une famille.`,
   );
+}
 
-  const situations = new Set(s.paliers.map((p) => p.situation));
-  verifier(
-    situations.size === s.paliers.length,
-    `Série ${s.id} : deux paliers décrivent la même situation.`,
-  );
+for (const fine of valeursFines) {
+  for (const voisine of fine.voisines) {
+    verifier(
+      labelsFins.has(voisine),
+      `« ${fine.label} » déclare une voisine inconnue « ${voisine} ».`,
+    );
+  }
+  for (const tension of fine.tensions) {
+    verifier(
+      situerValeur(tension).famille === fine.famille,
+      `« ${fine.label} » déclare une tension hors de sa famille : « ${tension} ».`,
+    );
+  }
+}
+
+// Une famille sans valeur fine reste jouable — le moteur travaille alors à la
+// maille famille —, mais c'est une occasion manquée de dire quelque chose de
+// précis dans la carte finale.
+for (const v of valeurs) {
+  const fines = valeursFines.filter((f) => f.famille === v.label).length;
+  if (fines === 0) {
+    avertissements.push(`Valeur « ${v.label} » n'a aucune valeur fine.`);
+  }
 }
 
 // ── Couverture ───────────────────────────────────────────────────────────────
@@ -230,49 +243,133 @@ for (const famille of familles) {
   }
 }
 
-// Une valeur sans duel ne pourra jamais être mise à l'épreuve.
+// Une valeur qui ne peut entrer en collision avec aucune autre ne pourra jamais
+// être mise à l'épreuve : elle serait dans le lexique sans jamais être jouée.
 for (const v of valeurs) {
-  const apparait = duels.some((d) => d.valeurA === v.label || d.valeurB === v.label);
-  verifier(apparait, `Valeur « ${v.label} » n'apparaît dans aucun duel.`);
+  const opposable = valeurs.some(
+    (autre) =>
+      autre.label !== v.label &&
+      peutEntrerEnCollision([v.label], [autre.label]).admissible,
+  );
+  verifier(
+    opposable,
+    `Valeur « ${v.label} » ne peut être opposée à aucune autre valeur.`,
+  );
+}
+
+/**
+ * Une main jouable : des limites *et* des enjeux.
+ *
+ * `distribuerCartes` compose la main famille par famille, donc couper au rang N
+ * ne rendrait que des lignes rouges — et une main sans enjeu ne produit aucune
+ * collision. On prélève donc un nombre fixe dans chaque famille.
+ */
+function echantillonner(graine: number, parFamille: number): CarteContenu[] {
+  const main = distribuerCartes(graine);
+  return familles.flatMap((famille) =>
+    main.filter((c) => c.famille === famille).slice(0, parFamille),
+  );
 }
 
 // ── Une partie doit toujours se terminer ─────────────────────────────────────
 
-/** Rejoue une partie complète en répondant toujours de la même façon. */
+/** Les cartes du catalogue, telles que le parcours les reçoit. */
+function versCartes(ids: string[]): CarteArbitrable[] {
+  return ids.flatMap((id) => {
+    const carte = cartes.find((c) => c.id === id);
+    if (!carte) return [];
+    return [
+      {
+        id: carte.id,
+        famille: carte.famille,
+        label: carte.label,
+        valeursConfirmees: carte.valeursSuggerees,
+      },
+    ];
+  });
+}
+
+/**
+ * Rejoue une partie complète en répondant toujours de la même façon, arbitrages
+ * compris. Le but n'est pas de simuler une vraie personne : c'est de garantir
+ * qu'aucune combinaison de réponses ne laisse quelqu'un coincé sur un écran.
+ */
 function jouerJusquAuBout(
-  valeursConfirmees: string[],
+  main: CarteArbitrable[],
   choix: string,
   graine = 0,
 ): number {
   const reponses: ReponseConnue[] = [];
-  for (let tour = 0; tour < 200; tour++) {
-    const parcours = calculerParcours({ valeursConfirmees, reponses, graine });
+  const arbitrages: ReponseArbitrage[] = [];
+
+  for (let tour = 0; tour < 400; tour++) {
+    const parcours = calculerParcours({
+      reponses,
+      cartes: main,
+      arbitrages,
+      graine,
+      // On force l'approfondissement : c'est le chemin le plus long, donc
+      // celui qui doit se terminer.
+      approfondissementDemande: true,
+    });
+
+    if (parcours.prochainBloc) {
+      arbitrages.push({
+        bloc: parcours.prochainBloc.bloc,
+        carteIds: parcours.prochainBloc.cartes.map((c) => c.id),
+        carteMeilleure:
+          choix === "passer" ? null : parcours.prochainBloc.cartes[0].id,
+        cartePire:
+          choix === "passer"
+            ? null
+            : parcours.prochainBloc.cartes[
+                parcours.prochainBloc.cartes.length - 1
+              ].id,
+      });
+      continue;
+    }
+
     if (!parcours.prochaine) return tour;
-    const q = parcours.prochaine;
+
     reponses.push({
-      dilemmeId: q.dilemmeId,
-      valeurA: q.valeurA,
-      valeurB: q.valeurB,
+      dilemmeId: parcours.prochaine.dilemmeId,
+      valeurA: parcours.prochaine.valeurA,
+      valeurB: parcours.prochaine.valeurB,
       choix,
       facteurDepend: null,
-      serieId: q.serieId,
-      palier: q.palier,
     });
   }
+
   erreurs.push(
-    `Le parcours ne se termine pas pour [${valeursConfirmees.join(", ")}] en répondant « ${choix} ».`,
+    `Le parcours ne se termine pas pour ${main.length} cartes en répondant « ${choix} ».`,
   );
   return -1;
 }
 
 const scenarios: { nom: string; cartesChoisies: string[] }[] = [
   { nom: "une seule carte", cartesChoisies: ["JV1002"] },
-  { nom: "trois lignes rouges", cartesChoisies: ["JV1002", "JV1004", "JV1010"] },
+  {
+    nom: "trois lignes rouges",
+    cartesChoisies: ["JV1002", "JV1004", "JV1010"],
+  },
   {
     nom: "mélange des trois familles",
-    cartesChoisies: ["JV1002", "JV1004", "JV2003", "JV2006", "JV3002", "JV3004"],
+    cartesChoisies: [
+      "JV1002",
+      "JV1004",
+      "JV2003",
+      "JV2006",
+      "JV3002",
+      "JV3004",
+    ],
   },
-  { nom: "toutes les cartes", cartesChoisies: cartes.map((c) => c.id) },
+  // Une main volumineuse mais atteignable. Le tirage propose 54 cartes et la
+  // personne en retient une poignée ; prendre les 921 du catalogue ferait
+  // 161 895 collisions, un état de partie qui n'existe pas.
+  {
+    nom: "une grosse main",
+    cartesChoisies: echantillonner(4242, 13).map((c) => c.id),
+  },
 ];
 
 // Un identifiant qui ne correspond à rien ferait passer un scénario à vide,
@@ -287,24 +384,30 @@ for (const scenario of scenarios) {
 }
 
 for (const scenario of scenarios) {
-  const valeursConfirmees = Array.from(
-    new Set(
-      scenario.cartesChoisies.flatMap(
-        (id) => cartes.find((c) => c.id === id)?.valeursSuggerees ?? [],
-      ),
-    ),
-  );
+  const main = versCartes(scenario.cartesChoisies);
+  const admissibles = collisionsPossibles(
+    main.map((c): CarteJeu => ({
+      id: c.id,
+      famille: c.famille,
+      label: c.label,
+      valeurs: c.valeursConfirmees ?? [],
+    })),
+  ).length;
+
   for (const choix of ["A", "B", "ca_depend", "passer"]) {
-    const tours = jouerJusquAuBout(valeursConfirmees, choix);
-    if (tours === 0 && valeursConfirmees.length >= 2) {
+    const tours = jouerJusquAuBout(main, choix);
+    if (tours === 0 && admissibles > 0) {
       erreurs.push(`Scénario « ${scenario.nom} » : aucune question posée.`);
     }
   }
 }
 
-// Le parcours doit tenir sans aucune valeur, sans planter.
-const vide = calculerParcours({ valeursConfirmees: [], reponses: [] });
-verifier(vide.prochaine === null, "Sans valeur confirmée, le jeu devrait n'avoir aucune question.");
+// Le parcours doit tenir sans aucune carte, sans planter.
+const vide = calculerParcours({ reponses: [] });
+verifier(
+  vide.prochaine === null && vide.prochainBloc === null,
+  "Sans carte, le jeu ne devrait avoir aucune question.",
+);
 
 // ── La main de cartes ───────────────────────────────────────────────────────
 
@@ -351,66 +454,107 @@ for (let graine = 1; graine <= 2000; graine++) {
   for (const c of distribuerCartes(graine)) cartesVues.add(c.id);
 }
 
-// ── Le tirage des situations : varié d'une partie à l'autre ─────────────────
+// ── Le tirage des collisions : varié d'une partie à l'autre ─────────────────
 
-const toutesLesValeurs = valeurs.map((v) => v.label);
+function mainType(graine: number): CarteJeu[] {
+  return echantillonner(graine, 6).map((c) => ({
+    id: c.id,
+    famille: c.famille,
+    label: c.label,
+    valeurs: c.valeursSuggerees,
+  }));
+}
+
+const mainReference = mainType(12345);
 
 // Une graine donnée doit toujours produire exactement la même partie, sinon
 // rafraîchir la page changerait les questions sous les pieds de la personne.
-const planA = planifierDuels(toutesLesValeurs, 12345).map((d) => d.id);
-const planA2 = planifierDuels(toutesLesValeurs, 12345).map((d) => d.id);
+const planA = planifierCollisions(mainReference, 12345).premiereVague.map(
+  (c) => c.id,
+);
+const planA2 = planifierCollisions(mainReference, 12345).premiereVague.map(
+  (c) => c.id,
+);
 verifier(
   planA.join(",") === planA2.join(","),
-  "Une même graine doit redonner exactement le même plan de duels.",
+  "Une même graine doit redonner exactement le même plan de collisions.",
 );
 
 // Et deux parties différentes ne doivent pas jouer la même chose.
 const plans = new Set<string>();
 for (let graine = 1; graine <= 200; graine++) {
-  plans.add(planifierDuels(toutesLesValeurs, graine).map((d) => d.id).join(","));
+  plans.add(
+    planifierCollisions(mainReference, graine)
+      .premiereVague.map((c) => c.id)
+      .join(","),
+  );
 }
 verifier(
   plans.size > 150,
   `Le tirage varie trop peu : ${plans.size} plans distincts sur 200 graines.`,
 );
 
-// Combien de situations différentes le jeu peut-il servir en tout.
-const vues = new Set<number>();
-for (let graine = 1; graine <= 500; graine++) {
-  for (const d of planifierDuels(toutesLesValeurs, graine)) vues.add(d.id);
+// Toutes les collisions admissibles doivent rester jouables : le jeu ne coupe
+// pas la matrice à un nombre arbitraire, il la sert par vagues.
+for (let graine = 1; graine <= 50; graine++) {
+  const plan = planifierCollisions(mainReference, graine);
+  const servies = plan.premiereVague.length + plan.approfondissement.length;
+  if (servies !== plan.total) {
+    erreurs.push(
+      `Graine ${graine} : ${servies} collisions servies sur ${plan.total} admissibles.`,
+    );
+    break;
+  }
 }
 
-// Une variante ne doit jamais partir sans sa jumelle : l'écran annonce
-// « déjà croisé, autrement », et la stabilité se calcule en comparant les deux.
-for (let graine = 1; graine <= 200; graine++) {
-  const plan = planifierDuels(toutesLesValeurs, graine);
-  const paires = plan.map((d) => clePaire(d.valeurA, d.valeurB));
-  for (const d of plan.filter((x) => x.variante)) {
-    const cle = clePaire(d.valeurA, d.valeurB);
-    if (paires.filter((p) => p === cle).length < 2) {
-      erreurs.push(
-        `Graine ${graine} : la variante ${d.id} est servie sans son duel principal.`,
-      );
+// Aucune collision circulaire ne doit jamais sortir du planificateur.
+let collisionsVerifiees = 0;
+for (let graine = 1; graine <= 50; graine++) {
+  const main = mainType(graine);
+  for (const c of collisionsPossibles(main)) {
+    collisionsVerifiees++;
+    const verdict = peutEntrerEnCollision(c.valeursLimite, c.valeursEnjeu);
+    if (!verdict.admissible) {
+      erreurs.push(`Collision circulaire servie : « ${c.situation} ».`);
       break;
     }
   }
 }
 
+// La première vague ne doit jamais poser deux fois le même couple de valeurs :
+// c'est ce qui garantit qu'un premier portrait couvre toute la constellation.
+for (let graine = 1; graine <= 50; graine++) {
+  const vague = planifierCollisions(mainType(graine), graine).premiereVague;
+  const couples = vague.map((c) => [c.valeurA, c.valeurB].sort().join("|"));
+  if (new Set(couples).size !== couples.length) {
+    erreurs.push(
+      `Graine ${graine} : un couple de valeurs revient dans la première vague.`,
+    );
+    break;
+  }
+}
+
 // Toute partie doit se terminer, quelle que soit la graine.
 for (const graine of [0, 1, 7, 99, 123456]) {
-  jouerJusquAuBout(toutesLesValeurs, "A", graine);
+  jouerJusquAuBout(
+    mainReference.map((c) => ({
+      id: c.id,
+      famille: c.famille,
+      label: c.label,
+      valeursConfirmees: c.valeurs,
+    })),
+    "A",
+    graine,
+  );
 }
 
 // ── Rapport ──────────────────────────────────────────────────────────────────
 
-const paires = new Set(duels.map((d) => clePaire(d.valeurA, d.valeurB)));
-
 console.log(
   [
-    `${valeurs.length} valeurs`,
+    `${valeurs.length} familles de valeurs`,
+    `${valeursFines.length} valeurs fines`,
     `${cartes.length} cartes`,
-    `${duels.length} duels sur ${paires.size} paires`,
-    `${series.length} séries de bascule`,
   ].join(" · "),
 );
 console.log(
@@ -422,7 +566,8 @@ console.log(
     `${mains.size} mains distinctes sur 200 parties · ${cartesVues.size}/${cartes.length} cartes atteignables`,
 );
 console.log(
-  `Situations : ${plans.size} sélections distinctes sur 200 parties · ${vues.size}/${duels.length} duels atteignables`,
+  `Collisions : ${plans.size} sélections distinctes sur 200 parties · ` +
+    `${collisionsVerifiees} collisions vérifiées, aucune circulaire`,
 );
 
 for (const a of avertissements) console.warn(`⚠ ${a}`);

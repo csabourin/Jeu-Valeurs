@@ -16,8 +16,7 @@ export const ObservationConstellationType = {
   stabilite: 'stabilite',
   couverture: 'couverture',
   point_de_bascule: 'point_de_bascule',
-  valeur_protegee: 'valeur_protegee',
-  contexte: 'contexte',
+  limite_tenue: 'limite_tenue',
   arbitrage: 'arbitrage',
   ecart_declare: 'ecart_declare',
 } as const;

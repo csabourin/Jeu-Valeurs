@@ -5,43 +5,30 @@
  * Jeu des valeurs — API
  * OpenAPI spec version: 0.1.0
  */
+import type { QuestionEnjeuFamille } from './questionEnjeuFamille';
 import type { QuestionType } from './questionType';
 
 /**
- * Une situation concrète à trancher. `optionA` protège `valeurA`, `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un contexte donné ; une bascule reprend la même tension en ne faisant bouger qu'une seule dimension d'un palier à l'autre.
+ * Une collision : une limite de la personne mise en face d'un enjeu — une aspiration qu'elle veut atteindre, ou un essentiel qu'elle veut préserver. `optionA` (« oui, je franchirais ») fait passer `valeurA`, portée par l'enjeu, devant `valeurB`, protégée par la limite.
  */
 export interface Question {
   type: QuestionType;
   dilemmeId: number;
+  /** Valeur portée par l'enjeu — celle que « oui » fait gagner */
   valeurA: string;
+  /** Valeur protégée par la limite — celle que « non » fait tenir */
   valeurB: string;
   situation: string;
   optionA: string;
   optionB: string;
-  /**
-     * Duel : amis, ecole, maison, en_ligne, equipe, public
-     * @nullable
-     */
-  contexte?: string | null;
-  /** Vrai si cette tension a déjà été vue sous une autre forme */
-  estVariante: boolean;
-  /** @nullable */
-  serieId?: string | null;
-  /** @nullable */
-  palier?: number | null;
-  /**
-     * Bascule : la seule dimension qui bouge — ampleur_impact, proximite_sociale, certitude, cout_personnel, urgence, nombre_personnes, reversibilite
-     * @nullable
-     */
-  dimension?: string | null;
-  /**
-     * Bascule : le cran atteint à ce palier
-     * @nullable
-     */
-  reglage?: string | null;
-  /**
-     * Bascule : le décor, identique à tous les paliers de la série
-     * @nullable
-     */
-  amorce?: string | null;
+  limiteLabel: string;
+  enjeuLabel: string;
+  /** horizons = une aspiration à obtenir, tresors = un essentiel à garder */
+  enjeuFamille: QuestionEnjeuFamille;
+  /** Vrai si ce couple de valeurs a déjà été vu à travers d'autres cartes. C'est ainsi que se mesure la stabilité, sans jamais demander à la personne si elle se trouve cohérente. */
+  estReprise: boolean;
+  /** Vrai pendant la deuxième passe seulement. C'est le seul moment où l'on pose les questions de difficulté, de certitude et de valeur protégée : posées à chaque collision, elles cassent le rythme. */
+  approfondissement: boolean;
+  /** Pourquoi le moteur a choisi cette collision. Vide en première vague. */
+  motifs: string[];
 }

@@ -5,20 +5,25 @@
  * Jeu des valeurs — API
  * OpenAPI spec version: 0.1.0
  */
-import type { PointDeBasculeChoixInitial } from './pointDeBasculeChoixInitial';
 
+/**
+ * Jusqu'où une limite tient, et à partir de quel enjeu elle devient franchissable. La question posée est : quelle importance doit avoir l'enjeu pour que cette limite cède ?
+ */
 export interface PointDeBascule {
-  serieId: string;
-  valeurA: string;
-  valeurB: string;
-  dimension: string;
-  /** Réponse au premier palier */
-  choixInitial: PointDeBasculeChoixInitial;
-  /** Nombre de paliers joués dans la série */
-  paliers: number;
+  limiteId: string;
+  limiteLabel: string;
   /**
-     * Le cran où la réponse a changé. Null si elle n'a pas changé sur l'étendue jouée — le point de bascule est alors hors de portée du jeu.
+     * L'enjeu le plus lourd devant lequel la limite a tenu
      * @nullable
      */
-  reglageBascule: string | null;
+  tientDevant: string | null;
+  /**
+     * L'enjeu le plus léger devant lequel la limite a cédé
+     * @nullable
+     */
+  cedeDevant: string | null;
+  jamaisFranchie: boolean;
+  toujoursFranchie: boolean;
+  /** La limite a cédé devant un enjeu plus léger que celui devant lequel elle a tenu. Ce n'est pas une incohérence à corriger : c'est le signe que le contexte, et non le poids de l'enjeu, a fait la différence. */
+  ordreInverse: boolean;
 }

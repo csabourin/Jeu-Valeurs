@@ -1,52 +1,51 @@
 /**
- * Moteur de constellation V2 — déterministe, sans LLM.
+ * Constellation — ce que les collisions jouées permettent de dire.
  *
- * Tout ce qui est affiché à la fin est recalculable à partir des réponses
- * brutes, et chaque observation transporte les identifiants des réponses qui
- * l'appuient : rien n'est affirmé sans pouvoir montrer d'où ça vient.
+ * Le moteur ne prouve jamais qu'une personne est incohérente, et ne conclut
+ * jamais qu'une valeur « ne compte pas ». Une limite franchie dans une
+ * situation dit qu'à ce moment-là, cet enjeu-là est passé devant — rien de
+ * plus. Une limite franchie dans un contexte et pas dans un autre n'est pas une
+ * contradiction : c'est l'information la plus intéressante du jeu, puisque
+ * quelque chose dans le contexte a changé la priorité.
  *
- * Ce que le moteur refuse de faire, par construction :
- *   • sortir un classement unique des valeurs (on garde le contexte) ;
- *   • traiter une réponse différente comme une contradiction (c'est un
- *     changement de réglage, et c'est l'information intéressante) ;
- *   • déduire ce que la personne voulait protéger — cette information n'existe
- *     que si elle l'a écrite elle-même (`valeurProtegee`).
- *
- * Les formulations restent au conditionnel et bornées à ce qui a été joué.
+ * Le classement lui-même vient de `@workspace/contenu` : il émerge des
+ * arbitrages par un modèle de Bradley–Terry, et n'est jamais demandé
+ * directement à la personne. Ce fichier ne fait que l'habiller de phrases et le
+ * croiser avec ce qu'elle a dit à froid pendant les arbitrages.
  */
 
 import {
-  planifierDuels,
-  planifierCombatsCartes,
-  trouverDuel,
-  trouverSerie,
-  libellesDimension,
-  libellesContexte,
-  clePaire,
+  planifierCollisions,
+  collisionsPossibles,
+  observer,
+  ordonner,
+  mesurerTensions,
+  trouverBascules,
   calculerScoresCartes,
-  type Contexte,
-  type Dimension,
   type Famille,
   type ScoreCarte,
   type ReponseArbitrage,
+  type CarteJeu,
+  type RangValeur,
+  type Bascule,
+  type Tension,
 } from "@workspace/contenu";
 
 /**
- * 3 : les arbitrages entrent dans le calcul. Une constellation calculée en
- * version 2 n'avait ni classement déclaré ni écart entre le dit et le joué.
+ * 4 : le classement vient d'un modèle Bradley–Terry sur les collisions
+ * limite × enjeu. Une constellation calculée en version 3 comptait des duels
+ * écrits à l'avance et des séries de bascule qui n'existent plus.
  */
-const VERSION_CALCUL = 3;
+const VERSION_CALCUL = 4;
 
-/** Nombre de mises à l'épreuve avant de dire d'une valeur qu'elle n'a pas encore cédé. */
-const SEUIL_VALEUR_PROTEGEE = 2;
+/** Nombre de mises à l'épreuve avant de dire d'une limite qu'elle a tenu. */
+const SEUIL_LIMITE_TENUE = 2;
 /** Part de réponses non tranchées à partir de laquelle une tension est dite forte. */
 const SEUIL_TENSION_FORTE = 0.5;
-/** Écarts nets en deçà desquels on ne parle pas de tendance. */
-const SEUIL_TENDANCE = 0.5;
 /** À partir d'où une valeur est dite « mise devant » dans les arbitrages. */
 const SEUIL_DECLARE = 0.25;
-/** Combien de fois une valeur doit avoir été mise à l'épreuve avant de parler d'écart. */
-const MIN_COLLISIONS_ECART = 2;
+/** Écart de force en deçà duquel deux valeurs sont présentées comme à égalité. */
+const ECART_EGALITE = 0.25;
 
 export interface ReponseSource {
   id: number;
@@ -58,9 +57,6 @@ export interface ReponseSource {
   facteurDependLibre: string | null;
   difficulte: number | null;
   certitude: number | null;
-  serieId: string | null;
-  palier: number | null;
-  dimension: string | null;
   valeurProtegee: string | null;
   version: number;
 }
@@ -91,21 +87,19 @@ export interface ValeurDeclaree {
   cartes: string[];
 }
 
+/** Une valeur dans le classement, telle qu'elle s'affiche. */
 export interface TendanceValeur {
   valeur: string;
-  scoreNet: number;
+  /** Force Bradley–Terry — l'ordination proprement dite. */
+  force: number;
+  rang: number;
   totalCollisions: number;
   foisPrivilegiee: number;
   foisCedee: number;
   incertitudes: number;
-  abandonnes: number;
   difficulteMoyenne: number | null;
   certitudeMoyenne: number | null;
   territoireInexplore: boolean;
-  estProtegee: boolean;
-  domine: string[];
-  cedeDevant: string[];
-  contextesFavorables: string[];
 }
 
 export interface TensionObservee {
@@ -117,14 +111,18 @@ export interface TensionObservee {
   estStable: boolean | null;
 }
 
+/**
+ * Un point de bascule : jusqu'où une limite tient, et à partir de quel enjeu
+ * elle cède.
+ */
 export interface PointDeBascule {
-  serieId: string;
-  valeurA: string;
-  valeurB: string;
-  dimension: string;
-  choixInitial: "A" | "B";
-  paliers: number;
-  reglageBascule: string | null;
+  limiteId: string;
+  limiteLabel: string;
+  tientDevant: string | null;
+  cedeDevant: string | null;
+  jamaisFranchie: boolean;
+  toujoursFranchie: boolean;
+  ordreInverse: boolean;
 }
 
 export type TypeObservation =
@@ -134,8 +132,7 @@ export type TypeObservation =
   | "stabilite"
   | "couverture"
   | "point_de_bascule"
-  | "valeur_protegee"
-  | "contexte"
+  | "limite_tenue"
   | "arbitrage"
   | "ecart_declare";
 
@@ -170,24 +167,6 @@ function estDecisif(choix: string): boolean {
   return choix === "A" || choix === "B";
 }
 
-/** Qui l'a emporté dans cette réponse, en tenant compte du sens du duel. */
-function gagnant(r: ReponseSource): string | null {
-  if (r.choix === "A") return r.valeurA;
-  if (r.choix === "B") return r.valeurB;
-  return null;
-}
-
-function perdant(r: ReponseSource): string | null {
-  if (r.choix === "A") return r.valeurB;
-  if (r.choix === "B") return r.valeurA;
-  return null;
-}
-
-function contexteDe(r: ReponseSource): Contexte | null {
-  if (r.dilemmeId == null) return null;
-  return trouverDuel(r.dilemmeId)?.contexte ?? null;
-}
-
 function moyenne(valeurs: number[]): number | null {
   if (valeurs.length === 0) return null;
   return valeurs.reduce((s, v) => s + v, 0) / valeurs.length;
@@ -203,183 +182,87 @@ function enumerer(valeurs: string[]): string {
   return `${cites.slice(0, -1).join(", ")} et ${cites[cites.length - 1]}`;
 }
 
-function labelFacteur(facteur: string | null, libre: string | null): string {
-  if (!facteur) return "un facteur non nommé";
-  if (facteur === "autre") return libre ? `« ${libre} »` : "un autre facteur";
-  const connu = libellesDimension[facteur as Dimension];
-  if (connu) return connu;
-  const autres: Record<string, string> = {
-    responsabilite: "ta part de responsabilité",
+function versCarteJeu(carte: CarteJugee): CarteJeu {
+  return {
+    id: carte.carteId,
+    famille: carte.famille,
+    label: carte.label,
+    valeurs: carte.valeursConfirmees,
   };
-  return autres[facteur] ?? facteur;
 }
 
-// ─── Tendances par valeur ────────────────────────────────────────────────────
+// ─── Tendances ───────────────────────────────────────────────────────────────
 
+/**
+ * Le classement, enrichi de ce que les réponses disaient à côté.
+ *
+ * `ordonner` fournit la force et le rang ; la difficulté et la certitude ne
+ * sont recueillies que pendant l'approfondissement, donc souvent absentes.
+ */
 function calculerTendances(
+  classement: RangValeur[],
   reponses: ReponseSource[],
   valeursConnues: string[],
 ): TendanceValeur[] {
-  const toutes = new Set<string>(valeursConnues);
-  for (const r of reponses) {
-    toutes.add(r.valeurA);
-    toutes.add(r.valeurB);
-  }
+  const parValeur = new Map(classement.map((r) => [r.valeur, r]));
+  const toutes = new Set<string>([
+    ...valeursConnues,
+    ...classement.map((r) => r.valeur),
+  ]);
 
   return Array.from(toutes)
     .map((valeur) => {
+      const rang = parValeur.get(valeur);
       const impliquees = reponses.filter(
         (r) => r.valeurA === valeur || r.valeurB === valeur,
       );
-      const decisives = impliquees.filter((r) => estDecisif(r.choix));
-
-      const gagnees = decisives.filter((r) => gagnant(r) === valeur);
-      const perdues = decisives.filter((r) => perdant(r) === valeur);
-
-      const domine = Array.from(
-        new Set(gagnees.map((r) => perdant(r) as string)),
-      ).sort();
-      const cedeDevant = Array.from(
-        new Set(perdues.map((r) => gagnant(r) as string)),
-      ).sort();
-      const contextesFavorables = Array.from(
-        new Set(
-          gagnees
-            .map((r) => contexteDe(r))
-            .filter((c): c is Contexte => c !== null),
-        ),
-      ).sort();
-
       const notees = impliquees.filter((r) => r.choix !== "passer");
-      const total = gagnees.length + perdues.length;
 
       return {
         valeur,
-        scoreNet: total > 0 ? (gagnees.length - perdues.length) / total : 0,
-        totalCollisions: impliquees.length,
-        foisPrivilegiee: gagnees.length,
-        foisCedee: perdues.length,
-        incertitudes: impliquees.filter(
-          (r) => r.choix === "ca_depend" || r.choix === "je_ne_sais_pas",
-        ).length,
-        abandonnes: impliquees.filter((r) => r.choix === "passer").length,
+        force: rang?.force ?? 0,
+        rang: rang?.rang ?? 0,
+        totalCollisions: rang?.confrontations ?? 0,
+        foisPrivilegiee: rang?.gagnees ?? 0,
+        foisCedee: rang?.perdues ?? 0,
+        incertitudes: rang?.indecises ?? 0,
         difficulteMoyenne: moyenne(
           notees.map((r) => r.difficulte).filter((d): d is number => d != null),
         ),
         certitudeMoyenne: moyenne(
           notees.map((r) => r.certitude).filter((c): c is number => c != null),
         ),
-        territoireInexplore: total === 0,
-        estProtegee:
-          gagnees.length >= SEUIL_VALEUR_PROTEGEE && perdues.length === 0,
-        domine,
-        cedeDevant,
-        contextesFavorables,
+        territoireInexplore: rang === undefined,
       };
     })
-    .sort(
-      (a, b) => b.scoreNet - a.scoreNet || a.valeur.localeCompare(b.valeur),
-    );
+    .sort((a, b) => b.force - a.force || a.valeur.localeCompare(b.valeur));
 }
 
-// ─── Tensions ────────────────────────────────────────────────────────────────
-
-/**
- * La stabilité se mesure sur les duels seulement.
- *
- * Une réponse qui change à l'intérieur d'une série de bascule n'est pas une
- * instabilité : c'est le résultat recherché, puisque le jeu a délibérément
- * monté un réglage d'un cran.
- */
-function calculerTensions(reponses: ReponseSource[]): TensionObservee[] {
-  const duelsSeuls = reponses.filter((r) => !r.serieId);
-  const groupes = new Map<string, ReponseSource[]>();
-
-  for (const r of duelsSeuls) {
-    const cle = clePaire(r.valeurA, r.valeurB);
-    const groupe = groupes.get(cle);
-    if (groupe) groupe.push(r);
-    else groupes.set(cle, [r]);
-  }
-
-  const tensions: TensionObservee[] = [];
-  for (const groupe of groupes.values()) {
-    const incertitudes = groupe.filter(
-      (r) => r.choix === "ca_depend" || r.choix === "je_ne_sais_pas",
-    ).length;
-    const gagnants = groupe
-      .filter((r) => estDecisif(r.choix))
-      .map((r) => gagnant(r) as string);
-
-    tensions.push({
-      valeurA: groupe[0].valeurA,
-      valeurB: groupe[0].valeurB,
-      totalCollisions: groupe.length,
-      incertitudes,
-      estForte: incertitudes / groupe.length >= SEUIL_TENSION_FORTE,
-      estStable:
-        gagnants.length >= 2 ? gagnants.every((g) => g === gagnants[0]) : null,
-    });
-  }
-
-  return tensions.sort(
-    (a, b) =>
-      b.incertitudes - a.incertitudes ||
-      a.valeurA.localeCompare(b.valeurA) ||
-      a.valeurB.localeCompare(b.valeurB),
-  );
+function versTensionObservee(t: Tension): TensionObservee {
+  return {
+    valeurA: t.valeurA,
+    valeurB: t.valeurB,
+    totalCollisions: t.rencontres,
+    incertitudes: t.indecises,
+    estForte: t.indecises / Math.max(1, t.rencontres) >= SEUIL_TENSION_FORTE,
+    estStable: t.stable,
+  };
 }
 
-// ─── Points de bascule ───────────────────────────────────────────────────────
-
-function calculerBascules(reponses: ReponseSource[]): PointDeBascule[] {
-  const groupes = new Map<string, ReponseSource[]>();
-  for (const r of reponses) {
-    if (!r.serieId || r.palier == null || !estDecisif(r.choix)) continue;
-    const groupe = groupes.get(r.serieId);
-    if (groupe) groupe.push(r);
-    else groupes.set(r.serieId, [r]);
-  }
-
-  const bascules: PointDeBascule[] = [];
-  for (const [serieId, groupe] of groupes) {
-    if (groupe.length < 2) continue;
-    const serie = trouverSerie(serieId);
-    if (!serie) continue;
-
-    const ordonnees = [...groupe].sort(
-      (a, b) => (a.palier as number) - (b.palier as number),
-    );
-    const initial = ordonnees[0].choix as "A" | "B";
-    const bascule = ordonnees.find((r) => r.choix !== initial);
-
-    bascules.push({
-      serieId,
-      valeurA: serie.valeurA,
-      valeurB: serie.valeurB,
-      dimension: serie.dimension,
-      choixInitial: initial,
-      paliers: ordonnees.length,
-      reglageBascule: bascule
-        ? (serie.paliers.find((p) => p.palier === bascule.palier)?.reglage ??
-          null)
-        : null,
-    });
-  }
-
-  return bascules.sort((a, b) => a.serieId.localeCompare(b.serieId));
+function versPointDeBascule(b: Bascule): PointDeBascule {
+  return {
+    limiteId: b.limiteId,
+    limiteLabel: b.limiteLabel,
+    tientDevant: b.tientDevant?.enjeuLabel ?? null,
+    cedeDevant: b.cedeDevant?.enjeuLabel ?? null,
+    jamaisFranchie: b.jamaisFranchie,
+    toujoursFranchie: b.toujoursFranchie,
+    ordreInverse: b.ordreInverse,
+  };
 }
 
-// ─── Ce qui a été dit hors situation ─────────────────────────────────────────
+// ─── Ce qui a été dit à froid ────────────────────────────────────────────────
 
-/**
- * Des scores de cartes vers des scores de valeurs.
- *
- * Une carte porte les valeurs que la personne a confirmées dessus ; sa place
- * dans le classement déteint donc sur chacune d'elles, à parts égales. C'est
- * grossier, et assumé : on ne s'en sert que pour repérer un écart franc avec
- * ce qui s'est joué en situation, jamais pour annoncer un classement de valeurs.
- */
 function calculerValeursDeclarees(
   scores: ScoreCarte[],
   cartes: CarteJugee[],
@@ -397,25 +280,24 @@ function calculerValeursDeclarees(
     if (!carte) continue;
 
     for (const valeur of carte.valeursConfirmees) {
-      const entree = cumul.get(valeur);
-      if (entree) {
-        entree.total += score.score;
-        entree.n++;
-        entree.cartes.push(carte.label);
-      } else {
-        cumul.set(valeur, { total: score.score, n: 1, cartes: [carte.label] });
-      }
+      const entree = cumul.get(valeur) ?? { total: 0, n: 0, cartes: [] };
+      entree.total += score.score;
+      entree.n += 1;
+      entree.cartes.push(carte.label);
+      cumul.set(valeur, entree);
     }
   }
 
-  return Array.from(cumul, ([valeur, { total, n, cartes: labels }]) => ({
-    valeur,
-    scoreDeclare: total / n,
-    cartes: labels.sort(),
-  })).sort(
-    (a, b) =>
-      b.scoreDeclare - a.scoreDeclare || a.valeur.localeCompare(b.valeur),
-  );
+  return Array.from(cumul.entries())
+    .map(([valeur, { total, n, cartes: labels }]) => ({
+      valeur,
+      scoreDeclare: total / n,
+      cartes: labels.sort(),
+    }))
+    .sort(
+      (a, b) =>
+        b.scoreDeclare - a.scoreDeclare || a.valeur.localeCompare(b.valeur),
+    );
 }
 
 // ─── Observations ────────────────────────────────────────────────────────────
@@ -464,199 +346,111 @@ function redigerObservations(
   valeursDeclarees: ValeurDeclaree[],
   arbitrages: ArbitrageSource[],
   couverture: number,
-  duelsPlanifies: number,
+  collisionsPlanifiees: number,
 ): ObservationConstellation[] {
   const obs = new Observations();
   const idsArbitrages = arbitrages
     .filter((a) => a.carteMeilleure || a.cartePire)
     .map((a) => a.id);
 
-  // Valeurs qui n'ont pas encore cédé.
-  for (const t of tendances.filter((x) => x.estProtegee)) {
+  const jouees = tendances.filter((t) => !t.territoireInexplore);
+
+  // Le haut du classement. Formulé comme une observation sur ce qui est passé
+  // devant, jamais comme un jugement sur ce qui compterait « vraiment ».
+  const haut = jouees.slice(0, 3).filter((t) => t.foisPrivilegiee > 0);
+  for (const t of haut) {
     obs.ajouter(
-      "valeur_protegee",
-      `${citer(t.valeur)} n'a pas encore cédé : chaque fois qu'elle a été mise à l'épreuve, tu l'as choisie. Ça ne veut pas dire qu'elle ne cédera jamais — seulement qu'aucune situation jouée jusqu'ici ne l'a fait plier.`,
+      "tendance",
+      `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} est passée devant ce qui lui était opposé ${t.foisPrivilegiee} fois sur ${t.totalCollisions}.`,
       [t.valeur],
       idsImpliquant(reponses, t.valeur),
     );
   }
 
-  // Tendances nettes, dans un sens comme dans l'autre.
-  for (const t of tendances) {
-    const total = t.foisPrivilegiee + t.foisCedee;
-    if (total < 2 || Math.abs(t.scoreNet) <= SEUIL_TENDANCE) continue;
-    if (t.estProtegee) continue; // déjà dit, en mieux
-
-    const texte =
-      t.scoreNet > 0
-        ? `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} est passée devant ${enumerer(t.domine)}.`
-        : `Dans les situations jouées jusqu'ici, ${citer(t.valeur)} a plutôt cédé la place à ${enumerer(t.cedeDevant)}.`;
+  // Les quasi-égalités : deux valeurs que rien ne départage encore.
+  for (let i = 1; i < jouees.length; i++) {
+    const precedente = jouees[i - 1];
+    const courante = jouees[i];
+    if (Math.abs(precedente.force - courante.force) >= ECART_EGALITE) continue;
+    if (precedente.totalCollisions === 0 || courante.totalCollisions === 0)
+      continue;
 
     obs.ajouter(
-      "tendance",
-      texte,
-      [t.valeur],
-      idsImpliquant(reponses, t.valeur),
+      "tension",
+      `${citer(precedente.valeur)} et ${citer(courante.valeur)} se tiennent de très près : rien dans ce que tu as joué ne permet encore de les départager.`,
+      [precedente.valeur, courante.valeur],
+      [
+        ...idsImpliquant(reponses, precedente.valeur),
+        ...idsImpliquant(reponses, courante.valeur),
+      ],
     );
+    break;
+  }
+
+  // Les limites qui ont tenu.
+  for (const b of bascules) {
+    if (!b.jamaisFranchie) continue;
+    const fois = reponses.filter((r) => r.choix === "B").length;
+    if (fois < SEUIL_LIMITE_TENUE) continue;
+
+    obs.ajouter(
+      "limite_tenue",
+      `${citer(b.limiteLabel)} n'a cédé devant aucun des enjeux rencontrés. Ça ne veut pas dire qu'elle ne céderait jamais — seulement qu'aucune situation jouée ne l'a fait bouger.`,
+      [],
+      [],
+    );
+  }
+
+  // Les points de bascule : là où la limite devient franchissable.
+  for (const b of bascules) {
+    if (b.tientDevant === null || b.cedeDevant === null) continue;
+
+    const texte = b.ordreInverse
+      ? `${citer(b.limiteLabel)} a tenu devant ${citer(b.tientDevant)}, mais a cédé devant ${citer(b.cedeDevant)}. Ce n'est pas une contradiction : quelque chose dans la situation, et pas seulement le poids de l'enjeu, a changé la priorité.`
+      : `${citer(b.limiteLabel)} tient devant ${citer(b.tientDevant)}, et cède devant ${citer(b.cedeDevant)}. C'est entre les deux que passe ta limite.`;
+
+    obs.ajouter("point_de_bascule", texte, [], []);
+  }
+
+  // Une tension revue sous une autre carte, et qui a changé de réponse.
+  for (const t of tensions) {
+    if (t.estStable !== false) continue;
+    obs.ajouter(
+      "stabilite",
+      `Entre ${citer(t.valeurA)} et ${citer(t.valeurB)}, tu n'as pas répondu pareil selon la situation. C'est le genre d'écart qui en dit plus qu'une réponse constante.`,
+      [t.valeurA, t.valeurB],
+      [],
+    );
+    break;
   }
 
   // La carte mise devant les autres, hors situation.
-  const jugees = scoresCartes.filter((s) => s.apparitions > 0);
-  const devant = jugees.filter((s) => s.score === jugees[0]?.score);
-  if (jugees.length >= 2 && devant.length === 1 && devant[0].score > 0) {
+  const meilleure = scoresCartes.find((c) => c.apparitions > 0);
+  if (meilleure && meilleure.score > 0) {
     obs.ajouter(
       "arbitrage",
-      `Quand tes cartes étaient côte à côte, sans situation autour, c'est ${citer(devant[0].label)} que tu as mise devant le plus souvent.`,
+      `Quand tu compares tes cartes à froid, ${citer(meilleure.label)} passe devant les autres.`,
       [],
       [],
       idsArbitrages,
     );
   }
 
-  // L'écart entre ce qui a été dit à froid et ce qui s'est joué en situation.
-  //
-  // C'est l'observation que la phase d'arbitrage existe pour rendre possible.
-  // Elle ne dit jamais que la personne s'est trompée quelque part : les deux
-  // réponses sont vraies, elles répondent simplement à deux questions
-  // différentes — ce qui compte, et ce qui l'emporte quand ça coûte.
+  // L'écart entre ce qui est dit à froid et ce qui est joué en situation.
   for (const declaree of valeursDeclarees) {
     if (declaree.scoreDeclare < SEUIL_DECLARE) continue;
     const tendance = tendances.find((t) => t.valeur === declaree.valeur);
-    if (!tendance) continue;
-    if (tendance.foisPrivilegiee + tendance.foisCedee < MIN_COLLISIONS_ECART)
-      continue;
-    if (tendance.scoreNet > -SEUIL_TENDANCE) continue;
+    if (!tendance || tendance.territoireInexplore) continue;
+    if (tendance.foisCedee <= tendance.foisPrivilegiee) continue;
 
     obs.ajouter(
       "ecart_declare",
-      `Cartes en main, ${citer(declaree.valeur)} passait devant. Dans les situations, c'est ${enumerer(tendance.cedeDevant)} qui l'a emporté. Les deux sont vraies : mises côte à côte, tes cartes ne pèsent pas le même poids qu'au moment de choisir.`,
+      `Tu places ${citer(declaree.valeur)} haut quand tu classes tes cartes à froid, et en situation elle a plutôt cédé. L'écart n'est pas une faute : c'est souvent là que le jeu a quelque chose à montrer.`,
       [declaree.valeur],
       idsImpliquant(reponses, declaree.valeur),
       idsArbitrages,
     );
-  }
-
-  // Une valeur qui ne gagne que dans un seul contexte.
-  //
-  // On ne compte que les victoires en duel : les paliers de bascule ne portent
-  // pas de contexte, et les inclure ferait dire « seulement avec tes amis » à
-  // une valeur qui a aussi gagné ailleurs, sans étiquette.
-  for (const t of tendances) {
-    if (t.contextesFavorables.length !== 1) continue;
-    const victoiresSituees = reponses.filter(
-      (r) =>
-        estDecisif(r.choix) &&
-        gagnant(r) === t.valeur &&
-        contexteDe(r) !== null,
-    );
-    if (victoiresSituees.length < 2) continue;
-    const contexte = libellesContexte[t.contextesFavorables[0] as Contexte];
-    if (!contexte) continue;
-    obs.ajouter(
-      "contexte",
-      `Chaque fois que ${citer(t.valeur)} est passée devant dans une situation située, c'était la même : ${contexte.toLowerCase()}. Ailleurs, le jeu ne l'a pas encore mise à l'épreuve.`,
-      [t.valeur],
-      victoiresSituees.map((r) => r.id),
-    );
-  }
-
-  // Points de bascule.
-  for (const b of bascules) {
-    const serie = trouverSerie(b.serieId);
-    if (!serie) continue;
-    const dimension =
-      libellesDimension[b.dimension as Dimension] ?? b.dimension;
-    const choixDepart = b.choixInitial === "A" ? serie.optionA : serie.optionB;
-    const sources = reponses
-      .filter((r) => r.serieId === b.serieId)
-      .map((r) => r.id);
-
-    const texte = b.reglageBascule
-      ? `Entre ${citer(b.valeurA)} et ${citer(b.valeurB)}, tu répondais « ${choixDepart} ». On montait ${dimension} — ton choix a changé à ce cran-ci : ${b.reglageBascule}.`
-      : `Entre ${citer(b.valeurA)} et ${citer(b.valeurB)}, on montait ${dimension} jusqu'au dernier cran et ton choix n'a pas bougé. Si un point de bascule existe, il est plus loin que ce que le jeu est allé.`;
-
-    obs.ajouter("point_de_bascule", texte, [b.valeurA, b.valeurB], sources);
-  }
-
-  // Tensions difficiles à trancher.
-  for (const t of tensions.filter((x) => x.estForte)) {
-    const sources = reponses
-      .filter(
-        (r) =>
-          clePaire(r.valeurA, r.valeurB) === clePaire(t.valeurA, t.valeurB) &&
-          (r.choix === "ca_depend" || r.choix === "je_ne_sais_pas"),
-      )
-      .map((r) => r.id);
-    obs.ajouter(
-      "tension",
-      `${citer(t.valeurA)} contre ${citer(t.valeurB)} fait partie des tensions que tu as le moins tranchées. Ce n'est pas une hésitation : les deux ont l'air de compter pour vrai.`,
-      [t.valeurA, t.valeurB],
-      sources,
-    );
-  }
-
-  // Même conflit, autre forme.
-  for (const t of tensions.filter((x) => x.estStable === false)) {
-    const sources = reponses
-      .filter(
-        (r) =>
-          !r.serieId &&
-          clePaire(r.valeurA, r.valeurB) === clePaire(t.valeurA, t.valeurB) &&
-          estDecisif(r.choix),
-      )
-      .map((r) => r.id);
-    obs.ajouter(
-      "stabilite",
-      `Tu as rencontré ${citer(t.valeurA)} contre ${citer(t.valeurB)} deux fois, dans deux situations différentes, et tu n'as pas répondu pareil. Ce n'est pas une contradiction : quelque chose dans la situation a compté.`,
-      [t.valeurA, t.valeurB],
-      sources,
-    );
-  }
-
-  // Facteurs invoqués de façon répétée dans les « ça dépend ».
-  const parFacteur = new Map<string, { ids: number[]; libre: string | null }>();
-  for (const r of reponses) {
-    if (r.choix !== "ca_depend" || !r.facteurDepend) continue;
-    const entree = parFacteur.get(r.facteurDepend);
-    if (entree) {
-      entree.ids.push(r.id);
-      entree.libre = entree.libre ?? r.facteurDependLibre;
-    } else {
-      parFacteur.set(r.facteurDepend, {
-        ids: [r.id],
-        libre: r.facteurDependLibre,
-      });
-    }
-  }
-  for (const [facteur, { ids, libre }] of parFacteur) {
-    if (ids.length < 2) continue;
-    obs.ajouter(
-      "tension",
-      `Quand tu réponds « ça dépend », c'est souvent ${labelFacteur(facteur, libre)} qui décide.`,
-      [],
-      ids,
-    );
-  }
-
-  // Ce que la personne a elle-même nommé.
-  const nommees = reponses.filter((r) => r.valeurProtegee);
-  if (nommees.length >= 2) {
-    const comptes = new Map<string, number[]>();
-    for (const r of nommees) {
-      const cle = r.valeurProtegee as string;
-      const ids = comptes.get(cle);
-      if (ids) ids.push(r.id);
-      else comptes.set(cle, [r.id]);
-    }
-    for (const [valeur, ids] of comptes) {
-      if (ids.length < 2) continue;
-      obs.ajouter(
-        "tendance",
-        `Quand on t'a demandé ce que tu essayais de protéger, tu as répondu ${citer(valeur)} plus d'une fois. C'est toi qui l'as nommée — le jeu ne l'a pas déduite.`,
-        [valeur],
-        ids,
-      );
-    }
+    break;
   }
 
   // Territoires inexplorés.
@@ -673,10 +467,10 @@ function redigerObservations(
   }
 
   // Étendue de ce qui a été joué.
-  if (duelsPlanifies > 0 && couverture < 1) {
+  if (collisionsPlanifiees > 0 && couverture < 1) {
     obs.ajouter(
       "couverture",
-      `Tu as joué ${Math.round(couverture * 100)} % des situations prévues pour tes cartes. Tout ce qui est écrit ici ne parle que de celles-là.`,
+      `Tu as joué ${Math.round(couverture * 100)} % des collisions possibles entre tes cartes. Tout ce qui est écrit ici ne parle que de celles-là.`,
       [],
       [],
     );
@@ -703,9 +497,17 @@ export function calculerConstellation({
   arbitrages = [],
   graine = 0,
 }: EntreeConstellation): ResultatConstellation {
-  const tendances = calculerTendances(reponses, valeursConnues);
-  const tensions = calculerTensions(reponses);
-  const bascules = calculerBascules(reponses);
+  const main = cartes.map(versCarteJeu);
+  const collisions = collisionsPossibles(main);
+
+  const observations = observer(collisions, reponses);
+  const classement = ordonner(observations);
+
+  const tendances = calculerTendances(classement, reponses, valeursConnues);
+  const tensions = mesurerTensions(observations).map(versTensionObservee);
+  const bascules = trouverBascules(collisions, reponses, classement).map(
+    versPointDeBascule,
+  );
 
   const cartesJugees = calculerScoresCartes(
     cartes.map((c) => ({ id: c.carteId, famille: c.famille, label: c.label })),
@@ -713,26 +515,19 @@ export function calculerConstellation({
   );
   const valeursDeclarees = calculerValeursDeclarees(cartesJugees, cartes);
 
-  const combatsPlanifies = planifierCombatsCartes(
-    cartes.map((carte) => ({
-      id: carte.carteId,
-      famille: carte.famille,
-      label: carte.label,
-      valeursConfirmees: carte.valeursConfirmees,
-    })),
-    graine,
-  );
-  const duelsPlanifies =
-    combatsPlanifies.length || planifierDuels(valeursConnues, graine).length;
-  const duelsRepondus = reponses.filter(
-    (r) => !r.serieId && r.choix !== "passer",
-  ).length;
+  // La couverture se mesure sur ce que le parcours sert réellement, pas sur la
+  // matrice entière : sinon elle annoncerait 4 % à quelqu'un qui a tout joué.
+  const plan = planifierCollisions(main, graine);
+  const collisionsPlanifiees = plan.total;
+  const collisionsJouees = observations.length;
   const couverture =
-    duelsPlanifies > 0 ? Math.min(1, duelsRepondus / duelsPlanifies) : 0;
+    collisionsPlanifiees > 0
+      ? Math.min(1, collisionsJouees / collisionsPlanifiees)
+      : 0;
 
-  // Stabilité : parmi les tensions revues sous une autre forme, combien ont
-  // reçu la même réponse. Sans reprise, il n'y a rien à mesurer — on ne
-  // pénalise pas, on affiche 1 et l'observation de couverture dit le reste.
+  // Stabilité : parmi les couples revus sous une autre carte, combien ont reçu
+  // la même réponse. Sans reprise, il n'y a rien à mesurer — on affiche 1 et
+  // l'observation de couverture dit le reste.
   const revues = tensions.filter((t) => t.estStable !== null);
   const stabilite =
     revues.length > 0
@@ -754,7 +549,7 @@ export function calculerConstellation({
       valeursDeclarees,
       arbitrages,
       couverture,
-      duelsPlanifies,
+      collisionsPlanifiees,
     ),
     couverture,
     stabilite,

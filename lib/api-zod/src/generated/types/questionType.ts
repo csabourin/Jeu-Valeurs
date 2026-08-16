@@ -10,6 +10,5 @@ export type QuestionType = typeof QuestionType[keyof typeof QuestionType];
 
 
 export const QuestionType = {
-  duel: 'duel',
-  bascule: 'bascule',
+  collision: 'collision',
 } as const;

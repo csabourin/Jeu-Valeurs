@@ -25,6 +25,18 @@ type LigneComparaison = {
   ecart: number;
 };
 
+/**
+ * La force Bradley–Terry ramenée dans [-1, 1].
+ *
+ * Les forces sont des rapports centrés sur 1 : « deux fois plus forte », pas
+ * « 0,3 de plus ». Les soustraire donnerait un écart qui dépend de l'échelle.
+ * On passe donc par le logarithme — l'échelle naturelle du modèle — puis par
+ * une tangente hyperbolique, qui borne le résultat sans jamais le couper.
+ */
+function position(t: TendanceValeur): number {
+  return Math.tanh(Math.log(Math.max(t.force, 1e-6)));
+}
+
 function lignesCommunes(
   moi: Constellation,
   autre: Constellation,
@@ -41,9 +53,9 @@ function lignesCommunes(
       const correspondante = index.get(t.valeur)!;
       return {
         valeur: t.valeur,
-        moi: t.scoreNet,
-        autre: correspondante.scoreNet,
-        ecart: Math.abs(t.scoreNet - correspondante.scoreNet),
+        moi: position(t),
+        autre: position(correspondante),
+        ecart: Math.abs(position(t) - position(correspondante)),
       };
     });
 }
@@ -51,7 +63,7 @@ function lignesCommunes(
 function valeursFortes(tendances: TendanceValeur[]) {
   return tendances
     .filter((t) => !t.territoireInexplore)
-    .sort((a, b) => b.scoreNet - a.scoreNet)
+    .sort((a, b) => b.force - a.force)
     .slice(0, 5);
 }
 
@@ -332,7 +344,7 @@ function PortraitCompact({
             <strong>{tendance.valeur}</strong>
             <i
               style={{
-                width: `${Math.max(8, ((tendance.scoreNet + 1) / 2) * 100)}%`,
+                width: `${Math.max(8, ((position(tendance) + 1) / 2) * 100)}%`,
               }}
             />
           </li>

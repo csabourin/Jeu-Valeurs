@@ -460,49 +460,69 @@ components:
     Question:
       type: object
       description: >
-        Une situation concrète à trancher. `optionA` protège `valeurA`,
-        `optionB` protège `valeurB`. Un duel oppose deux valeurs dans un
-        contexte donné ; une bascule reprend la même tension en ne faisant
-        bouger qu'une seule dimension d'un palier à l'autre.
-      required: [type, dilemmeId, valeurA, valeurB, situation, optionA, optionB, estVariante]
+        Une collision : une limite de la personne mise en face d'un enjeu —
+        une aspiration qu'elle veut atteindre, ou un essentiel qu'elle veut
+        préserver. `optionA` (« oui, je franchirais ») fait passer `valeurA`,
+        portée par l'enjeu, devant `valeurB`, protégée par la limite.
+      required:
+        [
+          type,
+          dilemmeId,
+          valeurA,
+          valeurB,
+          situation,
+          optionA,
+          optionB,
+          limiteLabel,
+          enjeuLabel,
+          enjeuFamille,
+          estReprise,
+          approfondissement,
+          motifs,
+        ]
       properties:
         type:
           type: string
-          enum: [duel, bascule]
+          enum: [collision]
         dilemmeId:
           type: number
         valeurA:
           type: string
+          description: Valeur portée par l'enjeu — celle que « oui » fait gagner
         valeurB:
           type: string
+          description: Valeur protégée par la limite — celle que « non » fait tenir
         situation:
           type: string
         optionA:
           type: string
         optionB:
           type: string
-        contexte:
-          type: ["string", "null"]
-          description: "Duel : amis, ecole, maison, en_ligne, equipe, public"
-        estVariante:
+        limiteLabel:
+          type: string
+        enjeuLabel:
+          type: string
+        enjeuFamille:
+          type: string
+          enum: [horizons, tresors]
+          description: horizons = une aspiration à obtenir, tresors = un essentiel à garder
+        estReprise:
           type: boolean
-          description: Vrai si cette tension a déjà été vue sous une autre forme
-        serieId:
-          type: ["string", "null"]
-        palier:
-          type: ["number", "null"]
-        dimension:
-          type: ["string", "null"]
           description: >
-            Bascule : la seule dimension qui bouge — ampleur_impact,
-            proximite_sociale, certitude, cout_personnel, urgence,
-            nombre_personnes, reversibilite
-        reglage:
-          type: ["string", "null"]
-          description: "Bascule : le cran atteint à ce palier"
-        amorce:
-          type: ["string", "null"]
-          description: "Bascule : le décor, identique à tous les paliers de la série"
+            Vrai si ce couple de valeurs a déjà été vu à travers d'autres
+            cartes. C'est ainsi que se mesure la stabilité, sans jamais
+            demander à la personne si elle se trouve cohérente.
+        approfondissement:
+          type: boolean
+          description: >
+            Vrai pendant la deuxième passe seulement. C'est le seul moment où
+            l'on pose les questions de difficulté, de certitude et de valeur
+            protégée : posées à chaque collision, elles cassent le rythme.
+        motifs:
+          type: array
+          items:
+            type: string
+          description: Pourquoi le moteur a choisi cette collision. Vide en première vague.
 
     # ─── Session ───────────────────────────────────────────────────────────────
 
@@ -857,29 +877,31 @@ components:
 
     TendanceValeur:
       type: object
+      description: >
+        Une valeur telle que la partie l'a située. La force et le rang viennent
+        de l'ordination Bradley–Terry ; le reste dit sur quoi elle repose.
       required:
         [
           valeur,
-          scoreNet,
+          force,
+          rang,
           totalCollisions,
           foisPrivilegiee,
           foisCedee,
           incertitudes,
-          abandonnes,
           difficulteMoyenne,
           certitudeMoyenne,
           territoireInexplore,
-          estProtegee,
-          domine,
-          cedeDevant,
-          contextesFavorables,
         ]
       properties:
         valeur:
           type: string
-        scoreNet:
+        force:
           type: number
-          description: Score net (victoires - défaites) / total significatifs
+          description: Force Bradley–Terry, normalisée autour de 1
+        rang:
+          type: number
+          description: Rang à partir de 1. Les ex æquo partagent le rang.
         totalCollisions:
           type: number
         foisPrivilegiee:
@@ -891,37 +913,16 @@ components:
         incertitudes:
           type: number
           description: ca_depend + je_ne_sais_pas
-        abandonnes:
-          type: number
-          description: passer
         difficulteMoyenne:
           type: ["number", "null"]
+          description: >
+            Recueillie seulement pendant l'approfondissement : souvent nulle
+            après la première passe, et ce n'est pas une anomalie.
         certitudeMoyenne:
           type: ["number", "null"]
         territoireInexplore:
           type: boolean
           description: Vrai si aucune collision résolue pour cette valeur
-        estProtegee:
-          type: boolean
-          description: >
-            Vrai si aucun compromis n'a encore été observé — la valeur a été
-            privilégiée à chaque fois qu'elle a été mise à l'épreuve. Ce n'est
-            pas un classement : c'est l'absence d'exception connue à ce jour.
-        domine:
-          type: array
-          items:
-            type: string
-          description: Valeurs devant lesquelles celle-ci est passée
-        cedeDevant:
-          type: array
-          items:
-            type: string
-          description: Valeurs devant lesquelles celle-ci a cédé
-        contextesFavorables:
-          type: array
-          items:
-            type: string
-          description: Contextes où cette valeur est passée devant
 
     TensionObservee:
       type: object
@@ -946,28 +947,69 @@ components:
 
     PointDeBascule:
       type: object
-      required: [serieId, valeurA, valeurB, dimension, choixInitial, paliers, reglageBascule]
+      description: >
+        Jusqu'où une limite tient, et à partir de quel enjeu elle devient
+        franchissable. La question posée est : quelle importance doit avoir
+        l'enjeu pour que cette limite cède ?
+      required:
+        [
+          limiteId,
+          limiteLabel,
+          tientDevant,
+          cedeDevant,
+          jamaisFranchie,
+          toujoursFranchie,
+          ordreInverse,
+        ]
       properties:
-        serieId:
+        limiteId:
           type: string
-        valeurA:
+        limiteLabel:
           type: string
-        valeurB:
-          type: string
-        dimension:
-          type: string
-        choixInitial:
-          type: string
-          enum: [A, B]
-          description: Réponse au premier palier
-        paliers:
-          type: number
-          description: Nombre de paliers joués dans la série
-        reglageBascule:
+        tientDevant:
           type: ["string", "null"]
+          description: L'enjeu le plus lourd devant lequel la limite a tenu
+        cedeDevant:
+          type: ["string", "null"]
+          description: L'enjeu le plus léger devant lequel la limite a cédé
+        jamaisFranchie:
+          type: boolean
+        toujoursFranchie:
+          type: boolean
+        ordreInverse:
+          type: boolean
           description: >
-            Le cran où la réponse a changé. Null si elle n'a pas changé sur
-            l'étendue jouée — le point de bascule est alors hors de portée du jeu.
+            La limite a cédé devant un enjeu plus léger que celui devant lequel
+            elle a tenu. Ce n'est pas une incohérence à corriger : c'est le
+            signe que le contexte, et non le poids de l'enjeu, a fait la
+            différence.
+
+    RangValeur:
+      type: object
+      description: >
+        Une valeur dans l'ordination. La force vient d'un modèle de
+        Bradley–Terry sur les collisions jouées : battre une valeur qui gagne
+        souvent pèse plus que battre une valeur qui perd partout. Le classement
+        n'est jamais demandé à la personne, il émerge de ses arbitrages.
+      required:
+        [valeur, force, rang, confrontations, gagnees, perdues, indecises]
+      properties:
+        valeur:
+          type: string
+        force:
+          type: number
+          description: Force Bradley–Terry, normalisée autour de 1
+        rang:
+          type: number
+          description: Rang à partir de 1. Les ex æquo partagent le rang.
+        confrontations:
+          type: number
+        gagnees:
+          type: number
+        perdues:
+          type: number
+        indecises:
+          type: number
 
     ObservationConstellation:
       type: object
@@ -989,8 +1031,7 @@ components:
               stabilite,
               couverture,
               point_de_bascule,
-              valeur_protegee,
-              contexte,
+              limite_tenue,
               arbitrage,
               ecart_declare,
             ]
@@ -1085,8 +1126,9 @@ components:
           arbitragesRepondus,
           duelsPlanifies,
           duelsRepondus,
-          seriesPlanifiees,
-          seriesTerminees,
+          collisionsPossibles,
+          collisionsRepondues,
+          classement,
           nombreReponses,
           prochaineQuestion,
           prochainBloc,
@@ -1108,8 +1150,12 @@ components:
             ]
         phase:
           type: string
-          enum: [arbitrages, duels, bascules, termine]
-          description: Où en est la partie, calculé depuis les réponses
+          enum: [arbitrages, duels, portrait, bascules, termine]
+          description: >
+            Où en est la partie, calculé depuis les réponses. `duels` est la
+            première vague de collisions ; `portrait` est la porte où la
+            personne voit son ordination et décide de la mettre à l'épreuve ;
+            `bascules` est l'approfondissement.
         nombreCartes:
           type: number
         nombreValeurs:
@@ -1121,16 +1167,28 @@ components:
           type: number
         duelsPlanifies:
           type: number
-          description: Nombre de duels prévus pour cette partie
+          description: >
+            Taille de la première vague — ce qu'il faut jouer pour voir le
+            portrait. Un exemplaire de chaque couple de valeurs.
         duelsRepondus:
           type: number
-        seriesPlanifiees:
+        collisionsPossibles:
           type: number
-        seriesTerminees:
+          description: >
+            Toutes les collisions admissibles entre les cartes de la personne.
+            Le jeu n'impose aucun plafond : il les sert par vagues.
+        collisionsRepondues:
           type: number
+        classement:
+          type: array
+          items:
+            $ref: "#/components/schemas/RangValeur"
+          description: >
+            L'ordination telle qu'elle se présente. Vide tant que la première
+            vague n'est pas terminée : le portrait n'existe pas encore.
         nombreReponses:
           type: number
-          description: Toutes réponses confondues, duels et bascules
+          description: Toutes réponses confondues
         prochaineQuestion:
           oneOf:
             - $ref: "#/components/schemas/Question"

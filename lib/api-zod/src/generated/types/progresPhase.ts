@@ -7,7 +7,7 @@
  */
 
 /**
- * Où en est la partie, calculé depuis les réponses
+ * Où en est la partie, calculé depuis les réponses. `duels` est la première vague de collisions ; `portrait` est la porte où la personne voit son ordination et décide de la mettre à l'épreuve ; `bascules` est l'approfondissement.
  */
 export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 
@@ -15,6 +15,7 @@ export type ProgresPhase = typeof ProgresPhase[keyof typeof ProgresPhase];
 export const ProgresPhase = {
   arbitrages: 'arbitrages',
   duels: 'duels',
+  portrait: 'portrait',
   bascules: 'bascules',
   termine: 'termine',
 } as const;
