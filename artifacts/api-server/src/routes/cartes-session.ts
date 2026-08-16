@@ -60,56 +60,50 @@ router.get(
   },
 );
 
-router.get(
-  "/sessions/:sessionId/cartes",
-  async (req, res): Promise<void> => {
-    const params = ListCartesSessionParams.safeParse(req.params);
-    if (!params.success) {
-      res.status(400).json({ error: params.error.message });
-      return;
-    }
+router.get("/sessions/:sessionId/cartes", async (req, res): Promise<void> => {
+  const params = ListCartesSessionParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
 
-    const cartes = await db
-      .select()
-      .from(cartesSessionTable)
-      .where(eq(cartesSessionTable.sessionId, params.data.sessionId));
+  const cartes = await db
+    .select()
+    .from(cartesSessionTable)
+    .where(eq(cartesSessionTable.sessionId, params.data.sessionId));
 
-    res.json(cartes.map(mapCarte));
-  },
-);
+  res.json(cartes.map(mapCarte));
+});
 
-router.post(
-  "/sessions/:sessionId/cartes",
-  async (req, res): Promise<void> => {
-    const params = AddCarteSessionParams.safeParse(req.params);
-    if (!params.success) {
-      res.status(400).json({ error: params.error.message });
-      return;
-    }
+router.post("/sessions/:sessionId/cartes", async (req, res): Promise<void> => {
+  const params = AddCarteSessionParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
 
-    const parsed = AddCarteSessionBody.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({ error: parsed.error.message });
-      return;
-    }
+  const parsed = AddCarteSessionBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
 
-    const [carte] = await db
-      .insert(cartesSessionTable)
-      .values({
-        sessionId: params.data.sessionId,
-        catalogueCarteId: parsed.data.catalogueCarteId ?? null,
-        famille: parsed.data.famille,
-        label: parsed.data.label,
-        description: parsed.data.description ?? null,
-        valeursSuggerees: parsed.data.valeursSuggérées ?? [],
-        valeursConfirmees: parsed.data.valeursConfirmées ?? [],
-        estPersonnalisee: parsed.data.estPersonnalisée ?? false,
-      })
-      .returning();
+  const [carte] = await db
+    .insert(cartesSessionTable)
+    .values({
+      sessionId: params.data.sessionId,
+      catalogueCarteId: parsed.data.catalogueCarteId ?? null,
+      famille: parsed.data.famille,
+      label: parsed.data.label,
+      description: parsed.data.description ?? null,
+      valeursSuggerees: parsed.data.valeursSuggérées ?? [],
+      valeursConfirmees: parsed.data.valeursConfirmées ?? [],
+      estPersonnalisee: parsed.data.estPersonnalisée ?? false,
+    })
+    .returning();
 
-    res.status(201).json(mapCarte(carte));
-  },
-);
+  res.status(201).json(mapCarte(carte));
+});
 
 router.patch(
   "/sessions/:sessionId/cartes/:carteSessionId",

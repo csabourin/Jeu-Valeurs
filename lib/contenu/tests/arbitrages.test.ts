@@ -36,15 +36,17 @@ describe("planifierArbitrages", () => {
   });
 
   it("planifie dès le minimum de cartes atteint", () => {
-    expect(planifierArbitrages(cartes(MIN_CARTES), 1).length).toBeGreaterThan(0);
+    expect(planifierArbitrages(cartes(MIN_CARTES), 1).length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("ne dépasse jamais le plafond de blocs", () => {
     for (const n of [3, 5, 9, 20, 54]) {
       for (const graine of [0, 7, 2024]) {
-        expect(planifierArbitrages(cartes(n), graine).length).toBeLessThanOrEqual(
-          MAX_BLOCS,
-        );
+        expect(
+          planifierArbitrages(cartes(n), graine).length,
+        ).toBeLessThanOrEqual(MAX_BLOCS);
       }
     }
   });

@@ -1,7 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { arbitragesTable } from "@workspace/db";
-import { ListArbitragesParams, CreateArbitrageParams, CreateArbitrageBody } from "@workspace/api-zod";
+import {
+  ListArbitragesParams,
+  CreateArbitrageParams,
+  CreateArbitrageBody,
+} from "@workspace/api-zod";
 import { eq, and } from "drizzle-orm";
 
 const router: IRouter = Router();
@@ -71,7 +75,8 @@ router.post(
     // La même carte en haut et en bas ne veut rien dire.
     if (meilleure && pire && meilleure === pire) {
       res.status(400).json({
-        error: "Une carte ne peut pas être à la fois la plus et la moins importante",
+        error:
+          "Une carte ne peut pas être à la fois la plus et la moins importante",
       });
       return;
     }

@@ -946,7 +946,6 @@ export const duels: DuelContenu[] = [
   },
 ];
 
-
 const duelsParId = new Map(duels.map((d) => [d.id, d]));
 
 export function trouverDuel(id: number): DuelContenu | undefined {

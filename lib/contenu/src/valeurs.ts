@@ -73,7 +73,8 @@ export const valeurs: ValeurCatalogue[] = [
   },
   {
     label: V.liberte,
-    description: "Pouvoir choisir toi-même, sans avoir à demander la permission.",
+    description:
+      "Pouvoir choisir toi-même, sans avoir à demander la permission.",
     famille: "ouverture",
     tensionsFrequentes: [V.securite, V.regles, V.famille],
   },
@@ -133,13 +134,15 @@ export const valeurs: ValeurCatalogue[] = [
   },
   {
     label: V.creativite,
-    description: "Faire les choses à ta manière, même si ce n'est pas la façon habituelle.",
+    description:
+      "Faire les choses à ta manière, même si ce n'est pas la façon habituelle.",
     famille: "ouverture",
     tensionsFrequentes: [V.regles, V.reussite, V.appartenance],
   },
   {
     label: V.nature,
-    description: "Protéger le vivant et les endroits qui tiennent encore debout.",
+    description:
+      "Protéger le vivant et les endroits qui tiennent encore debout.",
     famille: "attention_aux_autres",
     tensionsFrequentes: [V.plaisir, V.reussite, V.securite],
   },

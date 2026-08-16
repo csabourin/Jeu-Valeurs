@@ -72,7 +72,8 @@ export const series: SerieBascule[] = [
     valeurA: V.honnetete,
     valeurB: V.loyaute,
     dimension: "ampleur_impact",
-    amorce: "Ton ami a triché. Tu es la seule personne au courant, et on te pose la question directement.",
+    amorce:
+      "Ton ami a triché. Tu es la seule personne au courant, et on te pose la question directement.",
     optionA: "Tu dis ce que tu sais.",
     optionB: "Tu ne dis rien.",
     paliers: [
@@ -80,13 +81,15 @@ export const series: SerieBascule[] = [
         id: 501,
         palier: 1,
         reglage: "un devoir sans importance",
-        situation: "Il a copié les réponses d'un devoir qui ne compte pas dans la note.",
+        situation:
+          "Il a copié les réponses d'un devoir qui ne compte pas dans la note.",
       },
       {
         id: 502,
         palier: 2,
         reglage: "l'examen final",
-        situation: "Il a copié pendant l'examen final, celui qui décide de sa note de l'année.",
+        situation:
+          "Il a copié pendant l'examen final, celui qui décide de sa note de l'année.",
       },
       {
         id: 503,
@@ -102,7 +105,8 @@ export const series: SerieBascule[] = [
     valeurA: V.entraide,
     valeurB: V.reussite,
     dimension: "cout_personnel",
-    amorce: "Quelqu'un est bloqué et te demande de l'aide, juste avant la remise.",
+    amorce:
+      "Quelqu'un est bloqué et te demande de l'aide, juste avant la remise.",
     optionA: "Tu l'aides.",
     optionB: "Tu continues ton travail.",
     paliers: [
@@ -110,13 +114,15 @@ export const series: SerieBascule[] = [
         id: 511,
         palier: 1,
         reglage: "dix minutes",
-        situation: "L'aider te prendrait dix minutes. Ton travail est déjà prêt.",
+        situation:
+          "L'aider te prendrait dix minutes. Ton travail est déjà prêt.",
       },
       {
         id: 512,
         palier: 2,
         reglage: "ta soirée",
-        situation: "L'aider te prendrait ta soirée, et ton travail n'est pas fini.",
+        situation:
+          "L'aider te prendrait ta soirée, et ton travail n'est pas fini.",
       },
       {
         id: 513,
@@ -132,7 +138,8 @@ export const series: SerieBascule[] = [
     valeurA: V.liberte,
     valeurB: V.securite,
     dimension: "certitude",
-    amorce: "Tu veux faire quelque chose seul, à ta façon. On te dit que ça pourrait mal tourner.",
+    amorce:
+      "Tu veux faire quelque chose seul, à ta façon. On te dit que ça pourrait mal tourner.",
     optionA: "Tu y vas.",
     optionB: "Tu laisses faire.",
     paliers: [
@@ -140,19 +147,22 @@ export const series: SerieBascule[] = [
         id: 521,
         palier: 1,
         reglage: "personne n'en sait rien",
-        situation: "Personne ne sait vraiment si le risque est réel. C'est une impression, rien de plus.",
+        situation:
+          "Personne ne sait vraiment si le risque est réel. C'est une impression, rien de plus.",
       },
       {
         id: 522,
         palier: 2,
         reglage: "c'est déjà arrivé",
-        situation: "C'est déjà arrivé à quelqu'un l'an passé, dans les mêmes conditions que toi.",
+        situation:
+          "C'est déjà arrivé à quelqu'un l'an passé, dans les mêmes conditions que toi.",
       },
       {
         id: 523,
         palier: 3,
         reglage: "c'est arrivé aux trois derniers",
-        situation: "Les trois dernières personnes qui l'ont fait dans ces conditions-là s'y sont blessées.",
+        situation:
+          "Les trois dernières personnes qui l'ont fait dans ces conditions-là s'y sont blessées.",
       },
     ],
   },
@@ -161,7 +171,8 @@ export const series: SerieBascule[] = [
     valeurA: V.courage,
     valeurB: V.tranquillite,
     dimension: "proximite_sociale",
-    amorce: "Quelqu'un se fait rabaisser devant toi. Intervenir va t'attirer du trouble.",
+    amorce:
+      "Quelqu'un se fait rabaisser devant toi. Intervenir va t'attirer du trouble.",
     optionA: "Tu interviens.",
     optionB: "Tu laisses passer.",
     paliers: [
@@ -175,7 +186,8 @@ export const series: SerieBascule[] = [
         id: 532,
         palier: 2,
         reglage: "quelqu'un de ta classe",
-        situation: "C'est quelqu'un de ta classe, à qui tu parles de temps en temps.",
+        situation:
+          "C'est quelqu'un de ta classe, à qui tu parles de temps en temps.",
       },
       {
         id: 533,
@@ -190,7 +202,8 @@ export const series: SerieBascule[] = [
     valeurA: V.justice,
     valeurB: V.loyaute,
     dimension: "nombre_personnes",
-    amorce: "Ton groupe s'est arrangé pour obtenir un avantage auquel il n'avait pas droit. Tu peux le signaler.",
+    amorce:
+      "Ton groupe s'est arrangé pour obtenir un avantage auquel il n'avait pas droit. Tu peux le signaler.",
     optionA: "Tu le signales.",
     optionB: "Tu couvres ton groupe.",
     paliers: [
@@ -219,7 +232,8 @@ export const series: SerieBascule[] = [
     valeurA: V.regles,
     valeurB: V.entraide,
     dimension: "ampleur_impact",
-    amorce: "Quelqu'un te demande de contourner une règle pour lui rendre service.",
+    amorce:
+      "Quelqu'un te demande de contourner une règle pour lui rendre service.",
     optionA: "Tu respectes la règle.",
     optionB: "Tu rends le service.",
     paliers: [
@@ -239,7 +253,8 @@ export const series: SerieBascule[] = [
         id: 553,
         palier: 3,
         reglage: "sa sécurité",
-        situation: "C'est pour lui éviter de rentrer seul de nuit sans moyen de transport.",
+        situation:
+          "C'est pour lui éviter de rentrer seul de nuit sans moyen de transport.",
       },
     ],
   },
@@ -248,7 +263,8 @@ export const series: SerieBascule[] = [
     valeurA: V.viePrivee,
     valeurB: V.securite,
     dimension: "reversibilite",
-    amorce: "On te demande de partager en permanence ta position avec un service, en échange d'une protection.",
+    amorce:
+      "On te demande de partager en permanence ta position avec un service, en échange d'une protection.",
     optionA: "Tu refuses.",
     optionB: "Tu acceptes.",
     paliers: [
@@ -256,19 +272,22 @@ export const series: SerieBascule[] = [
         id: 561,
         palier: 1,
         reglage: "annulable en tout temps",
-        situation: "Tu peux couper le partage quand tu veux, et les données sont effacées.",
+        situation:
+          "Tu peux couper le partage quand tu veux, et les données sont effacées.",
       },
       {
         id: 562,
         palier: 2,
         reglage: "gardé un an",
-        situation: "Tu peux couper le partage, mais l'historique est conservé un an.",
+        situation:
+          "Tu peux couper le partage, mais l'historique est conservé un an.",
       },
       {
         id: 563,
         palier: 3,
         reglage: "impossible à effacer",
-        situation: "Une fois partagé, l'historique reste là et rien ne peut l'effacer.",
+        situation:
+          "Une fois partagé, l'historique reste là et rien ne peut l'effacer.",
       },
     ],
   },
@@ -314,7 +333,8 @@ export const series: SerieBascule[] = [
         id: 581,
         palier: 1,
         reglage: "vous êtes trois",
-        situation: "Vous êtes trois. Les traces disparaîtront d'ici quelques jours.",
+        situation:
+          "Vous êtes trois. Les traces disparaîtront d'ici quelques jours.",
       },
       {
         id: 582,
@@ -326,7 +346,8 @@ export const series: SerieBascule[] = [
         id: 583,
         palier: 3,
         reglage: "chaque fin de semaine",
-        situation: "Vous êtes trente, et le même groupe revient chaque fin de semaine de la saison.",
+        situation:
+          "Vous êtes trente, et le même groupe revient chaque fin de semaine de la saison.",
       },
     ],
   },
@@ -335,7 +356,8 @@ export const series: SerieBascule[] = [
     valeurA: V.honnetete,
     valeurB: V.entraide,
     dimension: "ampleur_impact",
-    amorce: "Quelqu'un te demande ton avis sincère sur quelque chose qu'il a préparé.",
+    amorce:
+      "Quelqu'un te demande ton avis sincère sur quelque chose qu'il a préparé.",
     optionA: "Tu dis ce que tu penses vraiment.",
     optionB: "Tu l'encourages sans dire le fond de ta pensée.",
     paliers: [
@@ -355,7 +377,8 @@ export const series: SerieBascule[] = [
         id: 593,
         palier: 3,
         reglage: "sa candidature en dépend",
-        situation: "Il va l'envoyer pour une candidature qui compte beaucoup pour lui.",
+        situation:
+          "Il va l'envoyer pour une candidature qui compte beaucoup pour lui.",
       },
     ],
   },

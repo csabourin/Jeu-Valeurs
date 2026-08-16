@@ -44,9 +44,11 @@ export const reecritures: Record<string, string> = {
   LR002: "Traiter quelqu'un de haut à cause d'où il vient.",
   LR003: "M'en prendre à quelqu'un qui ne peut pas se défendre.",
   LR004: "Ne voir quelqu'un que pour ce qu'il peut m'apporter.",
-  LR005: "Parler d'un groupe de gens comme s'ils n'étaient pas de vraies personnes.",
+  LR005:
+    "Parler d'un groupe de gens comme s'ils n'étaient pas de vraies personnes.",
   LR006: "Rire de quelqu'un qui vient d'échouer.",
-  LR007: "Décider que quelqu'un ne mérite plus de respect parce qu'il a mal agi.",
+  LR007:
+    "Décider que quelqu'un ne mérite plus de respect parce qu'il a mal agi.",
   LR008: "Mettre quelqu'un de côté parce qu'il n'est pas comme nous.",
   LR009: "Couper la parole à quelqu'un parce que j'ai plus d'autorité que lui.",
   LR010: "Exiger un respect que je ne donne pas moi-même.",
@@ -60,7 +62,8 @@ export const reecritures: Record<string, string> = {
   LR016: "Répéter un secret qu'on m'a confié, sans vraie raison.",
   LR017: "Cacher quelque chose d'important à quelqu'un qui doit décider.",
   LR018: "Jouer sur les peurs de quelqu'un pour qu'il fasse ce que je veux.",
-  LR019: "Faire croire que je sais faire quelque chose alors qu'on compte sur moi.",
+  LR019:
+    "Faire croire que je sais faire quelque chose alors qu'on compte sur moi.",
   LR020: "Défendre encore une chose fausse pour ne pas avoir l'air fou.",
 
   // Loyauté, engagements et relations
@@ -77,7 +80,8 @@ export const reecritures: Record<string, string> = {
 
   // Famille, proches et responsabilités intergénérationnelles
   LR031: "Laisser tomber quelqu'un de ma famille qui a besoin de moi.",
-  LR032: "Avantager les miens au point que quelqu'un d'autre en souffre pour vrai.",
+  LR032:
+    "Avantager les miens au point que quelqu'un d'autre en souffre pour vrai.",
   LR033: "Décider pour mes proches parce que je suis plus vieux qu'eux.",
   LR034: "Ne pas écouter les plus vieux parce qu'ils sont d'une autre époque.",
   LR035: "Exiger qu'un plus jeune obéisse sans jamais le laisser parler.",
@@ -89,12 +93,14 @@ export const reecritures: Record<string, string> = {
 
   // Justice, équité et réciprocité
   LR041: "Me donner un passe-droit que je refuserais à quelqu'un d'autre.",
-  LR042: "Punir quelqu'un pour une chose dont je sais qu'il n'est pas responsable.",
+  LR042:
+    "Punir quelqu'un pour une chose dont je sais qu'il n'est pas responsable.",
   LR043: "Profiter d'une règle en sachant que les autres n'y ont pas accès.",
   LR044: "Décider du sort de quelqu'un sans écouter sa version.",
   LR045: "Changer les règles en cours de route pour gagner.",
   LR046: "Demander aux autres un effort que je refuserais de faire.",
-  LR047: "Me servir de ma place pour obtenir ce qu'on ne me donnerait pas autrement.",
+  LR047:
+    "Me servir de ma place pour obtenir ce qu'on ne me donnerait pas autrement.",
   LR048: "Fermer les yeux sur une injustice parce qu'elle m'arrange.",
   LR049: "Partager ce qui appartient à tous selon mes préférences.",
   LR050: "Prendre bien plus que ma part en sachant qu'il va en manquer.",
@@ -106,14 +112,18 @@ export const reecritures: Record<string, string> = {
   LR054: "Insister jusqu'à ce que quelqu'un accepte ce qu'il avait refusé.",
   LR055: "Me servir de ce dont quelqu'un dépend pour diriger ses choix.",
   LR056: "Vouloir tout savoir de la vie de quelqu'un sans aucune raison.",
-  LR057: "Punir quelqu'un pour un choix différent du mien qui ne nuit à personne.",
-  LR058: "Laisser la majorité faire taire chaque fois ceux qui pensent autrement.",
-  LR059: "Décider que le choix de quelqu'un ne compte pas parce qu'il me semble bizarre.",
+  LR057:
+    "Punir quelqu'un pour un choix différent du mien qui ne nuit à personne.",
+  LR058:
+    "Laisser la majorité faire taire chaque fois ceux qui pensent autrement.",
+  LR059:
+    "Décider que le choix de quelqu'un ne compte pas parce qu'il me semble bizarre.",
   LR060: "Arrêter de penser par moi-même parce qu'on me le demande.",
 
   // Autorité, ordre, devoir et responsabilité
   LR061: "Ne pas suivre une règle importante parce qu'elle me dérange.",
-  LR062: "Laisser mes responsabilités à d'autres en espérant qu'ils les prennent.",
+  LR062:
+    "Laisser mes responsabilités à d'autres en espérant qu'ils les prennent.",
   LR063: "Faire ce que je veux sans regarder ce que ça coûte aux autres.",
   LR064: "Refuser toute autorité, même celle qui sert à tout le monde.",
   LR065: "Profiter du travail du groupe sans jamais y mettre du mien.",
@@ -121,48 +131,63 @@ export const reecritures: Record<string, string> = {
   LR067: "Accepter une responsabilité puis disparaître sans prévenir.",
   LR068: "Ne rien devoir à personne, même quand mon monde a besoin de moi.",
   LR069: "Me servir d'un poste de confiance pour mes propres intérêts.",
-  LR070: "Faire ce qu'on me demande alors que je trouve ça profondément injuste.",
+  LR070:
+    "Faire ce qu'on me demande alors que je trouve ça profondément injuste.",
 
   // Harmonie sociale, conflit et appartenance
   LR071: "Provoquer une chicane juste pour qu'on me regarde.",
-  LR072: "Ridiculiser quelqu'un en public alors qu'on pouvait en parler à deux.",
-  LR073: "Vouloir avoir raison au point de perdre une amitié, pour une niaiserie.",
+  LR072:
+    "Ridiculiser quelqu'un en public alors qu'on pouvait en parler à deux.",
+  LR073:
+    "Vouloir avoir raison au point de perdre une amitié, pour une niaiserie.",
   LR074: "Refuser tout compromis même quand on ne me demande rien d'essentiel.",
-  LR075: "Faire honte à quelqu'un devant les autres sans que ce soit nécessaire.",
+  LR075:
+    "Faire honte à quelqu'un devant les autres sans que ce soit nécessaire.",
   LR076: "Répandre une rumeur parce qu'elle me place bien dans le groupe.",
   LR077: "Sortir quelqu'un du groupe parce qu'il ne pense pas comme nous.",
-  LR078: "Demander à quelqu'un de se taire pour la paix, alors qu'il subit une injustice.",
+  LR078:
+    "Demander à quelqu'un de se taire pour la paix, alors qu'il subit une injustice.",
   LR079: "Faire passer mon image avant un groupe qui compte sur moi.",
-  LR080: "Faire comme si tout allait bien alors que tout le monde voit le problème.",
+  LR080:
+    "Faire comme si tout allait bien alors que tout le monde voit le problème.",
 
   // Tradition, culture et transmission
-  LR081: "Rire d'une tradition qui compte pour quelqu'un parce qu'elle m'est étrangère.",
+  LR081:
+    "Rire d'une tradition qui compte pour quelqu'un parce qu'elle m'est étrangère.",
   LR082: "Demander à quelqu'un d'abandonner sa langue pour être accepté.",
   LR083: "Détruire une trace du passé parce que je la trouve dépassée.",
   LR084: "Croire que nos traditions valent forcément mieux que les autres.",
   LR085: "Rejeter une façon de faire juste parce qu'elle est vieille.",
-  LR086: "Garder une façon de faire juste parce qu'elle est vieille, même si elle blesse.",
-  LR087: "Empêcher les jeunes de poser des questions sur ce qu'on leur transmet.",
+  LR086:
+    "Garder une façon de faire juste parce qu'elle est vieille, même si elle blesse.",
+  LR087:
+    "Empêcher les jeunes de poser des questions sur ce qu'on leur transmet.",
   LR088: "Ne pas transmettre ce qu'on m'a appris à ceux qui viennent après.",
-  LR089: "Utiliser un symbole important pour d'autres en sachant que ça les blesse.",
+  LR089:
+    "Utiliser un symbole important pour d'autres en sachant que ça les blesse.",
   LR090: "Effacer l'histoire d'un groupe parce qu'elle dérange.",
 
   // Sacré, convictions et sens
-  LR091: "Salir exprès ce qui est sacré pour d'autres, juste pour les provoquer.",
+  LR091:
+    "Salir exprès ce qui est sacré pour d'autres, juste pour les provoquer.",
   LR092: "Me moquer de ce en quoi quelqu'un croit sincèrement.",
   LR093: "Faire semblant de croire à quelque chose pour en tirer un avantage.",
   LR094: "Me servir des croyances de quelqu'un pour le manipuler.",
   LR095: "Obliger quelqu'un à participer à un rituel contre son gré.",
-  LR096: "Empêcher quelqu'un de pratiquer sa tradition parce qu'elle diffère de la mienne.",
+  LR096:
+    "Empêcher quelqu'un de pratiquer sa tradition parce qu'elle diffère de la mienne.",
   LR097: "Renier ce en quoi je crois pour être approuvé par le groupe.",
   LR098: "Imposer mes convictions à tous sans accepter d'être questionné.",
   LR099: "Traiter ce qui est sacré pour d'autres comme si ça ne valait rien.",
-  LR100: "Faire de l'argent avec ce qui est sacré pour d'autres, en sachant que ça les blesse.",
+  LR100:
+    "Faire de l'argent avec ce qui est sacré pour d'autres, en sachant que ça les blesse.",
 
   // Communauté, entraide et réciprocité
   LR101: "Ne jamais aider mon monde tout en comptant sur lui.",
-  LR102: "Laisser quelqu'un affronter seul un gros problème alors que je pouvais aider.",
-  LR103: "Garder pour moi ce dont je n'ai pas besoin quand d'autres en manquent.",
+  LR102:
+    "Laisser quelqu'un affronter seul un gros problème alors que je pouvais aider.",
+  LR103:
+    "Garder pour moi ce dont je n'ai pas besoin quand d'autres en manquent.",
   LR104: "Garder mes trucs pour moi pour rester le seul à savoir.",
   LR105: "Recevoir beaucoup d'un groupe sans jamais rien lui rendre.",
   LR106: "Prendre sans jamais reconnaître ce que les autres m'ont donné.",
@@ -181,7 +206,8 @@ export const reecritures: Record<string, string> = {
   LR117: "Laisser aux suivants un problème que je pouvais régler.",
   LR118: "Décider d'un territoire sans ceux qui y vivent.",
   LR119: "Utiliser ce qui est à tous sans jamais en prendre soin.",
-  LR120: "Interdire tout usage de la nature, même à ceux qui en vivent avec soin.",
+  LR120:
+    "Interdire tout usage de la nature, même à ceux qui en vivent avec soin.",
 
   // Pouvoir, statut et leadership
   LR121: "Me servir de mon autorité pour régler un compte personnel.",
@@ -190,16 +216,19 @@ export const reecritures: Record<string, string> = {
   LR124: "Prendre le crédit des réussites et laisser les échecs aux autres.",
   LR125: "Profiter du fait que quelqu'un dépend de moi pour qu'il obéisse.",
   LR126: "Garder une responsabilité que je n'assume plus, juste pour le titre.",
-  LR127: "Avantager ceux qui me sont fidèles quand je décide pour tout le groupe.",
+  LR127:
+    "Avantager ceux qui me sont fidèles quand je décide pour tout le groupe.",
   LR128: "Ne pas admettre mon erreur parce que c'est moi le responsable.",
   LR129: "Vouloir du pouvoir juste pour imposer mes goûts aux autres.",
-  LR130: "Refuser de mener quand un groupe compte sur moi et que j'en suis capable.",
+  LR130:
+    "Refuser de mener quand un groupe compte sur moi et que j'en suis capable.",
 
   // Courage, prudence et protection
   LR131: "Mettre les autres en danger pour montrer que je n'ai pas peur.",
   LR132: "Faire courir un risque à quelqu'un pour un petit avantage.",
   LR133: "Ignorer un danger connu quand d'autres dépendent de ma décision.",
-  LR134: "Ne jamais rien tenter par peur, même quand il faut protéger ce qui compte.",
+  LR134:
+    "Ne jamais rien tenter par peur, même quand il faut protéger ce qui compte.",
   LR135: "Décider sur un coup de tête une chose que d'autres vont payer.",
   LR136: "Cacher un danger à ceux qui vont s'y exposer.",
   LR137: "Demander aux autres un risque que je refuse de prendre.",
@@ -222,45 +251,61 @@ export const reecritures: Record<string, string> = {
   // Identité, authenticité et appartenance
   LR151: "Jouer un personnage pour être accepté.",
   LR152: "Renoncer à une part de qui je suis pour éviter le jugement.",
-  LR153: "Ne rien changer à ma façon d'être même quand elle complique la vie des autres.",
-  LR154: "Demander à quelqu'un de cacher qui il est pour entrer dans mon groupe.",
+  LR153:
+    "Ne rien changer à ma façon d'être même quand elle complique la vie des autres.",
+  LR154:
+    "Demander à quelqu'un de cacher qui il est pour entrer dans mon groupe.",
   LR155: "Supposer ce que quelqu'un pense à cause du groupe d'où il vient.",
   LR156: "Renier mon groupe parce qu'il n'est pas bien vu.",
-  LR157: "Rester fidèle à mon groupe quand il me demande une chose que je trouve inacceptable.",
+  LR157:
+    "Rester fidèle à mon groupe quand il me demande une chose que je trouve inacceptable.",
   LR158: "Exclure quelqu'un qui ne suit pas une coutume sans importance.",
-  LR159: "Me cacher derrière mon groupe pour ne jamais me remettre en question.",
+  LR159:
+    "Me cacher derrière mon groupe pour ne jamais me remettre en question.",
   LR160: "Couper tous mes liens pour être totalement indépendant.",
 
   // Hospitalité, accueil et frontières du groupe
-  LR161: "Refuser d'accueillir quelqu'un dans le besoin quand ça ne me coûte presque rien.",
+  LR161:
+    "Refuser d'accueillir quelqu'un dans le besoin quand ça ne me coûte presque rien.",
   LR162: "Mettre en danger ceux dont je réponds pour accueillir un inconnu.",
   LR163: "Profiter de l'accueil de quelqu'un sans respecter sa maison.",
   LR164: "Traiter un invité de haut parce qu'il dépend de moi pour l'instant.",
   LR165: "Fermer la porte aux nouveaux pour que le groupe reste pareil.",
   LR166: "Tout changer dans le groupe à chaque nouvelle arrivée.",
-  LR167: "Fermer l'accès à ce qui est à tous parce que quelqu'un vient d'ailleurs.",
-  LR168: "Accueillir quelqu'un sans écouter les inquiétudes de ceux qui sont là.",
+  LR167:
+    "Fermer l'accès à ce qui est à tous parce que quelqu'un vient d'ailleurs.",
+  LR168:
+    "Accueillir quelqu'un sans écouter les inquiétudes de ceux qui sont là.",
   LR169: "Juger quelqu'un selon l'accueil que mon groupe lui a réservé.",
   LR170: "Voir toute personne de l'extérieur comme une menace.",
 
   // Respect des ancêtres, héritage et changement
   LR171: "Mépriser ce qu'on m'a transmis sans chercher à le comprendre.",
   LR172: "Garder une vieille décision parce que personne n'a osé la changer.",
-  LR173: "Changer en profondeur un héritage commun sans demander à ceux qui y tiennent.",
+  LR173:
+    "Changer en profondeur un héritage commun sans demander à ceux qui y tiennent.",
   LR174: "Empêcher une tradition d'évoluer au nom du respect.",
   LR175: "Effacer les récits d'avant parce qu'ils ne nous ressemblent plus.",
-  LR176: "Raconter le passé plus beau qu'il était pour protéger l'image du groupe.",
-  LR177: "Juger les gens d'avant avec les yeux d'aujourd'hui, sans chercher à comprendre.",
-  LR178: "Me servir du respect des ancêtres pour empêcher quelqu'un de choisir sa voie.",
+  LR176:
+    "Raconter le passé plus beau qu'il était pour protéger l'image du groupe.",
+  LR177:
+    "Juger les gens d'avant avec les yeux d'aujourd'hui, sans chercher à comprendre.",
+  LR178:
+    "Me servir du respect des ancêtres pour empêcher quelqu'un de choisir sa voie.",
   LR179: "Ne pas transmettre ce que je sais pour rester le seul à le savoir.",
-  LR180: "Transmettre une pratique sans laisser les suivants décider quoi en faire.",
+  LR180:
+    "Transmettre une pratique sans laisser les suivants décider quoi en faire.",
 
   // Savoir, apprentissage et expertise
   LR181: "Refuser de changer d'idée devant des preuves solides, par orgueil.",
-  LR182: "Croire quelque chose juste parce que c'est quelqu'un d'important qui l'a dit.",
-  LR183: "Rejeter ce que quelqu'un a vécu parce qu'il ne le dit pas dans les bons mots.",
-  LR184: "Rejeter la science seulement quand elle contredit ce que j'aimerais croire.",
-  LR185: "Décider qu'un savoir ancien ne vaut rien parce qu'il n'est pas scientifique.",
+  LR182:
+    "Croire quelque chose juste parce que c'est quelqu'un d'important qui l'a dit.",
+  LR183:
+    "Rejeter ce que quelqu'un a vécu parce qu'il ne le dit pas dans les bons mots.",
+  LR184:
+    "Rejeter la science seulement quand elle contredit ce que j'aimerais croire.",
+  LR185:
+    "Décider qu'un savoir ancien ne vaut rien parce qu'il n'est pas scientifique.",
   LR186: "Décider qu'un savoir est vrai parce qu'il est ancien.",
   LR187: "Cacher ce que je sais pour garder une longueur d'avance.",
   LR188: "Donner un conseil sûr de moi sur un sujet que je ne maîtrise pas.",
@@ -268,12 +313,15 @@ export const reecritures: Record<string, string> = {
   LR190: "Imposer ma lecture d'une situation qui peut se comprendre autrement.",
 
   // Propriété, partage et biens communs
-  LR191: "Prendre ce qui est à quelqu'un parce que j'en ai plus besoin que lui.",
+  LR191:
+    "Prendre ce qui est à quelqu'un parce que j'en ai plus besoin que lui.",
   LR192: "Garder inutilisé ce dont quelqu'un a un besoin urgent.",
   LR193: "Traiter ce qui est à tous comme si c'était à moi.",
   LR194: "Me servir d'un bien commun sans jamais aider à l'entretenir.",
-  LR195: "Exiger que quelqu'un partage parce que je juge son besoin moins grand.",
-  LR196: "Mettre de côté ce qui est rare pour le revendre plus cher à ceux qui en ont besoin.",
+  LR195:
+    "Exiger que quelqu'un partage parce que je juge son besoin moins grand.",
+  LR196:
+    "Mettre de côté ce qui est rare pour le revendre plus cher à ceux qui en ont besoin.",
   LR197: "Interdire à chacun d'avoir quelque chose à soi, au nom de tous.",
   LR198: "M'approprier ce dont toute une communauté dépend depuis toujours.",
   LR199: "Gaspiller une chose parce que je l'ai payée.",
@@ -289,31 +337,41 @@ export const reecritures: Record<string, string> = {
   LR207: "Refuser de m'excuser parce que ça me ferait perdre du galon.",
   LR208: "Faire passer l'honneur du groupe avant ce qui s'est vraiment passé.",
   LR209: "Salir mon propre groupe pour être bien vu ailleurs.",
-  LR210: "Défendre l'honneur des miens en attaquant quelqu'un qui n'y est pour rien.",
+  LR210:
+    "Défendre l'honneur des miens en attaquant quelqu'un qui n'y est pour rien.",
 
   // Pardon, réparation et conséquences
   LR211: "Ne jamais pardonner, quoi que la personne fasse pour réparer.",
-  LR212: "Pardonner tout de suite une faute grave sans penser à ceux qui l'ont subie.",
+  LR212:
+    "Pardonner tout de suite une faute grave sans penser à ceux qui l'ont subie.",
   LR213: "Vouloir punir encore quelqu'un qui a déjà tout réparé.",
   LR214: "Ne rien exiger de quelqu'un juste parce qu'il est proche de moi.",
   LR215: "Ressortir sans arrêt une vieille erreur pour garder le contrôle.",
-  LR216: "Faire comme si de rien n'était alors que le tort n'a jamais été reconnu.",
+  LR216:
+    "Faire comme si de rien n'était alors que le tort n'a jamais été reconnu.",
   LR217: "Réclamer le pardon de quelqu'un qui n'est pas encore prêt.",
   LR218: "Refuser de me réconcilier pour continuer d'avoir raison.",
   LR219: "Croire que pardonner oblige à revenir exactement comme avant.",
-  LR220: "Décider que quelqu'un ne changera jamais à cause d'une vieille faute.",
+  LR220:
+    "Décider que quelqu'un ne changera jamais à cause d'une vieille faute.",
 
   // Individu et collectivité
-  LR221: "Sacrifier une personne innocente parce que la majorité y gagnerait un peu.",
-  LR222: "Refuser un petit effort qui éviterait un gros problème à tout le monde.",
-  LR223: "Faire passer l'avis du plus grand nombre avant les droits d'une minorité.",
+  LR221:
+    "Sacrifier une personne innocente parce que la majorité y gagnerait un peu.",
+  LR222:
+    "Refuser un petit effort qui éviterait un gros problème à tout le monde.",
+  LR223:
+    "Faire passer l'avis du plus grand nombre avant les droits d'une minorité.",
   LR224: "Laisser quelques personnes bloquer sans fin toute décision commune.",
-  LR225: "Demander à quelqu'un de s'effacer sans arrêt « pour le bien du groupe ».",
+  LR225:
+    "Demander à quelqu'un de s'effacer sans arrêt « pour le bien du groupe ».",
   LR226: "Ne jamais rien céder au groupe, au nom de mon indépendance.",
   LR227: "Croire qu'un besoin personnel est forcément égoïste.",
-  LR228: "Croire qu'une obligation commune est forcément une atteinte à ma liberté.",
+  LR228:
+    "Croire qu'une obligation commune est forcément une atteinte à ma liberté.",
   LR229: "Décider pour tout le monde sans écouter ceux que ça touche.",
-  LR230: "Abandonner une décision nécessaire parce que tout le monde n'est pas d'accord.",
+  LR230:
+    "Abandonner une décision nécessaire parce que tout le monde n'est pas d'accord.",
 
   // Temps, rythme et obligations
   LR231: "Faire attendre les autres comme si leur temps ne comptait pas.",
@@ -331,12 +389,15 @@ export const reecritures: Record<string, string> = {
   LR241: "Faire souffrir un animal pour m'amuser.",
   LR242: "Faire passer les animaux avant des gens dont je suis responsable.",
   LR243: "Détruire une forme de vie parce que je ne lui vois pas d'utilité.",
-  LR244: "Refuser toute intervention humaine, même celle qui réparerait nos dégâts.",
-  LR245: "Bouleverser un milieu vivant sans chercher à savoir ce que ça provoque.",
+  LR244:
+    "Refuser toute intervention humaine, même celle qui réparerait nos dégâts.",
+  LR245:
+    "Bouleverser un milieu vivant sans chercher à savoir ce que ça provoque.",
   LR246: "Croire que nos besoins justifient n'importe quoi envers le vivant.",
   LR247: "Croire que nos besoins ne justifient jamais rien envers le vivant.",
   LR248: "Épuiser ce dont une communauté vit sans penser au renouvellement.",
-  LR249: "Empêcher une communauté de vivre avec la nature comme elle le fait depuis toujours.",
+  LR249:
+    "Empêcher une communauté de vivre avec la nature comme elle le fait depuis toujours.",
   LR250: "Garder une pratique qui menace maintenant la survie d'une espèce.",
 
   // ── Horizons ──────────────────────────────────────────────────────────────
@@ -640,5 +701,3 @@ export const reecritures: Record<string, string> = {
   T299: "Le sentiment que les grandes décisions ne sont pas prises au hasard.",
   T300: "Pouvoir savoir qui est responsable d'une décision.",
 };
-
-
