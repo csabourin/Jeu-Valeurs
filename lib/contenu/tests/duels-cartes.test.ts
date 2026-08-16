@@ -112,10 +112,37 @@ describe("formulation", () => {
     expect(duel.optionB).toBe("Je ne le fais pas.");
   });
 
-  it("nomme les deux cartes dans un duel entre enjeux", () => {
-    const duel = duels.find((d) => d.forme === "enjeu_enjeu")!;
-    expect(duel.optionA).toContain("Devenir vraiment bon dans mon métier");
-    expect(duel.optionB).toContain("Le calme quand je rentre chez moi");
+  it("n'oppose jamais deux limites ni deux enjeux", () => {
+    // Le mécanisme est asymétrique : une limite en face d'un enjeu, et rien
+    // d'autre. Opposer deux cartes du même rôle remplirait la matrice plus
+    // vite, mais ferait un tournoi de cartes au lieu d'explorer un prix.
+    const role = (id: string) => cartes.find((c) => c.id === id)!.famille;
+    const estEnjeu = (id: string) =>
+      role(id) === "horizons" || role(id) === "tresors";
+
+    expect(duels.length).toBeGreaterThan(0);
+    for (const duel of duels) {
+      expect(duel.forme).toBe("limite_enjeu");
+      // A porte toujours l'enjeu, B toujours la limite.
+      expect(estEnjeu(duel.carteAId)).toBe(true);
+      expect(role(duel.carteBId)).toBe("lignes_rouges");
+    }
+  });
+
+  it("ne sert aucune paire que seules deux cartes du même rôle porteraient", () => {
+    // Deux limites entre elles : rien à jouer, même si les valeurs seraient
+    // parfaitement admissibles l'une à l'autre.
+    const deuxLimites: CarteDuel[] = [
+      cartes.find((c) => c.id === "1")!,
+      cartes.find((c) => c.id === "2")!,
+    ];
+    expect(duelsCartesPossibles(deuxLimites)).toEqual([]);
+
+    const deuxEnjeux: CarteDuel[] = [
+      cartes.find((c) => c.id === "3")!,
+      cartes.find((c) => c.id === "4")!,
+    ];
+    expect(duelsCartesPossibles(deuxEnjeux)).toEqual([]);
   });
 });
 
@@ -147,7 +174,12 @@ describe("cartes sans valeur confirmée", () => {
   it("les laisse de côté plutôt que de deviner", () => {
     const sansValeur = duelsCartesPossibles([
       cartes[0],
-      { id: "9", famille: "horizons", label: "Quelque chose", valeursConfirmees: [] },
+      {
+        id: "9",
+        famille: "horizons",
+        label: "Quelque chose",
+        valeursConfirmees: [],
+      },
     ]);
     expect(sansValeur).toEqual([]);
   });

@@ -19,11 +19,7 @@
 import { pairesAdmissibles } from "./eligibilite";
 
 export type ChoixComparaison =
-  | "A"
-  | "B"
-  | "ca_depend"
-  | "je_ne_sais_pas"
-  | "passer";
+  "A" | "B" | "ca_depend" | "je_ne_sais_pas" | "passer";
 
 /**
  * Où en est la personne dans son parcours.
@@ -104,13 +100,39 @@ export interface Couverture {
  * pas les n(n−1)/2 comparaisons dans une seule session : la première vague en
  * fait assez pour un premier ordre, « Affiner ma constellation » complète le
  * reste plus tard.
+ *
+ * `pairesJouables` restreint le dénominateur à ce que la partie peut réellement
+ * poser. Le mécanisme n'oppose qu'une limite à un enjeu : deux valeurs que
+ * seules des cartes d'un même rôle portent ne se rencontreront jamais, même si
+ * les règles d'éligibilité les autorisent. Les compter ferait plafonner la
+ * couverture sous 100 % pour toujours, et la carte finale annoncerait « 12 des
+ * 40 paires » à quelqu'un qui a pourtant tout joué.
+ *
+ * Une paire **déjà confrontée** reste pertinente même si plus rien ne peut la
+ * servir aujourd'hui : la personne a pu retirer une carte depuis, ou la réponse
+ * venir d'une situation écrite qui n'est plus au plan. Ce qui a été joué ne
+ * disparaît pas du décompte.
  */
 export function calculerCouverture(
   valeursActives: string[],
   comparaisons: Pick<Comparaison, "valeurA" | "valeurB">[],
+  pairesJouables?: [string, string][],
 ): Couverture {
-  const pairesPertinentes = pairesAdmissibles(valeursActives);
+  const admissibles = pairesAdmissibles(valeursActives);
   const vues = new Set(comparaisons.map((c) => clePaire(c.valeurA, c.valeurB)));
+
+  const pairesPertinentes =
+    pairesJouables === undefined
+      ? admissibles
+      : (() => {
+          const jouables = new Set(
+            pairesJouables.map(([a, b]) => clePaire(a, b)),
+          );
+          return admissibles.filter(([a, b]) => {
+            const cle = clePaire(a, b);
+            return jouables.has(cle) || vues.has(cle);
+          });
+        })();
 
   const pairesVues = pairesPertinentes.filter(([a, b]) =>
     vues.has(clePaire(a, b)),

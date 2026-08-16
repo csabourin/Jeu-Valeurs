@@ -429,7 +429,11 @@ export function calculerParcours(etat: EtatPartie): Parcours {
   // n'est jamais proposée, même si les deux valeurs sont actives.
   const pairesJouables = pairesDepuisManifestations(manifestations);
 
-  const couverture = calculerCouverture(valeursConfirmees, comparaisons);
+  const couverture = calculerCouverture(
+    valeursConfirmees,
+    comparaisons,
+    pairesJouables,
+  );
   const reponduesOrdination = comparaisons.filter(
     (c) => c.phase === "ordination",
   ).length;
@@ -463,9 +467,7 @@ export function calculerParcours(etat: EtatPartie): Parcours {
       reponduesOrdination >= Math.min(MIN_PREMIERE_VAGUE, planifiees) &&
       reponduesOrdination > 0,
     peutAffiner: couverture.pairesManquantes.some(([a, b]) =>
-      pairesJouables.some(
-        ([x, y]) => clePaire(x, y) === clePaire(a, b),
-      ),
+      pairesJouables.some(([x, y]) => clePaire(x, y) === clePaire(a, b)),
     ),
   };
 

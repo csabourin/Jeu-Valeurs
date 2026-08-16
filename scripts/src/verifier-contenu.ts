@@ -145,7 +145,9 @@ for (const c of cartesImportees) {
     }
   }
   if (c.label.length > LONGUEUR_MAX) {
-    avertissements.push(`${c.id} fait ${c.label.length} caractères : ${c.label}`);
+    avertissements.push(
+      `${c.id} fait ${c.label.length} caractères : ${c.label}`,
+    );
   }
   verifier(
     !c.label.includes("\u2019"),
@@ -157,7 +159,10 @@ for (const c of cartesImportees) {
 // ne s'affichera jamais et personne ne le remarquera.
 const idsImportes = new Set(cartesImportees.map((c) => c.id));
 for (const id of Object.keys(reecritures)) {
-  verifier(idsImportes.has(id), `Réécriture orpheline : « ${id} » ne correspond à aucune carte.`);
+  verifier(
+    idsImportes.has(id),
+    `Réécriture orpheline : « ${id} » ne correspond à aucune carte.`,
+  );
 }
 
 // ── Identifiants uniques, toutes situations confondues ───────────────────────
@@ -165,7 +170,10 @@ for (const id of Object.keys(reecritures)) {
 const identifiants = new Map<number, string>();
 function reserver(id: number, quoi: string): void {
   const deja = identifiants.get(id);
-  verifier(deja === undefined, `Identifiant ${id} utilisé par ${deja} et ${quoi}.`);
+  verifier(
+    deja === undefined,
+    `Identifiant ${id} utilisé par ${deja} et ${quoi}.`,
+  );
   identifiants.set(id, quoi);
 }
 
@@ -174,7 +182,10 @@ function reserver(id: number, quoi: string): void {
 const idsCartes = new Map<string, string>();
 for (const c of cartes) {
   const deja = idsCartes.get(c.id);
-  verifier(deja === undefined, `Identifiant de carte ${c.id} en double (${deja}).`);
+  verifier(
+    deja === undefined,
+    `Identifiant de carte ${c.id} en double (${deja}).`,
+  );
   idsCartes.set(c.id, c.label);
 }
 
@@ -186,9 +197,18 @@ for (const s of series) {
 // ── Duels ────────────────────────────────────────────────────────────────────
 
 for (const d of duels) {
-  verifier(labelsConnus.has(d.valeurA), `Duel ${d.id} : valeurA inconnue « ${d.valeurA} ».`);
-  verifier(labelsConnus.has(d.valeurB), `Duel ${d.id} : valeurB inconnue « ${d.valeurB} ».`);
-  verifier(d.valeurA !== d.valeurB, `Duel ${d.id} : la même valeur des deux côtés.`);
+  verifier(
+    labelsConnus.has(d.valeurA),
+    `Duel ${d.id} : valeurA inconnue « ${d.valeurA} ».`,
+  );
+  verifier(
+    labelsConnus.has(d.valeurB),
+    `Duel ${d.id} : valeurB inconnue « ${d.valeurB} ».`,
+  );
+  verifier(
+    d.valeurA !== d.valeurB,
+    `Duel ${d.id} : la même valeur des deux côtés.`,
+  );
   verifier(d.optionA !== d.optionB, `Duel ${d.id} : deux options identiques.`);
 }
 
@@ -202,9 +222,14 @@ for (const d of duels) {
 
 for (const d of duels.filter((x) => x.variante)) {
   const principal = duels.some(
-    (x) => !x.variante && clePaire(x.valeurA, x.valeurB) === clePaire(d.valeurA, d.valeurB),
+    (x) =>
+      !x.variante &&
+      clePaire(x.valeurA, x.valeurB) === clePaire(d.valeurA, d.valeurB),
   );
-  verifier(principal, `Duel ${d.id} est une variante sans duel principal sur sa paire.`);
+  verifier(
+    principal,
+    `Duel ${d.id} est une variante sans duel principal sur sa paire.`,
+  );
 }
 
 // ── Séries de bascule ────────────────────────────────────────────────────────
@@ -216,7 +241,10 @@ for (const s of series) {
 
   verifier(labelsConnus.has(s.valeurA), `Série ${s.id} : valeurA inconnue.`);
   verifier(labelsConnus.has(s.valeurB), `Série ${s.id} : valeurB inconnue.`);
-  verifier(s.valeurA !== s.valeurB, `Série ${s.id} : la même valeur des deux côtés.`);
+  verifier(
+    s.valeurA !== s.valeurB,
+    `Série ${s.id} : la même valeur des deux côtés.`,
+  );
   verifier(s.optionA !== s.optionB, `Série ${s.id} : deux options identiques.`);
 
   const rangs = s.paliers.map((p) => p.palier);
@@ -401,10 +429,20 @@ function jouerJusquAuBout(
 
 const scenarios: { nom: string; cartesChoisies: string[] }[] = [
   { nom: "une seule carte", cartesChoisies: ["JV1002"] },
-  { nom: "trois lignes rouges", cartesChoisies: ["JV1002", "JV1004", "JV1010"] },
+  {
+    nom: "trois lignes rouges",
+    cartesChoisies: ["JV1002", "JV1004", "JV1010"],
+  },
   {
     nom: "mélange des trois familles",
-    cartesChoisies: ["JV1002", "JV1004", "JV2003", "JV2006", "JV3002", "JV3004"],
+    cartesChoisies: [
+      "JV1002",
+      "JV1004",
+      "JV2003",
+      "JV2006",
+      "JV3002",
+      "JV3004",
+    ],
   },
   // Une main réaliste, mais large : personne ne retient 900 cartes, et les
   // duels de cartes croissent en n². Vingt-quatre est déjà au-delà de ce qu'un
@@ -451,19 +489,26 @@ for (const scenario of scenarios) {
   const valeursConfirmees = Array.from(
     new Set(main.flatMap((c) => c.valeursConfirmees ?? [])),
   );
+  // Une main jouable oppose au moins une limite à au moins un enjeu, et porte
+  // au moins une paire de valeurs que les règles autorisent.
+  const jouable =
+    main.some((c) => c.famille === "lignes_rouges") &&
+    main.some((c) => c.famille === "horizons" || c.famille === "tresors") &&
+    pairesAdmissibles(valeursConfirmees).length > 0;
+
   for (const choix of ["A", "B", "ca_depend", "je_ne_sais_pas", "passer"]) {
     for (const phase of ["ordination", "epreuve"] as const) {
-      const tours = jouerJusquAuBout(
-        valeursConfirmees,
-        main,
-        choix,
-        1,
-        phase,
-      );
+      const tours = jouerJusquAuBout(valeursConfirmees, main, choix, 1, phase);
+      // Le mécanisme est asymétrique : il faut une limite **et** un enjeu pour
+      // qu'une question existe. Une main d'un seul rôle n'a rien à poser, et
+      // c'est correct — l'écran de sélection interdit d'ailleurs d'en sortir.
+      // Ce qu'on vérifie ici, c'est qu'elle se termine proprement plutôt que
+      // de boucler ; l'exigence de poser une question ne vaut que pour une
+      // main réellement jouable.
       if (
         tours === 0 &&
         phase === "ordination" &&
-        pairesAdmissibles(valeursConfirmees).length > 0 &&
+        jouable &&
         main.length >= 2
       ) {
         erreurs.push(
@@ -476,7 +521,10 @@ for (const scenario of scenarios) {
 
 // Le parcours doit tenir sans aucune valeur, sans planter.
 const vide = calculerParcours({ valeursConfirmees: [], reponses: [] });
-verifier(vide.prochaine === null, "Sans valeur confirmée, le jeu devrait n'avoir aucune question.");
+verifier(
+  vide.prochaine === null,
+  "Sans valeur confirmée, le jeu devrait n'avoir aucune question.",
+);
 
 // Et l'ordination doit tenir sur une partie vide.
 const ordinationVide = ajusterModele([], []);
@@ -546,7 +594,11 @@ verifier(
 // Et deux parties différentes ne doivent pas jouer la même chose.
 const plans = new Set<string>();
 for (let graine = 1; graine <= 200; graine++) {
-  plans.add(planifierDuels(toutesLesValeurs, graine).map((d) => d.id).join(","));
+  plans.add(
+    planifierDuels(toutesLesValeurs, graine)
+      .map((d) => d.id)
+      .join(","),
+  );
 }
 verifier(
   plans.size > 150,
